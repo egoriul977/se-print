@@ -13,7 +13,7 @@ body:after{width:340px;height:210px;right:-105px;bottom:110px;background:radial-
 header{padding:22px 28px;background:linear-gradient(115deg,#11151d 0%,#181c27 48%,#10151d 100%);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:20px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(17,20,30,.20)}
 header:before{content:"";position:absolute;width:260px;height:90px;right:12%;top:-45px;background:radial-gradient(ellipse,rgba(0,207,255,.55),transparent 68%);filter:blur(10px);transform:rotate(-8deg)}header:after{content:"";position:absolute;width:240px;height:80px;left:30%;bottom:-50px;background:radial-gradient(ellipse,rgba(241,38,143,.55),transparent 68%);filter:blur(11px)}
 .logo{font-size:25px;font-weight:900;letter-spacing:.04em;position:relative;z-index:1;text-shadow:0 0 16px rgba(241,38,143,.28)}.logo small{display:block;font-size:11px;font-weight:700;letter-spacing:.22em;margin-top:3px;color:#cfd7e5}.logo:after{content:"";display:block;width:78px;height:3px;margin-top:7px;border-radius:99px;background:linear-gradient(90deg,var(--mag),var(--cyan));box-shadow:0 0 12px rgba(0,207,255,.55)}
-header>div:last-child{position:relative;z-index:1;font-weight:800;color:#dce7f4}
+header>div:last-child{position:relative;z-index:1;font-weight:800;color:#dce7f4}.header-contact{display:flex;align-items:center;gap:22px;text-align:right;font-size:12px;line-height:1.45}.header-phone{font-size:16px;font-weight:900;color:#fff;white-space:nowrap}.header-addresses{font-weight:600;color:#cbd7e6}.header-addresses b{color:#fff;font-weight:800}@media(max-width:760px){header{align-items:flex-start;flex-wrap:wrap}.header-contact{width:100%;text-align:left;justify-content:flex-start;flex-wrap:wrap;gap:12px 20px}.header-addresses{max-width:100%}}
 .wrap{max-width:1250px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;position:relative}
 .panel,.cart{background:var(--card);border:1px solid rgba(255,255,255,.9);border-radius:22px;box-shadow:var(--shadow);position:relative}
 .panel:before,.cart:before{content:"";position:absolute;inset:0;border-radius:22px;padding:1px;background:linear-gradient(135deg,rgba(241,38,143,.28),rgba(0,190,255,.20),transparent 55%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
@@ -23,7 +23,7 @@ h1{font-size:28px;margin:0 0 5px;letter-spacing:-.02em}.sub{color:var(--muted);m
 .cat{border:1px solid var(--line);border-radius:17px;padding:18px;cursor:pointer;background:rgba(255,255,255,.9);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;min-height:120px;position:relative;overflow:hidden}
 .cat:after{content:"";position:absolute;width:90px;height:55px;right:-32px;bottom:-25px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,195,255,.13),transparent 70%);pointer-events:none}.cat:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(34,61,105,.13),0 0 22px rgba(0,190,255,.08);border-color:rgba(0,190,255,.38)}
 .icon{font-size:34px;margin-bottom:10px;filter:drop-shadow(0 3px 8px rgba(0,180,255,.16))}.cat b{display:block;font-size:16px}.cat span{font-size:12px;color:var(--muted)}
-.hidden{display:none}.back{border:0;background:#f0f2f6;border-radius:10px;padding:9px 12px;cursor:pointer;margin-bottom:14px;font-weight:700;transition:.15s}.back:hover{background:#e9edf4;box-shadow:0 0 14px rgba(0,190,255,.10)}
+.copycenter-cat{background:linear-gradient(135deg,rgba(220,244,255,.95),rgba(235,249,255,.92));border-color:rgba(82,184,230,.30);box-shadow:0 8px 24px rgba(82,184,230,.10)}.copycenter-cat:hover{border-color:rgba(82,184,230,.55);box-shadow:0 14px 32px rgba(82,184,230,.16),0 0 22px rgba(160,225,255,.20)}.copycenter-cat .icon{filter:drop-shadow(0 3px 8px rgba(82,184,230,.20))}.copycenter-wrap{display:grid;gap:18px}.copycenter-section{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}.copycenter-section h3{margin:0;padding:13px 15px;background:linear-gradient(100deg,rgba(241,38,143,.08),rgba(0,190,255,.07));font-size:16px}.copytable{width:100%;border-collapse:collapse;font-size:13px}.copytable th,.copytable td{padding:10px 11px;border-top:1px solid var(--line);vertical-align:top}.copytable th{background:#f7f8fc;font-weight:800;text-align:left}.copytable .service{font-weight:700}.copytable .pricecell{font-weight:800;white-space:nowrap}.copytable .dash{color:#9aa2af}.copytable tr:hover td{background:#fcfdff}.copy-note{font-size:12px;color:var(--muted);line-height:1.45;padding:12px 14px;background:#fafbfe;border-top:1px solid var(--line)}.hidden{display:none}.back{border:0;background:#f0f2f6;border-radius:10px;padding:9px 12px;cursor:pointer;margin-bottom:14px;font-weight:700;transition:.15s}.back:hover{background:#e9edf4;box-shadow:0 0 14px rgba(0,190,255,.10)}
 .selectInfoRow{display:flex;align-items:center;gap:8px}.selectInfoRow select{flex:1}.options{display:grid;gap:10px}.option{border:1px solid var(--line);border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;cursor:pointer;background:rgba(255,255,255,.78);transition:.16s}.option:hover{background:#fff;border-color:rgba(241,38,143,.30);box-shadow:0 6px 18px rgba(48,65,100,.07)}.option input{width:18px;height:18px;accent-color:var(--mag)}.flag-choice{width:100%;text-align:left;font:inherit;color:inherit;background:rgba(255,255,255,.78);border:1px solid var(--line)}.flag-choice span{display:block}.option .info{margin-left:auto}
 label{font-size:13px;font-weight:700;display:block;margin:12px 0 6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 input,select{width:100%;padding:12px;border:1px solid #d9dde5;border-radius:10px;background:#fff;font-size:15px;transition:border-color .15s,box-shadow .15s}input:focus,select:focus{outline:none;border-color:rgba(0,190,255,.65);box-shadow:0 0 0 3px rgba(0,190,255,.10),0 0 16px rgba(0,190,255,.08)}
@@ -41,10 +41,10 @@ input,select{width:100%;padding:12px;border:1px solid #d9dde5;border-radius:10px
 .social-icon{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;flex:none}.vk-icon{background:#0077ff;box-shadow:0 0 12px rgba(0,119,255,.25)}.max-icon{background:#111}.order-max-btn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:14px 16px;background:linear-gradient(110deg,#7b2cff,#5b1ee6 48%,#a855f7);color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(123,44,255,.22),0 0 22px rgba(168,85,247,.16);transition:.16s;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}.order-max-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 28px rgba(123,44,255,.30),0 0 26px rgba(168,85,247,.20)}.order-max-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}.max-send-mark{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.16);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex:none}.order-max-btn small{flex-basis:100%;font-size:11px;line-height:1.35;font-weight:700;opacity:.95;margin-top:1px}
 .vk-paste-hint{margin-top:8px;padding:10px 12px;border-radius:11px;background:rgba(0,119,255,.07);border:1px solid rgba(0,119,255,.12);font-size:12px;line-height:1.4;color:#536070}.vk-paste-hint strong{color:#172033}.social-order{margin-top:12px}.social-links{gap:9px}.social-link{padding:11px 12px}.social-link:first-child{border-color:rgba(0,119,255,.18)}.order-vk-btn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:14px 16px;background:linear-gradient(110deg,#0077ff,#2787f5 48%,#4aa3ff);color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(0,119,255,.28),0 0 22px rgba(0,119,255,.16);transition:.16s;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}.order-vk-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,119,255,.36),0 0 30px rgba(39,135,245,.22)}.order-vk-btn:active{transform:translateY(0)}.order-vk-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.25);transform:none}.vk-send-mark{width:26px;height:26px;border-radius:8px;background:#fff;color:#0077ff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:1000;flex:none}.order-vk-btn small{flex-basis:100%;font-size:11px;line-height:1.35;font-weight:700;opacity:.95;margin-top:1px}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}.cart{position:static}.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}header{padding:18px}}
-</style>
+.volume-note{font-size:12px;color:#0a7aef;font-weight:600;margin-left:4px}</style>
 </head>
 <body>
-<header><div class="logo">СЕРЕЖНИКОВ<small>ТВОЯ ТИПОГРАФИЯ</small></div><div>Калькулятор заказов</div></header>
+<header><div class="logo">СЕРЕЖНИКОВ<small>ТВОЯ ТИПОГРАФИЯ</small></div><div class="header-contact"><div><div class="header-phone">8 918 588-00-27</div><div class="header-addresses"><b>г. Ростов-на-Дону</b><br>ул. Каширская 9В, строение 1, офис 209<br>ул. Зорге 13/7, павильон 6 (рынок Привоз)</div></div><div>Калькулятор заказов</div></div></header>
 <div class="wrap">
 <main class="panel">
 <section id="home">
@@ -53,7 +53,9 @@ input,select{width:100%;padding:12px;border:1px solid #d9dde5;border-radius:10px
 <div class="cat" data-product="banner"><div class="icon">🖨️</div><b>Баннер</b><span>Печать на прочной баннерной ткани, устойчивой к уличным условиям, ветру и осадкам.</span></div>
 <div class="cat" data-product="plotter"><div class="icon">✂️</div><b>Наклейки одноцветные без фона (плоттерные)</b><span>Вырезание контура из пленки без печатного фона — идеально для надписей и силуэтов.</span></div>
 <div class="cat" data-product="vinyl"><div class="icon">🏷️</div><b>Наклейки печатные виниловые</b><span>Полноцветная печать на самоклеющейся виниловой пленке с высоким разрешением.</span></div>
-<div class="cat" data-product="paper"><div class="icon">📄</div><b>Широкоформатная печать на бумаге</b><span>Печать на фотобумаге и постерной бумаге.</span></div>
+<div class="cat" data-product="paper"><div class="icon">📄</div><b>Широкоформатная печать фотографий и постеров на бумаге</b><span>Печать фотографий, постеров и изображений на фотобумаге и постерной бумаге.</span></div>
+<div class="cat" data-product="photos"><div class="icon">📷</div><b>Печать фотографий</b><span>Печать фотографий на глянцевой фотобумаге в любых размерах.</span></div>
+<div class="cat copycenter-cat" data-product="copycenter"><div class="icon">📋</div><b>Услуги копи-центра</b><span>Распечатка документов, копии, сканирование, ламинирование и другие услуги.</span></div>
 <div class="cat" data-product="backlit"><div class="icon">💡</div><b>Бэклит</b><span>Светопропускающая печать для световых коробов, лайтбоксов и рекламных конструкций.</span></div>
 <div class="cat" data-product="flag"><div class="icon">🚩</div><b>Флаг</b><span>Изготовление флагов на специальной ткани, устойчивой к выцветанию.</span></div>
 <div class="cat" data-product="plastic"><div class="icon">▣</div><b>Пластик / таблички / магниты</b><span>Прочные информационные таблички и вывески из листового пластика ПВХ.</span></div>
@@ -86,17 +88,11 @@ const info=t=>`<span class="iwrap"><button type="button" class="info" aria-label
 const ranges=[.25,.30,.35,.5,1,2,5,15,20,30,40];
 function rangeKey(a){if(a<.25)return '<0,25'; if(a<=.30)return '.25-.30'; if(a<=.35)return '.301-.35'; if(a<=.5)return '.3501-.5'; if(a<=1)return '.501-1'; if(a<=2)return '1.001-2'; if(a<=5)return '2.001-5'; if(a<=15)return '5.001-15'; if(a<=20)return '>15-20'; if(a<=30)return '>20-30'; if(a<=40)return '>30-40'; return '>40'}
 const products=[
-{id:'banner',icon:'🖨️',name:'Баннер',desc:'Печать на прочной баннерной ткани, устойчивой к уличным условиям, ветру и осадкам.',opts:[
+{id:'banner',icon:'🖨️',name:'Баннеры',desc:'Печать на прочной баннерной ткани, устойчивой к уличным условиям, ветру и осадкам.',opts:[
 ['440гр — повышенного качества','banner440','Плотный ламинированный баннер повышенной прочности, рассчитанный на долгий срок службы.'],
 ['280гр — бюджетный','banner280','Облегченный вариант баннерной ткани, оптимальный для кратковременных рекламных акций и помещений.'],
 ['Сетка','bannerMesh','Баннерная сетка со структурой отверстий, которая пропускает воздух и идеально подходит для уличных площадей с сильной ветровой нагрузкой.']
 ],post:['Люверсы / проклейка краёв','Резка в контур']},
-{id:'plotter',icon:'✂️',name:'Наклейки одноцветные без фона (плоттерные)',desc:'Вырезание контура из пленки без печатного фона — идеально для надписей и силуэтов.',opts:[
-['Белая плёнка','plotterWhite','Стандартная белая виниловая плёнка для контрастных надписей и силуэтов.'],
-['Цветная плёнка','plotterColor','Широкий ассортимент ярких базовых оттенков винила для интерьерного и наружного применения.'],
-['Плёнка цветная ЕВРОПА','plotterEuro','Высококачественная европейская виниловая плёнка с повышенной долговечностью и стабильностью цвета.'],
-['Серебро / золото / голограф и т. д.','plotterMetal','Декоративные металлизированные, зеркальные и голографические плёнки с премиальным эффектом.']
-],post:[]},
 {id:'vinyl',icon:'🏷️',name:'Наклейки печатные виниловые',desc:'Полноцветная печать на самоклеющейся виниловой пленке с высоким разрешением.',opts:[
 ['Стандартная плёнка','vStd','Качественный винил для универсального применения внутри помещений, на улице на автомобилях и т.д..'],
 ['Бюджетная плёнка','vBudget','Экономичный вариант самоклеящейся пленки для кратковременных рекламных кампаний или этикеток на продукцию.'],
@@ -104,26 +100,34 @@ const products=[
 ['Самоклеящаяся 1440 точек + контурная резка','v1440','Полноцветная печать ультравысокого разрешения (для мелких наклеек, где размер текста меньше 3мм в высоту).'],
 ['Изображение с КЛЕЙКОЙ стороны','vGlue','Печать на пленке для монтажа с внутренней стороны стекла, а изображение будет снаружи.']
 ],post:['Контурная резка плоттером','Ламинация','Резка прямоугольная (поштучно)']},
-{id:'paper',icon:'📄',name:'Широкоформатная печать на бумаге',desc:'Печать на фотобумаге и постерной бумаге.',opts:[
-['Фотобумага глянец без резки','photo','Плотная глянцевая фотобумага для ярких, насыщенных изображений и плакатов, любые размеры.'],
-['Постерная бумага без резки','poster','Специализированная бумага с матовым покрытием для интерьерной рекламы, афиш и постеров.']
-],post:['Ламинация','Резка прямоугольная (поштучно)']},
-{id:'backlit',icon:'💡',name:'Бэклит',desc:'Светопропускающая печать для световых коробов, лайтбоксов и рекламных конструкций.',opts:[['Бэклит','backlit','Светопропускающий материал со специальным светорассеивающим покрытием для равномерного распределения подсветки в лайтбоксах и световых коробах.']],post:['Ламинация','Резка прямоугольная (поштучно)']},
-{id:'flag',icon:'🚩',name:'Флаг',desc:'Изготовление флагов на специальной ткани, устойчивой к выцветанию.',opts:[['Флаговая ткань стандарт','flagStd','Легкая и прочная специализированная ткань для флагов с прокраской с обеих сторон.'],['Флаговая ткань с прослойкой','flagBlock','Плотный многослойный материал для двусторонних флагов, предотвращающий просвечивание изображения насквозь.']],post:['Пошив флага по периметру','Люверсы по одной из сторон']},
-{id:'plastic',icon:'▣',name:'Пластик / таблички / магниты',desc:'Прочные информационные таблички и вывески из листового пластика ПВХ.',opts:[
-['Пластик 3 мм, односторонняя','p3','Легкая информационная табличка из ПВХ-пластика толщиной 3 мм с односторонним нанесением изображения.'],
-['Пластик 3 мм, односторонняя + ламинация','p3lam','Табличка из ПВХ 3 мм с защитным ламинированным покрытием для стойкости к истиранию и выцветанию.'],
-['Пластик 3 мм, двухсторонняя / магнит 0,4 мм','p3two','Двусторонняя табличка из пластика 3 мм либо гибкий виниловый магнит толщиной 0,4 мм.'],
-['Пластик 5 мм, односторонняя / магнит 0,75 мм','p5','Усиленная жесткая табличка из толстого пластика 5 мм либо мощный утолщенный магнит 0,75 мм.']
-],post:['Нанесение скотча','Резка прямоугольная (поштучно)','Фигурная резка по контуру (только для магнитов)']},
-{id:'fabric',icon:'👕',name:'Нанесение на ткань',desc:'Нанесение ярких и долговечных принтов на текстиль методом термопечати.',opts:[
+{id:'plotter',icon:'✂️',name:'Наклейки одноцветные без фона (плоттерные)',desc:'Вырезание контура из пленки без печатного фона — идеально для надписей и силуэтов.',opts:[
+['Белая плёнка','plotterWhite','Стандартная белая виниловая плёнка для контрастных надписей и силуэтов.'],
+['Цветная плёнка','plotterColor','Широкий ассортимент ярких базовых оттенков винила для интерьерного и наружного применения.'],
+['Плёнка цветная ЕВРОПА','plotterEuro','Высококачественная европейская виниловая плёнка с повышенной долговечностью и стабильностью цвета.'],
+['Серебро / золото / голограф и т. д.','plotterMetal','Декоративные металлизированные, зеркальные и голографические плёнки с премиальным эффектом.']
+],post:[]},
+{id:'flag',icon:'🚩',name:'Печать флагов',desc:'Изготовление флагов на специальной ткани, устойчивой к выцветанию.',opts:[['Флаговая ткань стандарт','flagStd','Легкая и прочная специализированная ткань для флагов с прокраской с обеих сторон.'],['Флаговая ткань с прослойкой','flagBlock','Плотный многослойный материал для двусторонних флагов, предотвращающий просвечивание изображения насквозь.']],post:['Пошив флага по периметру','Люверсы по одной из сторон']},
+{id:'fabric',icon:'👕',name:'Печать на ткани (футболки, любая одежда)',desc:'Нанесение ярких и долговечных принтов на текстиль методом термопечати.',opts:[
 ['Белый рисунок','fabWhite','Термопечать белой эластичной пленкой для создания контрастных монохромных изображений на темном или цветном текстиле.'],
 ['Одноцветный цветной рисунок','fabColor','Перенос изображения с помощью одноцветной термопленки выбранного оттенка методом термотрансфера.'],
 ['Полноцветный рисунок','fabFull','Полноцветная экосольвентная печать на специальной термопленке с последующей контурной резкой и термопереносом на ткань.']
 ],post:[]},
 {id:'cards',icon:'💳',name:'Визитки / листовки',desc:'Оперативная цифровая и офсетная печать рекламной полиграфии высокого качества.',opts:[['Визитки стандарт 300 гр','cards','Классические визитки на плотном картоне плотностью 300 грамм.'],['Визитки эксклюзив','cardsEx','Презентабельные визитки премиум-класса с использованием дизайнерских бумаг или специальных видов отделки.'],['Листовки офсет 115 гр','leaf','Массовая рекламная полиграфия на тонкой глянцевой бумаге плотностью 115 грамм.']],post:[]},
-{id:'canvas',icon:'🖼️',name:'Холст + подрамник',desc:'Изготовление интерьерных картин с натяжкой на деревянный подрамник.',opts:[['Печать на холсте + подрамник','canvas','Выберите размер из списка']],post:[]}
-];
+{id:'canvas',icon:'🖼️',name:'Печать картин на холсте с подрамником (фото, портреты, рисунки)',desc:'Изготовление интерьерных картин с натяжкой на деревянный подрамник.',opts:[['Печать на холсте + подрамник','canvas','Выберите размер из списка']],post:[]},
+{id:'plastic',icon:'▣',name:'Пластиковые вывески, таблички, магнитные наклейки',desc:'Прочные информационные таблички и вывески из листового пластика ПВХ.',opts:[
+['Пластик 3 мм, односторонняя','p3','Легкая информационная табличка из ПВХ-пластика толщиной 3 мм с односторонним нанесением изображения.'],
+['Пластик 3 мм, односторонняя + ламинация','p3lam','Табличка из ПВХ 3 мм с защитным ламинированным покрытием для стойкости к истиранию и выцветанию.'],
+['Пластик 3 мм, двухсторонняя / магнит 0,4 мм','p3two','Двусторонняя табличка из пластика 3 мм либо гибкий виниловый магнит толщиной 0,4 мм.'],
+['Пластик 5 мм, односторонняя / магнит 0,75 мм','p5','Усиленная жесткая табличка из толстого пластика 5 мм либо мощный утолщенный магнит 0,75 мм.']
+],post:['Нанесение скотча','Резка прямоугольная (поштучно)','Фигурная резка по контуру (только для магнитов)']},
+{id:'photos',icon:'📷',name:'Печать фотографий',desc:'Печать фотографий на глянцевой фотобумаге в любых размерах.',opts:[['Фотобумага глянец без резки','photo','Плотная глянцевая фотобумага для ярких, насыщенных фотографий и изображений, любые размеры.']],post:['Ламинация','Резка прямоугольная (поштучно)']},
+{id:'paper',icon:'📄',name:'Широкоформатная печать фотографий и постеров на бумаге',desc:'Печать фотографий, постеров и изображений на фотобумаге и постерной бумаге.',opts:[
+['Фотобумага глянец без резки','photo','Плотная глянцевая фотобумага для ярких, насыщенных изображений и плакатов, любые размеры.'],
+['Постерная бумага без резки','poster','Специализированная бумага с матовым покрытием для интерьерной рекламы, афиш и постеров.']
+],post:['Ламинация','Резка прямоугольная (поштучно)']},
+{id:'backlit',icon:'💡',name:'Бэклит',desc:'Светопропускающая печать для световых коробов, лайтбоксов и рекламных конструкций.',opts:[['Бэклит','backlit','Светопропускающий материал со специальным светорассеивающим покрытием для равномерного распределения подсветки в лайтбоксах и световых коробах.']],post:['Ламинация','Резка прямоугольная (поштучно)']},
+{id:'copycenter',icon:'📋',name:'Услуги копи-центра',desc:'Распечатка документов, копии, сканирование, ламинирование и другие услуги.',opts:[],post:[]}
+]
 const priceSmall={
 banner440:[1380,1380,1380,1380],banner280:[700,700,700,700],bannerMesh:[1070,1070,1070,1070],
 vStd:[1760,1760,1760,1760],vBudget:[800,800,800,800],vGlue:[3500,3500,3500,3500],vPerf:[2100,2100,2100,2100],v1440:[3570,3570,3570,3570],
@@ -193,25 +197,108 @@ const vkOrderBtn=document.getElementById('vkOrderBtn');
 const maxOrderBtn=document.getElementById('maxOrderBtn');
 const liveTotal=document.getElementById('liveTotal');
 const breakdown=document.getElementById('breakdown');
-const cart=[];let current=null;let flagMode='';let flagFixed=null;
-function renderCats(){cats.innerHTML=products.map(p=>`<div class="cat" data-product="${p.id}"><div class="icon">${p.icon}</div><b>${p.name}</b><span>${p.desc}</span></div>`).join('');cats.querySelectorAll('.cat').forEach(card=>card.addEventListener('click',()=>openProduct(card.dataset.product)))}
+const cart=[];let current=null;let flagMode='';let flagFixed=null;let lastCalcMeta=null;
+function renderCats(){cats.innerHTML=products.map(p=>`<div class="cat${p.id==='copycenter'?' copycenter-cat':''}" data-product="${p.id}"><div class="icon">${p.icon}</div><b>${p.name}</b><span>${p.desc}</span></div>`).join('');cats.querySelectorAll('.cat').forEach(card=>card.addEventListener('click',()=>openProduct(card.dataset.product)))}
 function openProduct(id){
  current=products.find(p=>p.id===id);
  if(!current)return;
  home.classList.add('hidden');
  product.classList.remove('hidden');
  ptitle.innerHTML=current.icon+' '+current.name;
- pdesc.innerHTML=current.desc+' '+info('Цены и правила взяты из загруженного прайса.');
+ pdesc.innerHTML=current.id==='photos' ? current.desc+' '+info('Фотографии печатаются на обычной фотобумаге и со временем могут выгореть. Для повышенной стойкости выберите категорию «Широкоформатная печать фотографий и постеров на бумаге».') : current.desc+' '+info('Цены и правила взяты из загруженного прайса.');
  fixedBox.innerHTML='';
  form.innerHTML='';
  liveTotal.textContent='0 ₽';
  breakdown.textContent='';
+ if(id==='photos'){renderPhotos();return}
+ if(id==='copycenter'){renderCopyCenter();return}
  if(id==='cards'){renderCards();return}
  if(id==='canvas'){renderCanvas();return}
  if(id==='flag'){renderFlagChooser();return}
  renderGenericForm();
 }
 
+function renderCopyCenter(){
+ form.innerHTML=`
+ <div class="copycenter-wrap">
+   <div class="copycenter-section">
+     <h3>Услуги печати</h3>
+     <table class="copytable">
+       <thead><tr><th>Услуга</th><th>Текст/чертёж</th><th>Изображение</th></tr></thead>
+       <tbody>
+         <tr><td class="service">Ч/б печать А4 односторонняя (1-3 стр.)</td><td class="pricecell">10 ₽</td><td class="pricecell">15 ₽</td></tr>
+         <tr><td class="service">Ч/б печать А4 односторонняя (4-50 стр.)</td><td class="pricecell">7 ₽</td><td class="pricecell">10 ₽</td></tr>
+         <tr><td class="service">Ч/б печать А4 односторонняя (от 100 стр.)</td><td class="pricecell">5,5 ₽</td><td class="pricecell">7 ₽</td></tr>
+         <tr><td class="service">Ч/б печать А4 двусторонняя (1-50 стр.)</td><td class="pricecell">10 ₽</td><td class="pricecell">20 ₽</td></tr>
+         <tr><td class="service">Ч/б печать А4 двусторонняя (от 100 стр.)</td><td class="pricecell">7 ₽</td><td class="pricecell">15 ₽</td></tr>
+         <tr><td class="service">Цветная печать А4 односторонняя</td><td class="pricecell">13 ₽</td><td class="pricecell">25 ₽</td></tr>
+         <tr><td class="service">Цветная печать А4 двусторонняя</td><td class="pricecell">17 ₽</td><td class="pricecell">35 ₽</td></tr>
+         <tr><td class="service">Ч/б / цветная печать А3 120гр офсетная бум односторонняя</td><td class="pricecell">60 ₽</td><td class="pricecell">90 ₽</td></tr>
+         <tr><td class="service">Печать А4 фотобум (гл/мат) 180гр</td><td class="pricecell">60 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Печать А4 фотобум (гл/мат) 220гр</td><td class="pricecell">90 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Печать А4 фотобум (гл/мат) 300гр</td><td class="pricecell">150 ₽</td><td class="pricecell">200 ₽</td></tr>
+         <tr><td class="service">Печать А3 фотобум (гл/мат) 180гр</td><td class="pricecell">150 ₽</td><td class="pricecell">250 ₽</td></tr>
+         <tr><td class="service">Печать А3 фотобум (гл/мат) 220гр</td><td class="pricecell">230 ₽</td><td class="pricecell">300 ₽</td></tr>
+         <tr><td class="service">Печать А3 фотобум (гл/мат) 300гр</td><td class="pricecell">300 ₽</td><td class="pricecell">350 ₽</td></tr>
+         <tr><td class="service">Печать на бумажной самоклейке А4</td><td class="pricecell">80 ₽</td><td class="pricecell">120 ₽</td></tr>
+         <tr><td class="service">Фото на документы 3×4 (6 шт.)</td><td class="pricecell">450 ₽ — без порезки</td><td class="pricecell">500 ₽ — с порезкой</td></tr>
+         <tr><td class="service">Фото 10×15 (&lt;100шт)</td><td class="pricecell">15 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Фото 10×15 (&gt;100шт)</td><td class="pricecell">11 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Копия А4 ч/б</td><td class="pricecell">15 ₽</td><td class="pricecell">20 ₽</td></tr>
+         <tr><td class="service">Копия А4 цветная</td><td class="pricecell">30 ₽</td><td class="pricecell">36 ₽</td></tr>
+       </tbody>
+     </table>
+   </div>
+   <div class="copycenter-section">
+     <h3>Дополнительные услуги</h3>
+     <table class="copytable">
+       <thead><tr><th>Услуга</th><th>Цена</th><th>Доп. цена</th></tr></thead>
+       <tbody>
+         <tr><td class="service">Сканирование А4</td><td class="pricecell">10 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Сканирование &gt;А4</td><td class="pricecell">От 800 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Ламинирование А6</td><td class="pricecell">60 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Ламинирование А5</td><td class="pricecell">70 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Ламинирование А4</td><td class="pricecell">100 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Ламинирование А3</td><td class="pricecell">180 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Переплет на пластиковую пружину (до 70 стр.)</td><td class="pricecell">180 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Переплет на пластиковую пружину (70+ стр.)</td><td class="pricecell">240 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Набор текста</td><td class="pricecell">40 ₽ (1-3стр)</td><td class="pricecell">30 ₽ (&gt;3шт)</td></tr>
+         <tr><td class="service">Поиск информации в интернете</td><td class="pricecell">от 50 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Поиск готового бланка/договора в интернете</td><td class="pricecell">30 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Отправка на почту / MAX / VK</td><td class="pricecell">30 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Запись на флешку клиента</td><td class="pricecell">50 ₽</td><td class="pricecell">50–90 ₽</td></tr>
+       </tbody>
+     </table>
+   </div>
+ </div>`;
+ liveTotal.textContent='';
+ breakdown.textContent='Фиксированные цены — без расчёта площади и количества.';
+}
+
+function renderPhotos(){
+ form.innerHTML=`
+ <div class="note" style="margin-bottom:14px"><b>Важно:</b> фотографии печатаются на обычной фотобумаге и со временем могут выгореть. Если нужна печать с повышенной стойкостью к выгоранию, выберите категорию «Широкоформатная печать фотографий и постеров на бумаге».</div>
+ <label>Размер фотографии</label>
+ <select id="photoSize" onchange="photoCalc()">
+   <option value="10×15 см (А6)" data-price="15">10×15 см (А6) — 15 ₽/шт. (от 100 шт. — 12 ₽/шт.)</option>
+   <option value="15×21 см (А5)" data-price="35">15×21 см (А5) — 35 ₽/шт.</option>
+   <option value="21×30 см (А4)" data-price="60">21×30 см (А4) — 60 ₽/шт.</option>
+   <option value="30×42 см (А3)" data-price="250">30×42 см (А3) — 250 ₽/шт.</option>
+ </select>
+ <div style="margin-top:12px"><label>Количество, шт.</label><input id="photoQty" type="number" min="1" step="1" value="1" oninput="photoCalc()"></div>
+ <div class="note" style="margin-top:12px">Для формата 10×15 см: при тираже от 100 шт. применяется цена 12 ₽/шт.</div>`;
+ photoCalc();
+}
+function photoCalc(){
+ const size=document.getElementById('photoSize');
+ const q=Math.max(1,+(document.getElementById('photoQty')?.value||1));
+ const base=+(size?.selectedOptions?.[0]?.dataset.price||0);
+ const rate=(size?.value==='10×15 см (А6)' && q>=100)?12:base;
+ const total=rate*q;
+ lastCalcMeta={categoryId:'photos',fixed:true,photoSize:size?.value||'',qty:q,rate,total};
+ liveTotal.textContent=R(total);
+ breakdown.innerHTML=`${size?.value||''} · ${q} шт. × ${R(rate)}/шт.`;
+}
 function renderFlagChooser(){
  flagMode='';
  flagFixed=null;
@@ -269,9 +356,9 @@ function flagFixedChanged(){
 }
 
 function renderGenericForm(){
- const widthTip=current.id==='banner'?'Горизонтальный размер изделия в сантиметрах.':current.id==='plotter'?'Горизонтальный размер макета или заготовки в сантиметрах.':current.id==='vinyl'?'Горизонтальный размер изделия в сантиметрах.':current.id==='paper'?'Горизонтальный размер печатного изделия или полотна в сантиметрах.':current.id==='backlit'?'Горизонтальный размер рекламного полотна в сантиметрах.':current.id==='fabric'?'Горизонтальный размер макета нанесения в сантиметрах.':'Введите размер в сантиметрах.';
- const heightTip=current.id==='banner'?'Вертикальный размер изделия в сантиметрах.':current.id==='plotter'?'Вертикальный размер макета или заготовки в сантиметрах.':current.id==='vinyl'?'Вертикальный размер изделия в сантиметрах.':current.id==='paper'?'Вертикальный размер печатного изделия или полотна в сантиметрах.':current.id==='backlit'?'Вертикальный размер рекламного полотна в сантиметрах.':current.id==='fabric'?'Вертикальный размер макета нанесения в сантиметрах.':'Введите размер в сантиметрах.';
- const qtyTip=current.id==='plotter'||current.id==='vinyl'?'Общий тираж изготавливаемых наклеек.':current.id==='paper'||current.id==='backlit'||current.id==='fabric'?'Общий тираж изготавливаемых изделий.':'Тираж заказа.';
+ const widthTip=current.id==='banner'?'Горизонтальный размер изделия в сантиметрах.':current.id==='plotter'?'Горизонтальный размер макета или заготовки в сантиметрах.':current.id==='vinyl'?'Горизонтальный размер изделия в сантиметрах.':(current.id==='paper'||current.id==='photos')?'Горизонтальный размер печатного изделия или фотографии в сантиметрах.':current.id==='backlit'?'Горизонтальный размер рекламного полотна в сантиметрах.':current.id==='fabric'?'Горизонтальный размер макета нанесения в сантиметрах.':'Введите размер в сантиметрах.';
+ const heightTip=current.id==='banner'?'Вертикальный размер изделия в сантиметрах.':current.id==='plotter'?'Вертикальный размер макета или заготовки в сантиметрах.':current.id==='vinyl'?'Вертикальный размер изделия в сантиметрах.':(current.id==='paper'||current.id==='photos')?'Вертикальный размер печатного изделия или фотографии в сантиметрах.':current.id==='backlit'?'Вертикальный размер рекламного полотна в сантиметрах.':current.id==='fabric'?'Вертикальный размер макета нанесения в сантиметрах.':'Введите размер в сантиметрах.';
+ const qtyTip=current.id==='plotter'||current.id==='vinyl'?'Общий тираж изготавливаемых наклеек.':current.id==='paper'||current.id==='photos'||current.id==='backlit'||current.id==='fabric'?'Общий тираж изготавливаемых изделий.':'Тираж заказа.';
  form.innerHTML=`<div class="options">${current.opts.map((o,i)=>`<label class="option"><input type="radio" name="mat" value="${o[1]}" ${i===0?'checked':''} onchange="matChanged()"><span>${o[0]}</span>${info(o[2])}</label>`).join('')}</div>
  <div class="row"><div><label>Ширина, см ${info(widthTip)}</label><input id="w" type="number" min="0.1" step="0.1" value="100" oninput="recalc()"></div><div><label>Высота, см ${info(heightTip)}</label><input id="h" type="number" min="0.1" step="0.1" value="100" oninput="recalc()"></div></div>
  <div><label>Количество, шт ${info(qtyTip)}</label><input id="qty" type="number" min="1" step="1" value="1" oninput="recalc()"></div>
@@ -295,7 +382,7 @@ function renderPostArea(){
  box.innerHTML=posts.length?`<label>Постобработка</label><div class="options">${posts.map(x=>`<label class="option"><input type="checkbox" class="post" data-name="${x}" onchange="recalc()"><span>${x}</span>${info(postTip(x))}</label>`).join('')}</div>`:'';
 }
 function matChanged(){renderPostArea();recalc()}
-function postTip(x){if(current?.id==='flag'){if(x.includes('Пошив флага'))return 'Профессиональная обработка краев изделия двойной строчкой для защиты от растрепывания на ветру и пошивом кармана для флагштока.';if(x.includes('Люверсы'))return 'Установка металлических колец для удобного крепления флага на флагшток или тросы.';} if(current?.id==='backlit'){if(x.includes('Ламинация'))return 'Защитное покрытие для предотвращения выгорания чернил и повреждения поверхности при монтаже.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка готового тиража в заданный размер по периметру.';} if(current?.id==='paper'){if(x.includes('Ламинация'))return 'Нанесение защитной прозрачной пленки для предотвращения выцветания, загрязнений и механических повреждений бумаги.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка отпечатанного тиража по заданному размеру на отдельные готовые изделия.';} if(current?.id==='vinyl'){if(x.includes('Контурная резка'))return 'Точное вырезание наклеек по сложному индивидуальному контуру.';if(x.includes('Ламинация'))return 'Накатка защитной прозрачной пленки для защиты изображения от выгорания, царапин и механических повреждений.';if(x.includes('Резка прямоугольная'))return 'Нарезка отпечатанного тиража на отдельные прямоугольные изделия.';} if(current?.id==='plastic'){
+function postTip(x){if(current?.id==='flag'){if(x.includes('Пошив флага'))return 'Профессиональная обработка краев изделия двойной строчкой для защиты от растрепывания на ветру и пошивом кармана для флагштока.';if(x.includes('Люверсы'))return 'Установка металлических колец для удобного крепления флага на флагшток или тросы.';} if(current?.id==='backlit'){if(x.includes('Ламинация'))return 'Защитное покрытие для предотвращения выгорания чернил и повреждения поверхности при монтаже.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка готового тиража в заданный размер по периметру.';} if(current?.id==='paper'||current?.id==='photos'){if(x.includes('Ламинация'))return 'Нанесение защитной прозрачной пленки для предотвращения выцветания, загрязнений и механических повреждений бумаги.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка отпечатанного тиража по заданному размеру на отдельные готовые изделия.';} if(current?.id==='vinyl'){if(x.includes('Контурная резка'))return 'Точное вырезание наклеек по сложному индивидуальному контуру.';if(x.includes('Ламинация'))return 'Накатка защитной прозрачной пленки для защиты изображения от выгорания, царапин и механических повреждений.';if(x.includes('Резка прямоугольная'))return 'Нарезка отпечатанного тиража на отдельные прямоугольные изделия.';} if(current?.id==='plastic'){
    if(x.includes('Нанесение скотча'))return 'Приклеивание двустороннего скотча на тыльную сторону для быстрого и удобного монтажа на стены или поверхности.';
    if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка готовых изделий по заданному прямому контуру.';
    if(x.includes('Фигурная резка'))return 'Резка магнитов плоттером по заданной форме.';
@@ -341,7 +428,7 @@ function priceFor(id,a){
  return {price:arr[i],band:rangeNamesLarge[i],model:'per_m2',setup:0};
 }
 function recalc(){
- if(!current||current.id==='cards'||current.id==='canvas')return;
+ if(!current||current.id==='cards'||current.id==='canvas'){lastCalcMeta=null;return;}
  let mat=document.querySelector('input[name=mat]:checked')?.value;
  let q=+document.getElementById('qty').value||1;
  let unitArea=area(), a=unitArea*q;
@@ -396,6 +483,7 @@ function recalc(){
    }
  });
  let total=subtotal+launch+extras;
+ lastCalcMeta={categoryId:current.id, matId:mat, area:a, qty:q, unitArea, wCm:+document.getElementById('w').value||0, hCm:+document.getElementById('h').value||0, baseRate:base, launch, extras, total};
  liveTotal.textContent=R(total);
  breakdown.innerHTML=`Площадь 1 шт.: <b>${unitArea.toFixed(4)} м²</b> · тираж: <b>${q} шт.</b> · общая площадь: <b>${a.toFixed(3)} м²</b> · диапазон: <b>${pf.band}</b> · тариф: <b>${R(base)} / м²</b> · печать: <b>${R(subtotal)}</b>${launch?` · запуск: <b>${R(launch)}</b>`:''}${details.length?`<br>${details.join(' · ')}`:''}`;
 }
@@ -497,50 +585,131 @@ function cardCalc(){
    detail=el.selectedOptions[0].textContent;
  } else return;
  liveTotal.textContent=R(v);
+ lastCalcMeta={categoryId:current.id, fixed:true, qty:1, total:v};
  breakdown.innerHTML=detail;
 }
 function renderCanvas(){form.innerHTML=`<label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" value="1" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="options"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label></div>`;canvasCalc()}
-function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
-function addToCart(){let total=parseInt(liveTotal.textContent.replace(/\D/g,''))||0;if(!total)return alert('Не удалось получить цену по прайсу для выбранных параметров.');let name=current.name;let mat=flagMode==='standard'?(flagFixed?.label||''):(document.querySelector('input[name=mat]:checked')?.parentElement?.querySelector('span')?.textContent||document.querySelector('input[name=cardtype]:checked')?.parentElement?.querySelector('span')?.textContent||cv?.options[cv.selectedIndex]?.text||'');cart.push({name,mat,total});renderCart();alert('Позиция добавлена в корзину');}
-function buildCartMessage(){
- const base=cart.reduce((s,x)=>s+x.total,0);
- const lines=['Хочу сделать такой заказ:',''];
- cart.forEach((x,i)=>{
-   lines.push(`${i+1}. ${x.name}`);
-   if(x.mat) lines.push(`   Вариант: ${x.mat}`);
-   lines.push(`   Стоимость: ${R(x.total)}`);
-   lines.push('');
- });
- lines.push(`ИТОГО за наличные: ${R(base)}`);
- lines.push(`Картой (переводом): ${R(base*1.08)}`);
- lines.push(`По счёту с договором: ${R(base*1.10)}`);
- return lines.join('\n');
+function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
+function selectedPostNames(){
+ return [...document.querySelectorAll('.post:checked')].map(x=>x.dataset.name||x.parentElement?.querySelector('span')?.textContent||'').filter(Boolean);
 }
-async function buildCartOrderText(){
+function currentMaterialLabel(){
+ const el=document.querySelector('input[name=mat]:checked');
+ if(el)return el.parentElement?.querySelector('span')?.textContent||el.value;
+ const card=document.querySelector('input[name=cardtype]:checked');
+ if(card)return card.parentElement?.querySelector('span')?.textContent||card.value;
+ return '';
+}
+function buildCurrentDetails(){
+ const m=lastCalcMeta||{};
+ const lines=[];
+ if(m.fixed){
+   if(current?.id==='photos'){
+     const el=document.getElementById('photoSize'); const q=document.getElementById('photoQty');
+     lines.push(`Размер: ${el?.value||m.photoSize||'—'}`);
+     lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
+     if(m.rate) lines.push(`Цена за 1 шт.: ${R(m.rate)}`);
+   } else if(current?.id==='canvas'){
+     const cvEl=document.getElementById('cv'); const q=+(document.getElementById('cvq')?.value||m.qty||1);
+     lines.push(`Размер: ${cvEl?.selectedOptions?.[0]?.textContent||m.size||'—'}`);
+     lines.push(`Количество: ${q} шт.`);
+     if(document.getElementById('cvHook')?.checked) lines.push('Постобработка: крючок для крепежа');
+   } else if(current?.id==='cards'){
+     const el=document.getElementById('cardVariant');
+     lines.push(`Вариант: ${el?.selectedOptions?.[0]?.textContent||m.detail||'—'}`);
+   } else if(current?.id==='cardsEx'){
+     const t=document.getElementById('cardExType'); const q=document.getElementById('cardExQty');
+     lines.push(`Тип: ${t?.selectedOptions?.[0]?.textContent||m.type||'—'}`);
+     lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
+   } else if(current?.id==='leaf'){
+     const el=document.getElementById('lf'); lines.push(`Формат и тираж: ${el?.selectedOptions?.[0]?.textContent||m.detail||'—'}`);
+   } else {
+     const mat=currentMaterialLabel(); if(mat) lines.push(`Материал: ${mat}`);
+     if(m.qty) lines.push(`Количество: ${m.qty} шт.`);
+   }
+ } else {
+   const mat=currentMaterialLabel(); if(mat) lines.push(`Материал: ${mat}`);
+   if(m.wCm!=null && m.hCm!=null) lines.push(`Размер: ${m.wCm} × ${m.hCm} см`);
+   if(m.qty!=null) lines.push(`Количество: ${m.qty} шт.`);
+   if(m.area!=null) lines.push(`Площадь заказа: ${m.area.toFixed(3).replace('.',',')} м²`);
+   const posts=selectedPostNames(); if(posts.length) lines.push(`Постобработка: ${posts.join(', ')}`);
+   if(current?.id==='fabric'){
+     const shirt=document.getElementById('needShirt');
+     if(shirt?.checked) lines.push(`Футболка: ${document.getElementById('shirtQty')?.value||1} шт.`);
+   }
+   if(current?.id==='flag' && flagMode==='standard') lines.push('Размер: стандартный вариант');
+ }
+ return lines.join(' · ');
+}
+function addToCart(){
+ let total=parseInt(liveTotal.textContent.replace(/\D/g,''))||0;
+ if(!total)return alert('Не удалось получить цену по прайсу для выбранных параметров.');
+ let name=current.name;
+ let mat=flagMode==='standard'?(flagFixed?.label||''):(currentMaterialLabel()||'');
+ let meta=lastCalcMeta?{...lastCalcMeta}:null;
+ if(!meta) meta={categoryId:current.id,fixed:true,qty:1,total};
+ meta.total=total;
+ if(current.id==='canvas') meta.size=document.getElementById('cv')?.selectedOptions?.[0]?.textContent||'';
+ if(current.id==='cards') meta.detail=document.getElementById('cardVariant')?.selectedOptions?.[0]?.textContent||'';
+ if(current.id==='cardsEx') {meta.type=document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||'';meta.qty=+(document.getElementById('cardExQty')?.value||1);}
+ const details=buildCurrentDetails();
+ cart.push({name,mat,total,meta,details});
+ renderCart();
+ alert('Позиция добавлена в корзину');
+}
+function volumeAdjustedItems(){
+ const areaGroups={};
+ cart.forEach(x=>{if(x.meta?.area>0 && x.meta?.categoryId){const k=x.meta.categoryId;(areaGroups[k]??=[]).push(x);}});
+ const out=cart.map(x=>({...x}));
+ const byRef=new Map(cart.map((x,i)=>[x,i]));
+ for(const [category,items] of Object.entries(areaGroups)){
+   if(items.length<2) continue;
+   const totalArea=items.reduce((s,x)=>s+(x.meta.area||0),0);
+   items.forEach(item=>{
+     const pf=priceFor(item.meta.matId,totalArea);
+     if(!pf)return;
+     const m=item.meta;
+     const newPrint=(pf.price||0)*(m.area||0);
+     const newTotal=newPrint+(m.launch||0)+(m.extras||0);
+     const idx=byRef.get(item);
+     out[idx].total=newTotal;
+     out[idx].meta={...m,combinedArea:totalArea,baseRate:pf.price,band:pf.band,total:newTotal,volumeDiscount:true};
+   });
+ }
+ return out;
+}
+function renderCart(){
+ const priced=volumeAdjustedItems();
+ cartItems.className=cart.length?'':'empty';
+ cartItems.innerHTML=cart.length?priced.map((x,i)=>`<div class="item"><div class="itemtop"><b>${i+1}. ${x.name}</b><button class="remove" onclick="cart.splice(${i},1);renderCart()">×</button></div>${x.details?`<div class="muted cart-details">${x.details}</div>`:''}<div class="price">${R(x.total)}${x.meta?.volumeDiscount?` <span class="volume-note">(на эту позицию применена скидка на объём заказа)</span>`:''}</div></div>`).join(''):'Пока заказов нет.';
+ const base=priced.reduce((s,x)=>s+x.total,0);
+ grandCash.textContent=R(base);grandCard.textContent=R(base*1.08);grandInvoice.textContent=R(base*1.10);
+ if(typeof vkOrderBtn!=='undefined')vkOrderBtn.disabled=!cart.length;
+ if(typeof maxOrderBtn!=='undefined')maxOrderBtn.disabled=!cart.length;
+}
+function buildCartOrderText(){
+ const priced=volumeAdjustedItems();
  let text='Хочу сделать такой заказ:\n\n';
- cart.forEach((x,i)=>{text+=(i+1)+'. '+x.name+' — '+R(x.price)+'\n'+x.details+'\n\n';});
- const sum=cart.reduce((a,x)=>a+x.price,0);
- text+='Итого за наличные: '+R(sum);
+ priced.forEach((x,i)=>{
+   text+=`${i+1}. ${x.name}\n`;
+   if(x.details) text+=`${x.details}\n`;
+   text+=`Стоимость: ${R(x.total)}${x.meta?.volumeDiscount?' (на эту позицию применена скидка на объём заказа)':''}\n\n`;
+ });
+ text+=`Итого за наличные: ${R(priced.reduce((s,x)=>s+x.total,0))}`;
  return text;
 }
-function sendCartToMAX(){
+async function sendCartToVK(){
  if(!cart.length)return;
  const text=buildCartOrderText();
- navigator.clipboard?.writeText(text).catch(()=>{});
- window.open('https://max.ru/u/f9LHodD0cOJvjQyc7x4p_q-BXrJi4yZ0I1xOESctfY1BMOKcee_-WmF26eA','_blank');
-}
-async function sendCartToVK(){
- if(!cart.length){alert('Сначала добавьте хотя бы одну позицию в корзину.');return;}
- const message=buildCartMessage();
- try{
-   await navigator.clipboard.writeText(message);
- }catch(e){
-   const ta=document.createElement('textarea');ta.value=message;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');ta.remove();
- }
+ try{await navigator.clipboard.writeText(text);}catch(e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
  window.open('https://vk.ru/write1079224055','_blank','noopener,noreferrer');
- setTimeout(()=>alert('Заказ скопирован в буфер обмена. ВК откроется с подготовленным текстом сообщения. Если ВК не подставит текст автоматически, вставьте его из буфера обмена.'),120);
 }
-function renderCart(){cartItems.className=cart.length?'':'empty';cartItems.innerHTML=cart.length?cart.map((x,i)=>`<div class="item"><div class="itemtop"><b>${x.name}</b><button class="remove" onclick="cart.splice(${i},1);renderCart()">×</button></div><div class="muted">${x.mat}</div><div class="price">${R(x.total)}</div></div>`).join(''):'Пока заказов нет.';const base=cart.reduce((s,x)=>s+x.total,0);grandCash.textContent=R(base);grandCard.textContent=R(base*1.08);grandInvoice.textContent=R(base*1.10);if(typeof vkOrderBtn!=='undefined')vkOrderBtn.disabled=!cart.length;if(typeof maxOrderBtn!=='undefined')maxOrderBtn.disabled=!cart.length}
+async function sendCartToMAX(){
+ if(!cart.length)return;
+ const text=buildCartOrderText();
+ try{await navigator.clipboard.writeText(text);}catch(e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+ window.open('https://max.ru/u/f9LHodD0cOJvjQyc7x4p_q-BXrJi4yZ0I1xOESctfY1BMOKcee_-WmF26eA','_blank','noopener,noreferrer');
+}
 function clearCart(){cart.length=0;renderCart()}
 function goHome(){product.classList.add('hidden');home.classList.remove('hidden')}
 renderCats();renderCart();
