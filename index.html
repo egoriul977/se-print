@@ -2,8 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11151d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>СЕРЕЖНИКОВ — калькулятор типографии</title>
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js" defer></script>
 <style>
 :root{--bg:#f7f8fc;--card:rgba(255,255,255,.94);--text:#17191c;--muted:#667080;--line:#e5e8ef;--accent:#17191c;--cyan:#16c7ff;--blue:#4d7cff;--mag:#f1268f;--pink:#ff4ca5;--yel:#ffd84d;--shadow:0 18px 50px rgba(37,54,90,.10)}
 *{box-sizing:border-box}html{min-height:100%;background:#f7f8fc}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at 8% 12%,rgba(241,38,143,.12),transparent 24%),radial-gradient(circle at 91% 18%,rgba(0,190,255,.14),transparent 25%),radial-gradient(circle at 55% 100%,rgba(77,124,255,.08),transparent 30%),#f7f8fc;color:var(--text);min-height:100vh;position:relative;overflow-x:hidden}
@@ -87,6 +91,26 @@ input,select{width:100%;padding:12px;border:1px solid #d9dde5;border-radius:10px
 <button class="btn secondary" onclick="clearCart()">Очистить корзину</button></aside>
 </div>
 <script>
+/* VK Mini Apps: инициализация не блокирует загрузку калькулятора.
+   Если VK Bridge недоступен (обычный браузер/GitHub Pages), калькулятор продолжает работать самостоятельно. */
+(function initVK(){
+  function start(){
+    try{
+      if(window.vkBridge && typeof window.vkBridge.send==='function'){
+        window.vkBridge.send('VKWebAppInit').catch(()=>{});
+        const resize=()=>window.vkBridge.send('VKWebAppResizeWindow',{width:Math.max(320,document.documentElement.clientWidth),height:Math.max(1,document.documentElement.scrollHeight)}).catch(()=>{});
+        window.addEventListener('load',()=>setTimeout(resize,100));
+        window.addEventListener('resize',()=>setTimeout(resize,80));
+        if('ResizeObserver' in window){
+          const ro=new ResizeObserver(()=>setTimeout(resize,40));
+          ro.observe(document.documentElement);
+        }
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+})();
+
 const R=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
 const info=t=>`<span class="iwrap"><button type="button" class="info" aria-label="Пояснение" onclick="event.stopPropagation();toggleInfoTip(this)">?</button><span class="tip">${t}</span></span>`;
 function toggleInfoTip(btn){const wrap=btn.parentElement;wrap.classList.toggle("show");if(wrap.classList.contains("show")){const r=wrap.getBoundingClientRect();const maxWidth=280;wrap.classList.toggle("tip-left",r.right+25+maxWidth>window.innerWidth-8);}}
