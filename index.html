@@ -126,7 +126,7 @@ input,select{width:100%;padding:12px;border:1px solid #d9dde5;border-radius:10px
 <div class="cat" data-product="photos"><div class="icon">📷</div><b>Печать фотографий</b><span>Печать фотографий на глянцевой фотобумаге в любых размерах.</span></div>
 <div class="cat copycenter-cat" data-product="copycenter"><div class="icon">📋</div><b>Услуги копи-центра</b><span>Распечатка документов, копии, сканирование, ламинирование и другие услуги.</span></div>
 <div class="cat" data-product="backlit"><div class="icon">💡</div><b>Бэклит</b><span>Светопропускающая печать для световых коробов, лайтбоксов и рекламных конструкций.</span></div>
-<div class="cat" data-product="flag"><div class="icon">🚩</div><b>Флаг</b><span>Изготовление флагов на специальной ткани, устойчивой к выцветанию.</span></div>
+<div class="cat" data-product="flag"><div class="icon"></div><b>Флаг</b><span>Изготовление флагов на специальной ткани, устойчивой к выцветанию.</span></div>
 <div class="cat" data-product="plastic"><div class="icon">▣</div><b>Пластик / таблички / магниты</b><span>Прочные информационные таблички и вывески из листового пластика ПВХ.</span></div>
 <div class="cat" data-product="plasticCards"><div class="icon">💳</div><b>Пластиковые карты</b><span>Изготовление пластиковых карт — параметры и стоимость уточняются у менеджера.</span></div>
 <div class="cat" data-product="fabric"><div class="icon">👕</div><b>Нанесение на ткань</b><span>Нанесение ярких и долговечных принтов на текстиль методом термопечати.</span></div>
@@ -201,7 +201,7 @@ const products=[
 ['Светонакопительная плёнка (светится в темноте)','plotterGlow','Плёнка, которая накапливает свет и светится в темноте.'],
 ['Светоотражающая плёнка белая','plotterReflect','Белая светоотражающая плёнка для заметности при направленном освещении.']
 ],post:[]},
-{id:'flag',icon:'🚩',name:'Печать флагов',desc:'Изготовление флагов на специальной ткани, устойчивой к выцветанию.',opts:[['Флаговая ткань стандарт','flagStd','Легкая и прочная специализированная ткань для флагов с прокраской с обеих сторон.'],['Флаговая ткань с прослойкой','flagBlock','Плотный многослойный материал для двусторонних флагов, предотвращающий просвечивание изображения насквозь.']],post:['Пошив флага по периметру','Люверсы по одной из сторон']},
+{id:'flag',icon:'',name:'Печать флагов',desc:'Изготовление флагов на специальной ткани, устойчивой к выцветанию.',opts:[['Флаговая ткань стандарт','flagStd','Легкая и прочная специализированная ткань для флагов с прокраской с обеих сторон.'],['Флаговая ткань с прослойкой','flagBlock','Плотный многослойный материал для двусторонних флагов, предотвращающий просвечивание изображения насквозь.']],post:['Пошив флага по периметру','Люверсы по одной из сторон']},
 {id:'fabric',icon:'👕',name:'Печать на ткани (футболки, любая одежда)',desc:'Нанесение ярких и долговечных принтов на текстиль методом термопечати.',opts:[
 ['Белый рисунок','fabWhite','Термопечать белой эластичной пленкой для создания контрастных монохромных изображений на темном или цветном текстиле.'],
 ['Одноцветный цветной рисунок','fabColor','Перенос изображения с помощью одноцветной термопленки выбранного оттенка методом термотрансфера.'],
@@ -677,9 +677,9 @@ function renderFlagChooser(){
  form.innerHTML=`
  <label>Вариант изготовления флага</label>
  <div class="options flag-mode-row">
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')"><span class="flag-mode-label"><span class="flag-mode-icon">🚩</span><span>Стандартные размеры</span>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')"><span class="flag-mode-label"><span class="flag-mode-icon">🏳️</span><span>Виндеры</span>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>${exampleThumbSpanHTML('examples/flag/winder','Виндеры','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')"><span class="flag-mode-label"><span class="flag-mode-icon">📐</span><span>Размер на заказ</span>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — размер на заказ','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Стандартные размеры</span>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Виндеры</span>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>${exampleThumbSpanHTML('examples/flag/winder','Виндеры','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Размер на заказ</span>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — размер на заказ','')}</button>
  </div>
  <div id="flagModeBox"></div>`;
  renderFlagMode();
@@ -1702,3 +1702,54 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
  .example-gallery-item img{max-height:80vh!important;object-fit:contain!important}
 }
 </style>
+
+<style id="flag-mobile-selection-menu-v3">
+.option:has(input:checked),
+.flag-choice:has(input:checked),
+.option.selected,.flag-choice.selected{
+ border:2px solid #ff1688!important;
+ background:linear-gradient(115deg,rgba(255,34,139,.16),rgba(48,190,255,.12))!important;
+ box-shadow:0 0 0 3px rgba(255,22,136,.10),0 8px 24px rgba(255,22,136,.18)!important;
+ transform:translateY(-1px)!important;
+}
+.option:has(input:checked)::after,.flag-choice:has(input:checked)::after{
+ content:"✓ ВЫБРАНО";display:inline-flex;align-items:center;justify-content:center;
+ font-size:10px;font-weight:900;letter-spacing:.04em;color:#fff;background:#ff1688;
+ border-radius:999px;padding:4px 8px;margin-left:auto;
+}
+select{
+ transition:border-color .2s ease,box-shadow .2s ease,transform .18s ease,background-color .2s ease!important;
+ transform-origin:50% 0;
+}
+select:focus{
+ border-color:#ff1688!important;
+ box-shadow:0 0 0 4px rgba(255,22,136,.12),0 10px 24px rgba(34,102,180,.12)!important;
+ transform:translateY(-1px) scale(1.01)!important;
+}
+@media(max-width:700px){
+ .flag-choice .example-thumb,
+ .flag-mode-row .example-thumb{
+   width:100%!important;height:190px!important;max-height:none!important;
+   aspect-ratio:16/9!important;margin:10px 0 0!important;
+ }
+ .flag-choice .example-thumb img,.flag-mode-row .example-thumb img{
+   width:100%!important;height:100%!important;object-fit:cover!important;
+ }
+ .example-gallery{animation:mobileGalleryIn .22s cubic-bezier(.2,.8,.2,1)!important}
+ .example-gallery-inner{animation:mobileGalleryCardIn .25s cubic-bezier(.2,.8,.2,1)!important}
+ .example-gallery.closing{animation:mobileGalleryOut .18s ease forwards!important}
+ .example-gallery.closing .example-gallery-inner{animation:mobileGalleryCardOut .18s ease forwards!important}
+ @keyframes mobileGalleryIn{from{opacity:0}to{opacity:1}}
+ @keyframes mobileGalleryCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+ @keyframes mobileGalleryOut{to{opacity:0}}
+ @keyframes mobileGalleryCardOut{to{opacity:0;transform:translateY(10px) scale(.98)}}
+ .option:has(input:checked)::after,.flag-choice:has(input:checked)::after{
+   flex:0 0 auto!important;order:3!important;
+ }
+}
+</style>
+
+<script id="select-animation-helper">
+document.addEventListener('focusin',e=>{if(e.target&&e.target.tagName==='SELECT')e.target.classList.add('menu-opening')});
+document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName==='SELECT'){e.target.classList.remove('menu-opening');e.target.classList.add('menu-closing');setTimeout(()=>e.target?.classList.remove('menu-closing'),180)}});
+</script>
