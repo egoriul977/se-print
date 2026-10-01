@@ -880,6 +880,7 @@ function resolveExampleFolder(folder,title=''){
    if(t.includes('резк'))return 'examples/banner/contour-cut';
  }
  if(folder.startsWith('examples/fabric/')){
+   if(t.includes('однотон')||t.includes('цветный'))return 'examples/fabric/solid-color';
    if(t.includes('a4'))return 'examples/fabric/size-a4';
    if(t.includes('a3'))return 'examples/fabric/size-a3';
    if(t.includes('30×10')||t.includes('30x10'))return 'examples/fabric/size-30x10';
