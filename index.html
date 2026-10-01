@@ -2618,7 +2618,7 @@ body.ux-in-category #product{padding-top:56px!important}
 }
 </style>
 
-<script id="mobile-ux-v12">
+<script id="mobile-ux-v12-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const lower=x=>(x?.textContent||'').toLowerCase();
@@ -2712,5 +2712,249 @@ body.ux-in-category #product{padding-top:56px!important}
  document.addEventListener('change',schedule);document.addEventListener('input',schedule);document.addEventListener('click',()=>setTimeout(schedule,15));
  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
  setTimeout(schedule,100);
+})();
+</script>
+
+<style id="mobile-ux-v13">
+:root{--sel-blue:#43b7ff;--sel-blue-soft:#eaf7ff}
+html,body{max-width:100%;overflow-x:hidden!important}
+*,*:before,*:after{box-sizing:border-box}
+
+/* Do not replace original bottom cart anymore. Only restyle existing sticky helper safely. */
+#uxStickyTotal{display:none!important}
+
+/* Fixed category navigator */
+#uxCategoryHud{position:fixed!important;top:6px!important;left:50%!important;transform:translateX(-50%)!important;
+ width:min(760px,calc(100vw - 12px))!important;z-index:90!important;padding:5px!important;gap:5px!important}
+body.ux-in-category #product{padding-top:50px!important}
+#uxCategorySteps{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+#uxCategorySteps .ux-step{font-size:9px!important;padding:5px 7px!important}
+#uxBackCategory{width:34px!important;height:34px!important;flex:0 0 34px!important}
+
+/* Blue/cyan selected state */
+.option.ui-selected,.flag-choice.ui-selected,.option:has(input:checked){
+ border-color:var(--sel-blue)!important;
+ box-shadow:0 0 0 2px rgba(67,183,255,.12)!important;
+}
+.option.ui-selected::after,.flag-choice.ui-selected::after{
+ content:"✓ ВЫБРАНО"!important;background:var(--sel-blue)!important;color:#fff!important;
+ box-shadow:none!important
+}
+.option input[type=checkbox],.option input[type=radio],.flag-choice input[type=checkbox],.flag-choice input[type=radio]{
+ appearance:none!important;-webkit-appearance:none!important;width:18px!important;height:18px!important;min-width:18px!important;
+ border:1.5px solid #b8c3d2!important;background:#fff!important;outline:0!important;box-shadow:none!important;position:relative!important
+}
+.option input[type=checkbox]{border-radius:5px!important}.option input[type=radio]{border-radius:50%!important}
+.option input:checked,.flag-choice input:checked{background:var(--sel-blue)!important;border-color:var(--sel-blue)!important}
+.option input[type=checkbox]:checked:after,.flag-choice input[type=checkbox]:checked:after{
+ content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:1000
+}
+.option input[type=radio]:checked:after,.flag-choice input[type=radio]:checked:after{
+ content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;left:4.5px;top:4.5px
+}
+
+/* Help icons stay next to their label, never drift */
+label,.label,.field-label,.option>span:first-of-type{position:relative}
+.help,.info,.tip,.qmark,[data-tip],button[aria-label*="справ"],button[title*="справ"]{flex:0 0 auto!important;vertical-align:middle!important}
+label .help,label .info,label .tip,label .qmark{display:inline-grid!important;place-items:center!important;margin-left:4px!important;position:relative!important;top:0!important;right:auto!important}
+
+/* No-postprocessing should never participate in sibling scaling animation */
+.option.ux-no-post{transform:none!important;scale:1!important;transition:border-color .15s,background .15s,opacity .15s!important}
+.options:has(>.ui-selected)>.option.ux-no-post:not(.ui-selected){transform:none!important;opacity:.58!important}
+
+/* lighter mobile compactness */
+@media(max-width:700px){
+ body{padding-bottom:70px!important}
+ #product,#home{padding-left:6px!important;padding-right:6px!important}
+ #form{gap:5px!important}
+ .param-block{padding:6px!important;margin:4px 0!important;border-radius:10px!important}
+ .param-block>label,.param-block .label{font-size:10.5px!important;margin-bottom:4px!important}
+ .options{gap:5px!important}
+ .option,.flag-choice{padding:6px!important;border-radius:10px!important;min-height:34px!important;font-size:10.5px!important}
+ input,select,textarea{height:35px!important;min-height:35px!important;font-size:12px!important;padding:6px 8px!important}
+ .example-thumb{border-radius:9px!important}
+ .ux-post .option:has(.example-thumb)>.example-thumb,.post-block .option:has(.example-thumb)>.example-thumb{height:92px!important}
+ .flag-mode-unified>.flag-mode-card>.example-thumb{height:125px!important;flex-basis:125px!important}
+ .option.ui-selected::after,.flag-choice.ui-selected::after{font-size:8px!important;padding:3px 6px!important}
+ /* no costly transforms/filters on phone */
+ .options:has(>.ui-selected)>.option:not(.ui-selected),
+ .flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),
+ .material-options:has(>.ui-selected)>.option:not(.ui-selected),
+ .paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){transform:none!important;filter:none!important;opacity:.55!important}
+ .option.ui-selected,.flag-choice.ui-selected{transform:none!important}
+}
+</style>
+
+<script id="mobile-ux-v13">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],low=x=>(x?.textContent||'').toLowerCase();
+
+ function productVisible(){const p=q('#product');return !!p&&p.offsetParent!==null&&getComputedStyle(p).display!=='none'}
+ function kind(b){
+   const t=low(b);
+   if(/количество|тираж/.test(t))return 'qty';
+   if(/постобработ|дополнительно|ламинац|резк|люверс|скотч|пошив|основан|флагшток/.test(t))return 'post';
+   if(/размер|ширин|высот/.test(t))return 'size';
+   return 'material';
+ }
+ function done(b,k){
+   if(k==='post')return true;
+   const radios=qa('input[type=radio]',b).filter(x=>x.offsetParent!==null);if(radios.length)return radios.some(x=>x.checked);
+   const selects=qa('select',b).filter(x=>x.offsetParent!==null);if(selects.length)return selects.every(x=>x.value&& !/выберите/i.test(x.options[x.selectedIndex]?.text||''));
+   const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);if(nums.length)return nums.every(x=>String(x.value).trim()!==''&&+x.value>0);
+   return !!q('.ui-selected,.is-choice-selected,input:checked',b);
+ }
+ function ensureHud(){
+   let h=q('#uxCategoryHud');if(!h){h=document.createElement('div');h.id='uxCategoryHud';h.innerHTML='<button id="uxBackCategory" type="button">‹</button><div id="uxCategorySteps"></div>';document.body.appendChild(h)}
+   const back=q('#uxBackCategory',h);
+   back.onclick=()=>{const b=q('#backBtn')||qa('button,a').find(x=>/назад|все категории|категории/.test(low(x)));if(b&&b!==back)b.click();else if(typeof window.showHome==='function')window.showHome()};
+   return h;
+ }
+ function refreshHud(){
+   const h=ensureHud(),inside=productVisible();h.classList.toggle('show',inside);document.body.classList.toggle('ux-in-category',inside);if(!inside)return;
+   const form=window.form||q('#form');if(!form)return;
+   const blocks=qa(':scope > .param-block',form).filter(x=>x.offsetParent!==null);
+   const defs=[['material','Материал'],['size','Размер'],['post','Обработка'],['qty','Количество']];
+   const groups=defs.map(([k,label])=>{const bs=blocks.filter(b=>kind(b)===k);return{k,label,bs,done:bs.length&&bs.every(b=>done(b,k))}}).filter(g=>g.bs.length);
+   let active=groups.findIndex(g=>!g.done&&g.k!=='post');if(active<0)active=Math.max(0,groups.length-1);
+   const box=q('#uxCategorySteps',h);
+   box.innerHTML=groups.map((g,i)=>`<button class="ux-step ${g.done?'done':''} ${i===active?'active':''}" type="button" data-i="${i}">${g.done?'✓ ':''}${g.label}</button>`).join('');
+   qa('button',box).forEach(btn=>btn.onclick=()=>{
+     const g=groups[+btn.dataset.i],target=g?.bs[0];if(!target)return;
+     const hudH=h.getBoundingClientRect().height+12;
+     const y=window.scrollY+target.getBoundingClientRect().top-hudH;
+     window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+     target.animate([{outline:'0 solid rgba(67,183,255,0)'},{outline:'4px solid rgba(67,183,255,.20)'},{outline:'0 solid rgba(67,183,255,0)'}],{duration:520});
+   });
+ }
+ function blankManualQty(){
+   // Only manual quantity fields; preserve fixed/select quantities and any field the user already interacted with.
+   qa('input[type=number]').forEach(inp=>{
+     const holder=inp.closest('.param-block,.field,.row,div'),t=low(holder);
+     if(!/количество|тираж/.test(t))return;
+     if(inp.dataset.uxQtyInit)return;
+     inp.dataset.uxQtyInit='1';
+     const attr=inp.getAttribute('value');
+     if((attr==='1'||inp.value==='1') && !/ширин|высот|размер/.test(t)){inp.value='';inp.removeAttribute('value');inp.dispatchEvent(new Event('input',{bubbles:true}))}
+   });
+ }
+ function markNoPost(){
+   qa('.option').forEach(o=>o.classList.toggle('ux-no-post',/без постобработки/.test(low(o))));
+ }
+ function restoreCart(){
+   // Hide only our experimental replacement; never touch original cart controls or totals.
+   const x=q('#uxStickyTotal');if(x)x.style.display='none';
+ }
+ let scheduled=false;
+ function tick(){scheduled=false;restoreCart();blankManualQty();markNoPost();refreshHud()}
+ function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(tick)}
+ document.addEventListener('change',schedule);document.addEventListener('input',schedule);document.addEventListener('click',()=>setTimeout(schedule,20));
+ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+ setTimeout(schedule,120);
+})();
+</script>
+
+<style id="ux-v14">
+/* Compact one-line summary under category header */
+#uxSelectionSummary{
+ position:sticky;top:51px;z-index:54;margin:0 6px 6px;padding:7px 10px;
+ border:1px solid #e8ebf2;border-radius:11px;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(12px);font-size:10px;font-weight:800;color:#596174;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none
+}
+body.ux-in-category #uxSelectionSummary{display:block}
+
+/* Restore a safe sticky cart bar; it reads values only and never replaces calculator cart logic */
+#uxStickyCartV14{
+ position:fixed;z-index:88;left:50%;bottom:7px;transform:translateX(-50%);
+ width:min(760px,calc(100vw - 12px));display:none;align-items:center;gap:7px;
+ padding:7px 7px 7px 11px;border-radius:15px;background:rgba(20,27,42,.95);
+ backdrop-filter:blur(15px);box-shadow:0 10px 30px rgba(10,15,30,.25);color:#fff
+}
+body.ux-in-category #uxStickyCartV14{display:flex}
+#uxStickyCartV14 .prices{min-width:0;margin-right:auto}
+#uxStickyCartV14 .caption{font-size:8px;opacity:.65;font-weight:800}
+#uxStickyCartV14 .current{font-size:17px;font-weight:1000;line-height:1.05;white-space:nowrap}
+#uxStickyCartV14 .all{font-size:9px;opacity:.72;margin-top:2px;white-space:nowrap}
+#uxStickyCartV14 button{border:0;width:39px;height:39px;flex:0 0 39px;border-radius:11px;display:grid;place-items:center;font-size:17px;cursor:pointer}
+#uxStickyCartV14 .add{background:#43b7ff;color:#fff}
+#uxStickyCartV14 .go{background:#fff;color:#172033}
+#uxStickyCartV14 .pulse{animation:v14pulse .32s ease-out}
+@keyframes v14pulse{35%{transform:scale(1.14)}}
+
+/* Filled blocks collapse visually, but remain easy to reopen by tapping their header/label. */
+@media(max-width:700px){
+ body{padding-bottom:64px!important}
+ .param-block.ux-filled:not(.ux-editing){padding-top:5px!important;padding-bottom:5px!important}
+ .param-block.ux-filled:not(.ux-editing)>.options,
+ .param-block.ux-filled:not(.ux-editing)>input,
+ .param-block.ux-filled:not(.ux-editing)>select,
+ .param-block.ux-filled:not(.ux-editing)>.size-row,
+ .param-block.ux-filled:not(.ux-editing)>.dimensions,
+ .param-block.ux-filled:not(.ux-editing)>.dimension-row{max-height:58px!important;overflow:hidden!important}
+ #uxSelectionSummary{top:48px;margin:0 5px 5px;padding:6px 8px;font-size:9.5px}
+}
+</style>
+
+<script id="ux-v14">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],low=x=>(x?.textContent||'').toLowerCase();
+ function visible(x){return !!x&&x.offsetParent!==null}
+ function inCat(){return visible(q('#product'))}
+ function type(b){const t=low(b);if(/количество|тираж/.test(t))return'qty';if(/постобработ|дополнительно|ламинац|резк|люверс|скотч|пошив/.test(t))return'post';if(/размер|ширин|высот/.test(t))return'size';return'material'}
+ function selectedText(b){
+   const parts=[];
+   qa('input:checked',b).forEach(x=>{const l=x.closest('label,.option,.flag-choice');if(l)parts.push((l.textContent||'').replace(/✓ ВЫБРАНО/g,'').trim())});
+   qa('select',b).filter(visible).forEach(x=>{const t=x.options[x.selectedIndex]?.text?.trim();if(t&&!/выберите/i.test(t))parts.push(t)});
+   qa('input[type=number]',b).filter(visible).forEach(x=>{if(x.value){const ph=(x.placeholder||'').trim();parts.push((ph?ph+': ':'')+x.value)}});
+   return [...new Set(parts)].filter(Boolean).slice(0,3).join(' · ');
+ }
+ function complete(b){
+   const k=type(b);if(k==='post')return !!q('input:checked,.ui-selected',b);
+   const rs=qa('input[type=radio]',b).filter(visible);if(rs.length)return rs.some(x=>x.checked);
+   const ss=qa('select',b).filter(visible);if(ss.length)return ss.every(x=>x.value&&!/выберите/i.test(x.options[x.selectedIndex]?.text||''));
+   const ns=qa('input[type=number]',b).filter(visible);if(ns.length)return ns.every(x=>x.value!==''&&+x.value>0);
+   return !!q('input:checked,.ui-selected,.is-choice-selected',b);
+ }
+ function summary(){
+   let el=q('#uxSelectionSummary');
+   const form=window.form||q('#form');if(!form)return;
+   if(!el){el=document.createElement('div');el.id='uxSelectionSummary';form.parentElement?.insertBefore(el,form)}
+   const blocks=qa(':scope > .param-block',form).filter(visible);
+   const bits=[];
+   blocks.forEach(b=>{const t=selectedText(b);if(t)bits.push(t)});
+   el.textContent=bits.length?bits.join(' • '):'Выберите параметры заказа';
+ }
+ function collapse(){
+   if(innerWidth>700)return;
+   const form=window.form||q('#form');if(!form)return;
+   qa(':scope > .param-block',form).forEach(b=>{
+     const c=complete(b);b.classList.toggle('ux-filled',c);
+     if(!b.dataset.v14bind){b.dataset.v14bind='1';b.addEventListener('click',()=>{b.classList.add('ux-editing');setTimeout(()=>b.classList.remove('ux-editing'),5000)})}
+   });
+ }
+ function parseRub(t){const m=String(t||'').replace(/\s/g,'').match(/(\d+(?:[.,]\d+)?)/);return m?+m[1].replace(',','.') : null}
+ function currentPrice(){const e=window.liveTotal||q('#liveTotal');return (e?.textContent||'—').trim()}
+ function cartTotal(){
+   if(Array.isArray(window.cart)){let sum=0,ok=false;window.cart.forEach(x=>{const n=Number(x.adjustedTotal??x.total??x.price);if(Number.isFinite(n)){sum+=n;ok=true}});if(ok)return sum}
+   const e=q('#cartTotal,.cart-total-value,#totalCash,#cashTotal');const n=parseRub(e?.textContent);return n??0
+ }
+ function rub(n){return typeof window.R==='function'?window.R(n):Math.round(n).toLocaleString('ru-RU')+' ₽'}
+ let old='';
+ function bar(){
+   let b=q('#uxStickyCartV14');if(!b){b=document.createElement('div');b.id='uxStickyCartV14';b.innerHTML='<div class="prices"><div class="caption">В выбранной категории</div><div class="current">—</div><div class="all">В корзине: 0 ₽</div></div><button class="add" title="Добавить в корзину">＋</button><button class="go" title="Перейти к оформлению">🛒</button>';document.body.appendChild(b);
+     q('.add',b).onclick=()=>{const x=q('#addCart')||qa('button').find(z=>/добавить в корзину/i.test(z.textContent||''));x?.click()};
+     q('.go',b).onclick=()=>{const x=q('#cart')||q('.cart')||q('#cartBox')||qa('[id],[class]').find(z=>/корзин/.test(low(z)));x?.scrollIntoView({behavior:'smooth',block:'start'})};
+   }
+   const cur=currentPrice(),ce=q('.current',b);if(cur!==old){ce.textContent=cur;ce.classList.remove('pulse');void ce.offsetWidth;ce.classList.add('pulse');old=cur}
+   q('.all',b).textContent='В корзине: '+rub(cartTotal());
+   b.style.display=inCat()?'flex':'none';
+ }
+ let pending=false;
+ function tick(){pending=false;summary();collapse();bar()}
+ function go(){if(!pending){pending=true;requestAnimationFrame(tick)}}
+ document.addEventListener('input',go);document.addEventListener('change',go);document.addEventListener('click',()=>setTimeout(go,20));
+ new MutationObserver(go).observe(document.body,{childList:true,subtree:true,characterData:true});
+ setTimeout(go,150);
 })();
 </script>
