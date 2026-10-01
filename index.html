@@ -299,7 +299,7 @@ const maxOrderBtn=document.getElementById('maxOrderBtn');
 const liveTotal=document.getElementById('liveTotal');
 const breakdown=document.getElementById('breakdown');
 const cart=[];let current=null;let flagMode='';let flagFixed=null;let winderFixed=null;let lastCalcMeta=null;let editingCartIndex=-1;
-function renderCats(){cats.innerHTML=products.map(p=>`<div class="cat${p.id==='copycenter'?' copycenter-cat':''}${p.id==='banner'?' banner-cat':''}${p.id==='vinyl'?' vinyl-cat':''}" data-product="${p.id}"><div class="icon"><img class="category-icon" src="icons/${p.id}.png" alt="" onerror="this.replaceWith(document.createTextNode('${p.icon}'))"></div><b>${p.name}</b><span>${p.desc}</span></div>`).join('');cats.querySelectorAll('.cat').forEach(card=>card.addEventListener('click',()=>{const contentTop=document.querySelector('.wrap')?.offsetTop||document.querySelector('header')?.offsetHeight||0;window.scrollTo({top:contentTop,behavior:'smooth'});card.classList.remove('is-selected');void card.offsetWidth;card.classList.add('is-selected');setTimeout(()=>openProduct(card.dataset.product),180)}))}
+function renderCats(){cats.innerHTML=products.map(p=>`<div class="cat${p.id==='copycenter'?' copycenter-cat':''}${p.id==='banner'?' banner-cat':''}${p.id==='vinyl'?' vinyl-cat':''}" data-product="${p.id}"><div class="icon"><img class="category-icon" src="https://raw.githubusercontent.com/egoriul977/se-print/main/icons/${p.id}.png" alt="" onerror="this.replaceWith(document.createTextNode('${p.icon}'))"></div><b>${p.name}</b><span>${p.desc}</span></div>`).join('');cats.querySelectorAll('.cat').forEach(card=>card.addEventListener('click',()=>{const contentTop=document.querySelector('.wrap')?.offsetTop||document.querySelector('header')?.offsetHeight||0;window.scrollTo({top:contentTop,behavior:'smooth'});card.classList.remove('is-selected');void card.offsetWidth;card.classList.add('is-selected');setTimeout(()=>openProduct(card.dataset.product),180)}))}
 function openProduct(id){
  current=products.find(p=>p.id===id);
  if(!current)return;
@@ -308,7 +308,7 @@ function openProduct(id){
  product.classList.remove('page-enter','page-enter-back','page-exit','page-exit-back');
  void product.offsetWidth;
  product.classList.add('page-enter');
- ptitle.innerHTML=`<img class="product-title-icon" src="icons/${current.id}.png" alt="" onerror="this.replaceWith(document.createTextNode('${current.icon}'))">${current.name}`;
+ ptitle.innerHTML=`<img class="product-title-icon" src="https://raw.githubusercontent.com/egoriul977/se-print/main/icons/${current.id}.png" alt="" onerror="this.replaceWith(document.createTextNode('${current.icon}'))">${current.name}`;
  pdesc.innerHTML=current.id==='photos' ? current.desc+' '+info('Фотографии печатаются на обычной фотобумаге и со временем могут выгореть. Для повышенной стойкости выберите категорию «Широкоформатная печать фотографий и постеров на бумаге».') : current.desc+' '+info('Цены и правила взяты из загруженного прайса.');
  fixedBox.innerHTML='';
  form.innerHTML='';
@@ -875,17 +875,25 @@ function resolveExampleFolder(folder,title=''){
  }
  return folder;
 }
+function exampleAsset(path){return 'https://raw.githubusercontent.com/egoriul977/se-print/main/'+String(path).replace(/^\/+/, '');}
 function exampleCandidates(folder,n){
  folder=resolveExampleFolder(folder);
  const nums=[String(n).padStart(2,'0'),String(n)];
  const exts=['webp','jpg','png','jpeg'];
- return nums.flatMap(num=>exts.map(ext=>`${folder}/${num}.${ext}`));
+ return nums.flatMap(num=>exts.map(ext=>exampleAsset(`${folder}/${num}.${ext}`)));
 }
 function exampleThumbHTML(folder,title,cls='compact') {
- return `<button type="button" class="example-thumb ${cls}" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></button>`;
+ const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
+ return `<button type="button" class="example-thumb ${cls}" style="display:none" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)"></button>`;
 }
 function exampleThumbSpanHTML(folder,title,cls='') {
- return `<span class="example-thumb ${cls}" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></span>`;
+ const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
+ return `<span class="example-thumb ${cls}" style="display:none" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)"></span>`;
+}
+function exampleThumbFallback(img,folder,step){
+ const variants=['1.webp','01.jpg','1.jpg','01.png','1.png','01.jpeg','1.jpeg'];
+ if(step<=variants.length){img.onerror=()=>exampleThumbFallback(img,folder,step+1);img.src=exampleAsset(`${folder}/${variants[step-1]}`);}
+ else{const holder=img.parentElement;if(holder)holder.remove();}
 }
 function decorateExampleOptions(){
  if(!current)return;
@@ -895,7 +903,7 @@ function decorateExampleOptions(){
    const key=exampleKeyFromOption(opt,i), folder=`examples/${current.id}/${key}`;
    opt.classList.add('has-example');
    const thumb=document.createElement('button');thumb.type='button';thumb.className='example-thumb';thumb.dataset.folder=folder;thumb.dataset.title=(opt.querySelector('span')?.textContent||current.name).trim();
-   thumb.innerHTML=`<img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}">`;
+   const rf=resolveExampleFolder(folder,title);thumb.style.display='none';thumb.innerHTML=`<img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)">`;
    thumb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openExampleGallery(folder,thumb.dataset.title)});
    opt.appendChild(thumb);
  });
@@ -1549,4 +1557,8 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
     </div>
   </div>
 </div>
-</body></html>
+</body></html><style id="help-mark-layout-fix">
+.iwrap{position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;flex:0 0 20px!important;width:20px!important;height:20px!important;margin-left:6px!important;vertical-align:middle!important;align-items:center!important;justify-content:center!important}
+.option .iwrap{margin-left:auto!important}.option>span .iwrap,.flag-mode-label .iwrap{margin-left:6px!important}label>.iwrap{margin-left:5px!important}.option{min-width:0!important}.option>span{min-width:0!important}
+@media(max-width:560px){.iwrap{flex-basis:18px!important;width:18px!important;height:18px!important;margin-left:4px!important}}
+</style>
