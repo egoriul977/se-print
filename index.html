@@ -363,20 +363,21 @@ function fabricImageQtyChanged(){
    h:el.querySelector('.fabric-h')?.value||''
  }));
  box.innerHTML=Array.from({length:n},(_,i)=>fabricImageItemHTML(i,old[i])).join('');
- for(let i=0;i<n;i++) fabricImageSizeChanged(i,false);
+ for(let i=0;i<n;i++){ fabricImageTypeChanged(i,false); fabricImageSizeChanged(i,false); }
  fabricMultiCalc();
 }
 function fabricImageItemHTML(i,old={}){
  const type=old.type||'fabWhite', size=old.size||'A4';
  return `<div class="fabric-image-item" data-index="${i}">
-   <div class="fabric-item-head"><b>Изображение ${i+1}</b><span>180 ₽</span></div>
+   <div class="fabric-item-head"><b>Изображение ${i+1}</b></div>
    <div class="fabric-item-grid">
     <label>Тип нанесения
-     <select class="fabric-type" onchange="fabricMultiCalc()">
+     <select class="fabric-type" onchange="fabricImageTypeChanged(${i})">
       <option value="fabWhite" ${type==='fabWhite'?'selected':''}>Белый рисунок</option>
       <option value="fabColor" ${type==='fabColor'?'selected':''}>Одноцветный цветной рисунок</option>
       <option value="fabFull" ${type==='fabFull'?'selected':''}>Полноцветный рисунок</option>
      </select>
+     <div class="fabric-type-example"></div>
     </label>
     <label>Размер
      <select class="fabric-size" onchange="fabricImageSizeChanged(${i})">
@@ -394,6 +395,14 @@ function fabricImageItemHTML(i,old={}){
    </div>
    <div class="fabric-item-example"></div>
  </div>`;
+}
+function fabricImageTypeChanged(i,doCalc=true){
+ const el=document.querySelector(`.fabric-image-item[data-index="${i}"]`);if(!el)return;
+ const type=el.querySelector('.fabric-type')?.value||'fabWhite';
+ const ex=el.querySelector('.fabric-type-example');
+ const mp={fabWhite:'white',fabColor:'solid-color',fabFull:'full-color'};
+ if(ex)ex.innerHTML=exampleThumbHTML(`examples/fabric/${mp[type]}`,type,'fabric-type-thumb');
+ if(doCalc)fabricMultiCalc();
 }
 function fabricImageSizeChanged(i,doCalc=true){
  const el=document.querySelector(`.fabric-image-item[data-index="${i}"]`);if(!el)return;
@@ -815,25 +824,28 @@ function photoCalc(){
  breakdown.innerHTML=`${size?.value||''} · ${q} шт. × ${R(rate)}/шт.`;
 }
 function renderFlagChooser(){
- flagMode='';
- flagFixed=null;
  form.innerHTML=`
- <label>Вариант изготовления флага</label>
- <div class="options flag-mode-row">
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Стандартные размеры</span>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Виндеры</span>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>${exampleThumbSpanHTML('examples/flag/winder','Виндеры','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')"><span class="flag-mode-label"><span class="flag-mode-icon"></span><span>Размер на заказ</span>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — размер на заказ','')}</button>
+ <div class="param-block material-block">
+  <label>Тип изготовления</label>
+  <div class="flag-mode-row flag-mode-unified">
+   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('standard',this)">
+    <input type="radio" name="flagMode" value="standard" hidden>
+    <div class="flag-mode-label"><b>Стандартные размеры</b></div>
+    ${exampleThumbHTML('examples/flag/standard-size','Стандартные размеры','flag-mode-img')}
+   </label>
+   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('winder',this)">
+    <input type="radio" name="flagMode" value="winder" hidden>
+    <div class="flag-mode-label"><b>Виндеры</b></div>
+    ${exampleThumbHTML('examples/flag/winder','Виндеры','flag-mode-img')}
+   </label>
+   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('custom',this)">
+    <input type="radio" name="flagMode" value="custom" hidden>
+    <div class="flag-mode-label"><b>Размер на заказ</b></div>
+    ${exampleThumbHTML('examples/flag/custom-size','Размер на заказ','flag-mode-img')}
+   </label>
+  </div>
  </div>
- <div id="flagModeBox"></div>`;
- renderFlagMode();
-}
-function selectFlagMode(mode){
- flagMode=mode;
- flagFixed=null;
- winderFixed=null;
- lastCalcMeta=null;
- document.querySelectorAll('.flag-choice[data-flag-mode]').forEach(b=>b.classList.toggle('is-choice-selected',b.dataset.flagMode===mode));
- renderFlagMode();
+ <div id="flagModeBody"></div>`;
 }
 function renderFlagMode(){
  const box=document.getElementById('flagModeBox');
@@ -2085,4 +2097,44 @@ document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName==='SELECT
 .fabric-main-block{order:10}
 .fabric-main-block+.post-block{order:20}
 .fabric-image-count{order:90!important}
+</style>
+
+<style id="flag-fabric-visual-hard-fix-v6">
+/* ФЛАГИ: заголовок + изображение физически являются одной карточкой */
+.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+.flag-mode-unified .flag-mode-card{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ padding:10px!important;border-radius:16px!important;overflow:hidden!important;
+ min-width:0!important;height:auto!important;
+}
+.flag-mode-unified .flag-mode-label{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-height:44px!important;margin:0!important;padding:6px 5px 10px!important;
+ text-align:center!important;
+}
+.flag-mode-unified .flag-mode-card .example-thumb,
+.flag-mode-unified .flag-mode-card .flag-mode-img{
+ display:block!important;position:relative!important;inset:auto!important;
+ width:100%!important;max-width:none!important;height:150px!important;
+ margin:0!important;flex:none!important;border-radius:12px!important;overflow:hidden!important;
+}
+.flag-mode-unified .flag-mode-card .example-thumb img,
+.flag-mode-unified .flag-mode-card .flag-mode-img img{
+ width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;
+}
+/* ТКАНЬ: картинки типа нанесения непосредственно под выбором типа */
+.fabric-type-example{margin-top:8px!important}
+.fabric-type-example .example-thumb,.fabric-type-example .fabric-type-thumb{
+ width:100%!important;max-width:none!important;height:135px!important;margin:0!important;
+ border-radius:12px!important;overflow:hidden!important;
+}
+.fabric-type-example img{width:100%!important;height:100%!important;object-fit:cover!important}
+/* Полностью скрываем старый ценовой бейдж 180 ₽ возле названия изображения */
+.fabric-item-head>span{display:none!important}
+@media(max-width:700px){
+ .flag-mode-unified{grid-template-columns:1fr!important}
+ .flag-mode-unified .flag-mode-card .example-thumb,
+ .flag-mode-unified .flag-mode-card .flag-mode-img{height:190px!important}
+ .fabric-type-example .example-thumb,.fabric-type-example .fabric-type-thumb{height:175px!important}
+}
 </style>
