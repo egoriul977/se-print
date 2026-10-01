@@ -321,10 +321,153 @@ function openProduct(id){
  if(id==='cards'){renderCards();return}
  if(id==='canvas'){renderCanvas();return}
  if(id==='flag'){renderFlagChooser();return}
+ if(id==='fabric'){renderFabricMulti();return}
  if(id==='plasticCards'){renderPlasticCards();return}
  renderGenericForm();
 }
 
+
+function renderFabricMulti(){
+ form.innerHTML=`
+ <div class="param-block material-block fabric-main-block">
+   <label>Изображения для нанесения ${info('Укажите количество разных изображений. Для каждого отдельно выбираются тип печати и размер. Количество изображений равно количеству прижиганий термопрессом.')}</label>
+   <div id="fabricImages"></div>
+ </div>
+ <div class="param-block post-block">
+   <label>Дополнительно</label>
+   <div class="options"><label class="option"><input type="checkbox" id="needShirt" onchange="fabricMultiCalc()"><span>Нужна футболка <small>(+600 ₽/шт)</small></span></label></div>
+   <div id="shirtQtyBox" style="display:none;margin-top:10px"><div class="muted">Количество футболок = количеству изображений/нанесений.</div><input id="shirtQty" type="hidden" value="1"></div>
+ </div>
+ <div class="param-block qty-block fabric-image-count">
+   <label>Количество изображений ${info('Каждое изображение требует одного прижигания термопрессом — 180 ₽. Печать самого изображения отдельно считается по площади и тарифу ₽/м². Минимальная сумма всего заказа — 350 ₽.')}</label>
+   <input id="fabricImageQty" type="number" min="1" max="20" step="1" value="1" oninput="fabricImageQtyChanged()" onchange="fabricImageQtyChanged()">
+ </div>`;
+ const cb=document.getElementById('needShirt');
+ cb?.addEventListener('change',()=>{const b=document.getElementById('shirtQtyBox');if(b)b.style.display=cb.checked?'block':'none';fabricMultiCalc()});
+ fabricImageQtyChanged();
+}
+function fabricImageQtyChanged(){
+ const inp=document.getElementById('fabricImageQty');
+ if(!inp)return;
+ const raw=String(inp.value).trim();
+ if(raw==='')return;
+ let n=parseInt(raw,10);
+ if(!Number.isFinite(n))return;
+ n=Math.max(1,Math.min(20,n));
+ if(String(n)!==raw && document.activeElement!==inp) inp.value=n;
+ const box=document.getElementById('fabricImages'); if(!box)return;
+ const old=[...box.querySelectorAll('.fabric-image-item')].map(el=>({
+   type:el.querySelector('.fabric-type')?.value||'fabWhite',
+   size:el.querySelector('.fabric-size')?.value||'A4',
+   w:el.querySelector('.fabric-w')?.value||'',
+   h:el.querySelector('.fabric-h')?.value||''
+ }));
+ box.innerHTML=Array.from({length:n},(_,i)=>fabricImageItemHTML(i,old[i])).join('');
+ for(let i=0;i<n;i++) fabricImageSizeChanged(i,false);
+ fabricMultiCalc();
+}
+function fabricImageItemHTML(i,old={}){
+ const type=old.type||'fabWhite', size=old.size||'A4';
+ return `<div class="fabric-image-item" data-index="${i}">
+   <div class="fabric-item-head"><b>Изображение ${i+1}</b><span>180 ₽</span></div>
+   <div class="fabric-item-grid">
+    <label>Тип нанесения
+     <select class="fabric-type" onchange="fabricMultiCalc()">
+      <option value="fabWhite" ${type==='fabWhite'?'selected':''}>Белый рисунок</option>
+      <option value="fabColor" ${type==='fabColor'?'selected':''}>Одноцветный цветной рисунок</option>
+      <option value="fabFull" ${type==='fabFull'?'selected':''}>Полноцветный рисунок</option>
+     </select>
+    </label>
+    <label>Размер
+     <select class="fabric-size" onchange="fabricImageSizeChanged(${i})">
+      <option value="A4" ${size==='A4'?'selected':''}>A4 — 21 × 29,7 см</option>
+      <option value="A3" ${size==='A3'?'selected':''}>A3 — 29,7 × 42 см</option>
+      <option value="30x10" ${size==='30x10'?'selected':''}>30 × 10 см</option>
+      <option value="10x10" ${size==='10x10'?'selected':''}>10 × 10 см</option>
+      <option value="custom" ${size==='custom'?'selected':''}>Свой размер</option>
+     </select>
+    </label>
+   </div>
+   <div class="fabric-custom-size" style="display:${size==='custom'?'grid':'none'}">
+    <label>Ширина, см<input class="fabric-w" type="number" min=".1" step=".1" value="${old.w||''}" oninput="fabricMultiCalc()"></label>
+    <label>Высота, см<input class="fabric-h" type="number" min=".1" step=".1" value="${old.h||''}" oninput="fabricMultiCalc()"></label>
+   </div>
+   <div class="fabric-item-example"></div>
+ </div>`;
+}
+function fabricImageSizeChanged(i,doCalc=true){
+ const el=document.querySelector(`.fabric-image-item[data-index="${i}"]`);if(!el)return;
+ const size=el.querySelector('.fabric-size')?.value||'A4';
+ const custom=el.querySelector('.fabric-custom-size');if(custom)custom.style.display=size==='custom'?'grid':'none';
+ const ex=el.querySelector('.fabric-item-example');
+ const mp={A4:'size-a4',A3:'size-a3','30x10':'size-30x10','10x10':'size-10x10'};
+ if(ex)ex.innerHTML=mp[size]?exampleThumbHTML(`examples/fabric/${mp[size]}`,size,'fabric-size-thumb'):'';
+ if(doCalc)fabricMultiCalc();
+}
+function fabricMultiCalc(){
+ const items=[...document.querySelectorAll('.fabric-image-item')];
+ const imageCount=items.length||1;
+
+ const typeLabel={fabWhite:'Белый рисунок',fabColor:'Одноцветный цветной рисунок',fabFull:'Полноцветный рисунок'};
+ const sizeLabel={A4:'A4 (21×29,7 см)',A3:'A3 (29,7×42 см)','30x10':'30×10 см','10x10':'10×10 см',custom:'Свой размер'};
+ const sizeCm={A4:[21,29.7],A3:[29.7,42],'30x10':[30,10],'10x10':[10,10]};
+
+ const images=items.map((el,i)=>{
+   const type=el.querySelector('.fabric-type')?.value||'fabWhite';
+   const size=el.querySelector('.fabric-size')?.value||'A4';
+   let w=+(el.querySelector('.fabric-w')?.value||0), h=+(el.querySelector('.fabric-h')?.value||0);
+   if(size!=='custom'){ [w,h]=sizeCm[size]||[0,0]; }
+   const area=Math.max(0,w*h/10000);
+   return {n:i+1,type,typeLabel:typeLabel[type],size,sizeLabel:size==='custom'?`${w||'—'}×${h||'—'} см`:sizeLabel[size],w,h,area};
+ });
+
+ // Печать считается по площади. Для каждого типа нанесения суммируем площадь,
+ // определяем соответствующий тариф ₽/м² и умножаем его на эту площадь.
+ let printCost=0, printDetails=[], tariffMissing=false;
+ ['fabWhite','fabColor','fabFull'].forEach(type=>{
+   const group=images.filter(x=>x.type===type);
+   if(!group.length)return;
+   const groupArea=group.reduce((a,x)=>a+x.area,0);
+   const pf=priceFor(type,groupArea);
+   if(!pf){tariffMissing=true;printDetails.push(`${typeLabel[type]}: нет тарифа для ${R(groupArea)} м²`);return;}
+   const cost=pf.price*groupArea+(pf.setup||0);
+   printCost+=cost;
+   printDetails.push(`${typeLabel[type]}: ${R(groupArea)} м² × ${R(pf.price)} ₽/м² = ${R(cost)}`);
+ });
+
+ // 180 ₽ — стоимость одного прижигания термопрессом.
+ // Количество прижиганий всегда равно количеству изображений.
+ const pressQty=imageCount;
+ const pressCost=pressQty*180;
+
+ const needShirt=document.getElementById('needShirt')?.checked;
+ const shirtQtyEl=document.getElementById('shirtQty');
+ if(shirtQtyEl){shirtQtyEl.value=pressQty;shirtQtyEl.readOnly=true;}
+ const shirtCost=needShirt ? 600*pressQty : 0;
+
+ // 350 ₽ — НЕ минимум только для прижиганий.
+ // Это минимальная стоимость ВСЕГО заказа по категории:
+ // печать по м² + все прижигания + футболки (если выбраны).
+ const calculatedTotal=printCost+pressCost+shirtCost;
+ const total=Math.max(350,calculatedTotal);
+
+ liveTotal.textContent=tariffMissing?'Нет цены':R(total);
+ breakdown.innerHTML=tariffMissing
+   ? printDetails.join('<br>')
+   : [
+      ...printDetails,
+      `Печать по площади: ${R(printCost)}`,
+      `Прижигание термопрессом: ${pressQty} × 180 ₽ = ${R(pressCost)}`,
+      ...(shirtCost?[`Футболки: ${pressQty} × 600 ₽ = ${R(shirtCost)}`]:[]),
+      ...(calculatedTotal<350?[`Минимальная сумма заказа: 350 ₽`]:[])
+     ].join('<br>');
+
+ lastCalcMeta=tariffMissing?null:{
+   categoryId:'fabric',fixed:true,qty:pressQty,total,images,
+   printCost,pressQty,pressCost,shirtCost,needShirt,
+   minimumApplied:calculatedTotal<350
+ };
+}
 function renderPlasticCards(){
  form.innerHTML=`
  <div class="param-block material-block"><label>Тип карты ${info('Выберите поверхность пластиковой карты: матовую без бликов или глянцевую с блеском.')}</label><div class="options">
@@ -1243,7 +1386,11 @@ function buildCurrentDetails(){
  const m=lastCalcMeta||{};
  const lines=[];
  if(m.fixed){
-   if(current?.id==='photos'){
+   if(current?.id==='fabric'){
+     (m.images||[]).forEach(x=>lines.push(`Изображение ${x.n}: ${x.typeLabel} · ${x.sizeLabel}`));
+     lines.push(`Количество изображений: ${m.qty||1}`);
+     if(m.shirtCost) lines.push(`Футболки: ${R(m.shirtCost)}`);
+   } else if(current?.id==='photos'){
      const el=document.getElementById('photoSize'); const q=document.getElementById('photoQty');
      lines.push(`Размер: ${el?.value||m.photoSize||'—'}`);
      lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
@@ -1868,4 +2015,74 @@ document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName==='SELECT
     transform:none!important;
   }
 }
+</style>
+
+<style id="hierarchy-flag-fabric-qty-v5">
+/* When a main material/manufacturing option is selected, non-selected siblings recede slightly. */
+.material-options:has(input:checked) > .option:not(:has(input:checked)),
+.paper-material-row:has(input:checked) > .option:not(:has(input:checked)),
+.flag-mode-row:has(.is-choice-selected) > .flag-choice:not(.is-choice-selected){
+ transform:scale(.965)!important;
+ opacity:.72!important;
+ filter:saturate(.78)!important;
+}
+.material-options > .option,.paper-material-row > .option,.flag-mode-row > .flag-choice{
+ transition:transform .22s ease,opacity .22s ease,filter .22s ease,box-shadow .22s ease!important;
+}
+/* Flag mode = one self-contained card: heading and its own image. */
+.flag-mode-row{
+ align-items:stretch!important;
+}
+.flag-mode-row .flag-choice{
+ overflow:hidden!important;
+ position:relative!important;
+ padding:12px!important;
+ gap:10px!important;
+}
+.flag-mode-row .flag-choice .flag-mode-label{
+ width:100%!important;
+ min-height:38px!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:7px!important;
+ border-bottom:1px solid rgba(35,48,70,.10)!important;
+ padding-bottom:9px!important;
+}
+.flag-mode-row .flag-choice .example-thumb{
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:125px!important;
+ margin:0!important;
+ border-radius:12px!important;
+}
+.flag-mode-row .flag-choice .example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
+/* Multi-image fabric */
+.fabric-image-item{
+ background:rgba(255,255,255,.78);border:1px solid rgba(255,22,136,.14);
+ border-radius:15px;padding:12px;margin-top:10px;
+}
+.fabric-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.fabric-item-head span{font-weight:900;color:#ff1688}
+.fabric-item-grid,.fabric-custom-size{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fabric-item-example{margin-top:10px}
+.fabric-item-example .example-thumb{width:100%!important;height:150px!important;max-width:320px!important}
+.fabric-item-example .example-thumb img{width:100%;height:100%;object-fit:cover}
+@media(max-width:700px){
+ .flag-mode-row .flag-choice .example-thumb{height:185px!important}
+ .fabric-item-grid,.fabric-custom-size{grid-template-columns:1fr!important}
+ .fabric-item-example .example-thumb{max-width:none!important;height:175px!important}
+}
+</style>
+
+
+
+<style id="fabric-qty-working-fix">
+#form{display:flex;flex-direction:column}
+#form>.qty-block,#form>.param-qty,#form>.fabric-image-count{order:90}
+#form>#addCart,#form>.add-cart,#form>.note{order:100}
+.fabric-main-block{order:10}
+.fabric-main-block+.post-block{order:20}
+.fabric-image-count{order:90!important}
 </style>
