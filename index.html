@@ -856,7 +856,7 @@ function resolveExampleFolder(folder,title=''){
   'examples/banner/banner440':'examples/banner/440gsm','examples/banner/banner280':'examples/banner/budget','examples/banner/bannerMesh':'examples/banner/mesh',
   'examples/vinyl/vStd':'examples/vinyl/standard-print','examples/vinyl/vBudget':'examples/vinyl/budget-film','examples/vinyl/vPerf':'examples/vinyl/perforated','examples/vinyl/v1440':'examples/vinyl/1440dpi','examples/vinyl/vGlue':'examples/vinyl/adhesive-side',
   'examples/plotter/plotterWhite':'examples/plotter/white','examples/plotter/plotterColor':'examples/plotter/color','examples/plotter/plotterEuro':'examples/plotter/color','examples/plotter/plotterSilver':'examples/plotter/silver','examples/plotter/plotterGold':'examples/plotter/gold','examples/plotter/plotterHolo':'examples/plotter/holographic','examples/plotter/plotterGlow':'examples/plotter/glow','examples/plotter/plotterReflect':'examples/plotter/reflective',
-  'examples/flag/flagStd':'examples/flag/standard-fabric','examples/flag/flagBlock':'examples/flag/blackout',
+  'examples/flag/flagStd':'examples/flag/standard-fabric','examples/flag/flagBlock':'examples/flag/blackout','examples/fabric/sizeA4':'examples/fabric/size-a4','examples/fabric/sizeA3':'examples/fabric/size-a3','examples/fabric/size30x10':'examples/fabric/size-30x10','examples/fabric/size10x10':'examples/fabric/size-10x10',
   'examples/fabric/fabWhite':'examples/fabric/white','examples/fabric/fabColor':'examples/fabric/solid-color','examples/fabric/fabFull':'examples/fabric/full-color',
   'examples/paper/photo':'examples/paper/photo','examples/paper/poster':'examples/paper/poster',
   'examples/canvas/canvas':'examples/canvas/standard',
@@ -878,6 +878,12 @@ function resolveExampleFolder(folder,title=''){
    if(t.includes('люверс'))return 'examples/banner/grommets';
    if(t.includes('проклей'))return 'examples/banner/edge-gluing';
    if(t.includes('резк'))return 'examples/banner/contour-cut';
+ }
+ if(folder.startsWith('examples/fabric/')){
+   if(t.includes('a4'))return 'examples/fabric/size-a4';
+   if(t.includes('a3'))return 'examples/fabric/size-a3';
+   if(t.includes('30×10')||t.includes('30x10'))return 'examples/fabric/size-30x10';
+   if(t.includes('10×10')||t.includes('10x10'))return 'examples/fabric/size-10x10';
  }
  if(folder.startsWith('examples/plastic/')){
    if(t.includes('скотч'))return 'examples/plastic/double-sided-tape';
@@ -932,7 +938,7 @@ function openExampleGallery(folder,title){
  inner.addEventListener('click',e=>e.stopPropagation());
  document.body.appendChild(ov);
  let loaded=0, finished=0;
- const total=20;
+ const total=6;
  for(let n=1;n<=total;n++){
    findExampleImage(folder,n).then(src=>{
      finished++;
@@ -1650,5 +1656,48 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
  .example-gallery{padding:10px!important}
  .example-gallery-inner{width:100%!important;max-height:94vh!important;padding:8px!important;gap:8px!important;grid-template-columns:1fr!important}
  .example-gallery-item,.example-gallery-item img{min-height:0!important}
+}
+</style>
+
+<style id="mobile-stability-v2">
+@media(max-width:700px){
+ *{scroll-behavior:auto!important}
+ body::before,body::after{filter:none!important}
+ .card,.section,.option,.flag-choice,.example-thumb,.btn,.category-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .option,.option.has-example{
+   display:flex!important;
+   flex-wrap:wrap!important;
+   align-items:center!important;
+   gap:8px!important;
+   min-height:0!important;
+   height:auto!important;
+   padding:11px!important;
+ }
+ .option>input[type=radio],.option>input[type=checkbox]{order:1!important;flex:0 0 20px!important;margin:0!important}
+ .option>span:not(.example-thumb),.option>b,.option>label{order:2!important;flex:1 1 calc(100% - 58px)!important;min-width:0!important;width:auto!important;white-space:normal!important;overflow-wrap:anywhere!important;position:static!important}
+ .option>.iwrap{order:3!important;flex:0 0 20px!important;margin:0!important;position:static!important;inset:auto!important;transform:none!important}
+ .option>.example-thumb{
+   order:4!important;
+   flex:0 0 100%!important;
+   width:100%!important;
+   height:150px!important;
+   aspect-ratio:auto!important;
+   margin:3px 0 0!important;
+   position:relative!important;
+   inset:auto!important;
+   transform:none!important;
+ }
+ .flag-mode-row{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
+ .flag-choice{
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   height:auto!important;min-height:52px!important;padding:12px!important
+ }
+ .flag-choice .flag-mode-label{order:1!important;text-align:center!important}
+ .flag-choice .example-thumb{order:2!important;width:100%!important;height:140px!important;margin-top:8px!important}
+ .example-thumb{box-shadow:0 0 8px rgba(255,45,143,.28)!important}
+ .selected,.option.selected,.flag-choice.selected{animation:none!important}
+ .example-gallery{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;animation:none!important}
+ .example-gallery-inner{animation:none!important}
+ .example-gallery-item img{max-height:80vh!important;object-fit:contain!important}
 }
 </style>
