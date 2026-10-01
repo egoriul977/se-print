@@ -656,7 +656,7 @@ function renderPhotos(){
    <option value="15×21 см (А5)" data-price="35">15×21 см (А5) — 35 ₽/шт.</option>
    <option value="21×30 см (А4)" data-price="60">21×30 см (А4) — 60 ₽/шт.</option>
    <option value="30×42 см (А3)" data-price="250">30×42 см (А3) — 250 ₽/шт.</option>
- </select>${exampleThumbHTML('examples/photos/main','Печать фотографий')}</div>
+ </select>${exampleThumbHTML('examples/photos/standard','Печать фотографий')}</div>
  <div style="margin-top:12px"><label>Количество, шт.</label><input id="photoQty" type="number" min="1" step="1" value="1" oninput="photoCalc()"></div>
  <div class="note" style="margin-top:12px">Для формата 10×15 см: при тираже от 100 шт. применяется цена 12 ₽/шт.</div>`;
  photoCalc();
@@ -677,9 +677,9 @@ function renderFlagChooser(){
  form.innerHTML=`
  <label>Вариант изготовления флага</label>
  <div class="options flag-mode-row">
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')"><span class="flag-mode-label"><span class="flag-mode-icon">🚩</span><span>Стандартные размеры</span>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>${exampleThumbSpanHTML('examples/flag/mode-standard','Стандартные флаги','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')"><span class="flag-mode-label"><span class="flag-mode-icon">🏳️</span><span>Виндеры</span>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>${exampleThumbSpanHTML('examples/flag/mode-winder','Виндеры','')}</button>
-   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')"><span class="flag-mode-label"><span class="flag-mode-icon">📐</span><span>Размер на заказ</span>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>${exampleThumbSpanHTML('examples/flag/mode-custom','Флаг — размер на заказ','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')"><span class="flag-mode-label"><span class="flag-mode-icon">🚩</span><span>Стандартные размеры</span>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')"><span class="flag-mode-label"><span class="flag-mode-icon">🏳️</span><span>Виндеры</span>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>${exampleThumbSpanHTML('examples/flag/winder','Виндеры','')}</button>
+   <button type="button" class="option flag-choice has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')"><span class="flag-mode-label"><span class="flag-mode-icon">📐</span><span>Размер на заказ</span>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — размер на заказ','')}</button>
  </div>
  <div id="flagModeBox"></div>`;
  renderFlagMode();
@@ -832,7 +832,7 @@ function renderPostArea(){
  if(current.id==='banner' && posts.length){
    box.innerHTML=`<div class="param-block post-block"><label>Постобработка <small style="color:var(--muted);font-weight:600">— можно выбрать только один вариант</small></label><div class="options">${posts.map(x=>`<label class="option"><input type="radio" name="bannerPost" class="post" data-name="${x}" onchange="bannerPostChanged()"><span>${x}</span>${info(postTip(x))}</label>`).join('')}<label class="option"><input type="radio" name="bannerPost" onchange="bannerPostChanged()" checked><span>Без постобработки</span></label></div><div id="bannerGrommetStep" style="display:none;margin-top:12px"><label>Шаг установки люверсов ${info('Расстояние между соседними люверсами. Стандартный и самый распространённый вариант — каждые 30 см.')}</label><select id="bannerGrommetStepSelect" onchange="recalc()"><option value="15">Каждые 15 см</option><option value="20">Каждые 20 см</option><option value="30" selected>Каждые 30 см — стандарт</option></select></div></div>`;
  }else{
-   box.innerHTML=(posts.length||canDisableAutoCut)?`<div class="param-block post-block"><label>Постобработка</label>${cutWarning}<div class="options">${posts.map(x=>{const option=`<label class="option"><input type="checkbox" class="post" data-name="${x}" onchange="recalc()"><span>${x}</span>${info(postTip(x))}</label>`;if(current.id==='vinyl'){const slug=x.includes('Контурная')?'contour-cut':x.includes('Ламинация')?'lamination':x.includes('прямоугольная')?'rect-cut':'mounting-film';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/vinyl/post-${slug}`,x,'')}</div>`;}if(current.id==='plastic' && (x.includes('Нанесение скотча')||x.includes('Резка прямоугольная')||x.includes('Фигурная резка'))){const slug=x.includes('скотча')?'tape':x.includes('прямоугольная')?'rect-cut':'contour-cut';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/plastic/${slug}`,x,'')}</div>`;}return option;}).join('')}${canDisableAutoCut?`<label class="option no-example"><input type="checkbox" id="noAutoCut" onchange="recalc()"><span>Без порезки</span>${info('По умолчанию прямоугольная поштучная резка уже включена в расчёт. Поставьте эту галочку, если печать нужно выдать без порезки.')}</label>`:''}</div></div>`:'';
+   box.innerHTML=(posts.length||canDisableAutoCut)?`<div class="param-block post-block"><label>Постобработка</label>${cutWarning}<div class="options">${posts.map(x=>{const option=`<label class="option"><input type="checkbox" class="post" data-name="${x}" onchange="recalc()"><span>${x}</span>${info(postTip(x))}</label>`;if(current.id==='vinyl'){const slug=x.includes('Контурная')?'contour-cut':x.includes('Ламинация')?'lamination':x.includes('прямоугольная')?'rect-cut':'mounting-film';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/vinyl/${slug}`,x,'')}</div>`;}if(current.id==='plastic' && (x.includes('Нанесение скотча')||x.includes('Резка прямоугольная')||x.includes('Фигурная резка'))){const slug=x.includes('скотча')?'tape':x.includes('прямоугольная')?'rect-cut':'contour-cut';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/plastic/${slug}`,x,'')}</div>`;}return option;}).join('')}${canDisableAutoCut?`<label class="option no-example"><input type="checkbox" id="noAutoCut" onchange="recalc()"><span>Без порезки</span>${info('По умолчанию прямоугольная поштучная резка уже включена в расчёт. Поставьте эту галочку, если печать нужно выдать без порезки.')}</label>`:''}</div></div>`:'';
  }
  setTimeout(decorateExampleOptions,0);
 }
@@ -851,11 +851,41 @@ function exampleKeyFromOption(opt,index){
  const val=radio?.value||radio?.id||('item'+(index+1));
  return String(val).replace(/[^a-zA-Z0-9_-]/g,'-');
 }
+function resolveExampleFolder(folder,title=''){
+ const map={
+  'examples/banner/banner440':'examples/banner/440gsm','examples/banner/banner280':'examples/banner/budget','examples/banner/bannerMesh':'examples/banner/mesh',
+  'examples/vinyl/vStd':'examples/vinyl/standard-print','examples/vinyl/vBudget':'examples/vinyl/budget-film','examples/vinyl/vPerf':'examples/vinyl/perforated','examples/vinyl/v1440':'examples/vinyl/1440dpi','examples/vinyl/vGlue':'examples/vinyl/adhesive-side',
+  'examples/plotter/plotterWhite':'examples/plotter/white','examples/plotter/plotterColor':'examples/plotter/color','examples/plotter/plotterEuro':'examples/plotter/color','examples/plotter/plotterSilver':'examples/plotter/silver','examples/plotter/plotterGold':'examples/plotter/gold','examples/plotter/plotterHolo':'examples/plotter/holographic','examples/plotter/plotterGlow':'examples/plotter/glow','examples/plotter/plotterReflect':'examples/plotter/reflective',
+  'examples/flag/flagStd':'examples/flag/standard-fabric','examples/flag/flagBlock':'examples/flag/blackout',
+  'examples/fabric/fabWhite':'examples/fabric/white','examples/fabric/fabColor':'examples/fabric/solid-color','examples/fabric/fabFull':'examples/fabric/full-color',
+  'examples/paper/photo':'examples/paper/photo','examples/paper/poster':'examples/paper/poster',
+  'examples/canvas/canvas':'examples/canvas/standard',
+  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075'
+ };
+ if(map[folder]) return map[folder];
+ const t=String(title).toLowerCase();
+ if(folder==='examples/banner/on'){
+   if(t.includes('люверс'))return 'examples/banner/grommets';
+   if(t.includes('проклей'))return 'examples/banner/edge-gluing';
+   if(t.includes('резк'))return 'examples/banner/contour-cut';
+ }
+ if(folder.startsWith('examples/plastic/')){
+   if(t.includes('скотч'))return 'examples/plastic/double-sided-tape';
+   if(t.includes('фигур'))return 'examples/plastic/magnet-plotter-cut';
+ }
+ return folder;
+}
+function exampleCandidates(folder,n){
+ folder=resolveExampleFolder(folder);
+ const nums=[String(n).padStart(2,'0'),String(n)];
+ const exts=['webp','jpg','png','jpeg'];
+ return nums.flatMap(num=>exts.map(ext=>`${folder}/${num}.${ext}`));
+}
 function exampleThumbHTML(folder,title,cls='compact') {
- return `<button type="button" class="example-thumb ${cls}" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${folder}/1.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${folder}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${folder}/1.png'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></button>`;
+ return `<button type="button" class="example-thumb ${cls}" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></button>`;
 }
 function exampleThumbSpanHTML(folder,title,cls='') {
- return `<span class="example-thumb ${cls}" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${folder}/1.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${folder}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${folder}/1.png'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></span>`;
+ return `<span class="example-thumb ${cls}" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${String(title).replace(/"/g,'&quot;')}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}"></span>`;
 }
 function decorateExampleOptions(){
  if(!current)return;
@@ -865,16 +895,17 @@ function decorateExampleOptions(){
    const key=exampleKeyFromOption(opt,i), folder=`examples/${current.id}/${key}`;
    opt.classList.add('has-example');
    const thumb=document.createElement('button');thumb.type='button';thumb.className='example-thumb';thumb.dataset.folder=folder;thumb.dataset.title=(opt.querySelector('span')?.textContent||current.name).trim();
-   thumb.innerHTML=`<img src="${folder}/1.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${folder}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${folder}/1.png'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}">`;
+   thumb.innerHTML=`<img src="${resolveExampleFolder(folder,title)}/01.webp" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${resolveExampleFolder(folder,title)}/1.webp'}else if(this.dataset.f==1){this.dataset.f=2;this.src='${resolveExampleFolder(folder,title)}/01.jpg'}else if(this.dataset.f==2){this.dataset.f=3;this.src='${resolveExampleFolder(folder,title)}/1.jpg'}else{this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span>ФОТО<br>ПРИМЕРА</span>')}">`;
    thumb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openExampleGallery(folder,thumb.dataset.title)});
    opt.appendChild(thumb);
  });
 }
 function findExampleImage(folder,n){
- const exts=['jpg','webp','png','jpeg'];
- return new Promise(resolve=>{let i=0;const img=new Image();const next=()=>{if(i>=exts.length)return resolve(null);img.onload=()=>resolve(`${folder}/${n}.${exts[i-1]}`);img.onerror=next;img.src=`${folder}/${n}.${exts[i++]}`;};next();});
+ const candidates=exampleCandidates(folder,n);
+ return new Promise(resolve=>{let i=0;const img=new Image();const next=()=>{if(i>=candidates.length)return resolve(null);const src=candidates[i++];img.onload=()=>resolve(src);img.onerror=next;img.src=src;};next();});
 }
 async function openExampleGallery(folder,title){
+ folder=resolveExampleFolder(folder,title);
  document.querySelector('.example-gallery')?.remove();
  const found=(await Promise.all(Array.from({length:20},(_,i)=>findExampleImage(folder,i+1)))).filter(Boolean);
  const ov=document.createElement('div');ov.className='example-gallery';
@@ -1065,8 +1096,8 @@ function renderCardForm(){
 function cardCalc(){
  let t=document.querySelector('input[name=cardtype]:checked')?.value;
  let v=0,detail='';
- if(t==='cardsEx'){const el=document.getElementById('cardExType'),box=document.getElementById('cardExExample');if(el&&box){const slug={'Софт-тач':'soft-touch','Лён':'linen','Фольгирование 1+0':'foil-1-0','Фольгирование 1+1':'foil-1-1','Глянец/мат':'gloss-matte'}[el.value]||'exclusive';box.innerHTML=exampleThumbHTML(`examples/cards/exclusive-${slug}`,el.selectedOptions[0].textContent);}}
- if(t==='leaf'){const el=document.getElementById('leafCreaseLines'),box=document.getElementById('leafCreaseExample');if(el&&box){const n=el.value||'0';box.innerHTML=exampleThumbHTML(`examples/cards/crease-${n}`,el.selectedOptions[0].textContent);}}
+ if(t==='cardsEx'){const el=document.getElementById('cardExType'),box=document.getElementById('cardExExample');if(el&&box){const slug={'Софт-тач':'soft-touch','Лён':'linen','Фольгирование 1+0':'gold-foil','Фольгирование 1+1':'silver-foil','Глянец/мат':'gloss-lamination'}[el.value]||'exclusive';box.innerHTML=exampleThumbHTML(`examples/cards/${slug}`,el.selectedOptions[0].textContent);}}
+ if(t==='leaf'){const el=document.getElementById('leafCreaseLines'),box=document.getElementById('leafCreaseExample');if(el&&box){const n=el.value||'0';box.innerHTML=exampleThumbHTML(n==='1'?'examples/cards/booklet':n==='2'?'examples/cards/leaflet-2fold':'examples/cards/leaflet-115',el.selectedOptions[0].textContent);}}
  if(t==='cards'){
    const el=document.getElementById('cardVariant');
    if(!el)return;
@@ -1133,7 +1164,7 @@ function cardCalc(){
  if(t!=='leaf') lastCalcMeta={categoryId:current.id, fixed:true, qty:1, total:v};
  breakdown.innerHTML=detail;
 }
-function renderCanvas(){form.innerHTML=`<div class="inline-example-row"><div><label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select></div>${exampleThumbHTML('examples/canvas/main','Картина на холсте')}</div><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" value="1" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="post-example-row"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label>${exampleThumbHTML('examples/canvas/hook','Крючок для крепежа','')}</div>`;canvasCalc()}
+function renderCanvas(){form.innerHTML=`<div class="inline-example-row"><div><label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select></div>${exampleThumbHTML('examples/canvas/standard','Картина на холсте')}</div><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" value="1" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="post-example-row"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label>${exampleThumbHTML('examples/canvas/hook','Крючок для крепежа','')}</div>`;canvasCalc()}
 function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
 function selectedPostNames(){
  const names=[...document.querySelectorAll('.post:checked')].map(x=>x.dataset.name||x.parentElement?.querySelector('span')?.textContent||'').filter(Boolean);
