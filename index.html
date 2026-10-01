@@ -860,7 +860,17 @@ function resolveExampleFolder(folder,title=''){
   'examples/fabric/fabWhite':'examples/fabric/white','examples/fabric/fabColor':'examples/fabric/solid-color','examples/fabric/fabFull':'examples/fabric/full-color',
   'examples/paper/photo':'examples/paper/photo','examples/paper/poster':'examples/paper/poster',
   'examples/canvas/canvas':'examples/canvas/standard',
-  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075'
+  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075',
+  'examples/flag/mode-standard':'examples/flag/standard-size',
+  'examples/flag/mode-winder':'examples/flag/winder',
+  'examples/flag/mode-custom':'examples/flag/custom-size',
+  'examples/flag/w220':'examples/flag/winder-60x220',
+  'examples/flag/w240':'examples/flag/winder-60x240',
+  'examples/flag/w340':'examples/flag/winder-60x340',
+  'examples/photos/main':'examples/photos/standard',
+  'examples/canvas/main':'examples/canvas/standard',
+  'examples/cards/crease-1':'examples/cards/booklet',
+  'examples/cards/crease-2':'examples/cards/leaflet-2fold'
  };
  if(map[folder]) return map[folder];
  const t=String(title).toLowerCase();
@@ -884,16 +894,16 @@ function exampleCandidates(folder,n){
 }
 function exampleThumbHTML(folder,title,cls='compact') {
  const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
- return `<button type="button" class="example-thumb ${cls}" style="display:none" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)"></button>`;
+ return `<button type="button" class="example-thumb ${cls}" style="display:none" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)"></button>`;
 }
 function exampleThumbSpanHTML(folder,title,cls='') {
  const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
- return `<span class="example-thumb ${cls}" style="display:none" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)"></span>`;
+ return `<span class="example-thumb ${cls}" style="display:none" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)"></span>`;
 }
 function exampleThumbFallback(img,folder,step){
  const variants=['1.webp','01.jpg','1.jpg','01.png','1.png','01.jpeg','1.jpeg'];
  if(step<=variants.length){img.onerror=()=>exampleThumbFallback(img,folder,step+1);img.src=exampleAsset(`${folder}/${variants[step-1]}`);}
- else{const holder=img.parentElement;if(holder)holder.remove();}
+ else{const holder=img.parentElement;if(holder){const opt=holder.closest('.option');holder.remove();if(opt&&!opt.querySelector('.example-thumb'))opt.classList.remove('has-example');}}
 }
 function decorateExampleOptions(){
  if(!current)return;
@@ -901,9 +911,8 @@ function decorateExampleOptions(){
  options.forEach((opt,i)=>{
    if(opt.querySelector('.example-thumb'))return;
    const key=exampleKeyFromOption(opt,i), folder=`examples/${current.id}/${key}`;
-   opt.classList.add('has-example');
-   const thumb=document.createElement('button');thumb.type='button';thumb.className='example-thumb';thumb.dataset.folder=folder;thumb.dataset.title=(opt.querySelector('span')?.textContent||current.name).trim();
-   const rf=resolveExampleFolder(folder,title);thumb.style.display='none';thumb.innerHTML=`<img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="this.parentElement.style.display='flex'" onerror="exampleThumbFallback(this,'${rf}',1)">`;
+   const thumb=document.createElement('button');thumb.type='button';thumb.className='example-thumb';thumb.dataset.exampleFolder=folder;thumb.dataset.folder=folder;thumb.dataset.title=(opt.querySelector('span')?.textContent||current.name).trim();
+   const title=thumb.dataset.title;const rf=resolveExampleFolder(folder,title);thumb.style.display='none';thumb.innerHTML=`<img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)">`;
    thumb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openExampleGallery(folder,thumb.dataset.title)});
    opt.appendChild(thumb);
  });
@@ -1561,4 +1570,11 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
 .iwrap{position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;flex:0 0 20px!important;width:20px!important;height:20px!important;margin-left:6px!important;vertical-align:middle!important;align-items:center!important;justify-content:center!important}
 .option .iwrap{margin-left:auto!important}.option>span .iwrap,.flag-mode-label .iwrap{margin-left:6px!important}label>.iwrap{margin-left:5px!important}.option{min-width:0!important}.option>span{min-width:0!important}
 @media(max-width:560px){.iwrap{flex-basis:18px!important;width:18px!important;height:18px!important;margin-left:4px!important}}
+</style>
+<style id="no-layout-jump-fix">
+.option.has-example{display:flex!important;align-items:center!important;min-height:0!important}
+.option.has-example>.example-thumb{margin-left:auto!important;flex:0 0 126px!important}
+.option.has-example:not(:has(.example-thumb[style*="display: flex"]))>.example-thumb{display:none!important}
+.option.has-example:not(:has(.example-thumb[style*="display: flex"])){display:flex!important}
+.option.has-example:not(:has(.example-thumb[style*="display: flex"]))>span{width:auto!important}
 </style>
