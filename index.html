@@ -2423,7 +2423,7 @@ img,video,svg,canvas{max-width:100%}
 }
 </style>
 
-<script id="mobile-ux-v11">
+<script id="mobile-ux-v11-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s), qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const txt=x=>(x?.textContent||'').toLowerCase();
@@ -2517,5 +2517,200 @@ img,video,svg,canvas{max-width:100%}
  document.addEventListener('click',()=>setTimeout(tick,30));
  new MutationObserver(()=>requestAnimationFrame(tick)).observe(document.body,{childList:true,subtree:true,characterData:true});
  setTimeout(tick,120);
+})();
+</script>
+
+<style id="mobile-ux-v12">
+html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+*,*:before,*:after{box-sizing:border-box}
+
+/* TOP CATEGORY HUD: always follows viewport while inside product */
+#uxCategoryHud{
+ position:fixed;z-index:85;left:50%;top:8px;transform:translateX(-50%);
+ width:min(760px,calc(100vw - 16px));display:none;align-items:center;gap:7px;
+ padding:7px;background:rgba(255,255,255,.94);backdrop-filter:blur(15px);
+ border:1px solid rgba(30,45,75,.10);border-radius:15px;
+ box-shadow:0 8px 25px rgba(25,35,60,.12)
+}
+#uxCategoryHud.show{display:flex}
+#uxBackCategory{flex:0 0 38px;width:38px;height:38px;border:0;border-radius:11px;background:#172033;color:#fff;font-size:20px;font-weight:1000;cursor:pointer}
+#uxCategorySteps{display:flex;gap:5px;min-width:0;overflow-x:auto;scrollbar-width:none}
+#uxCategorySteps .ux-step{border:0;white-space:nowrap;cursor:pointer;padding:6px 8px;border-radius:999px;font-size:9px;font-weight:900;background:#f2f3f7;color:#8a91a3}
+#uxCategorySteps .ux-step.done{background:#eefaf4;color:#168754}
+#uxCategorySteps .ux-step.active{background:#fff0f7;color:#ff1688}
+body.ux-in-category #product{padding-top:56px!important}
+
+/* Hide the old in-form progress bar. */
+#uxProgress{display:none!important}
+
+/* Mobile selection effect: no scale/filter => much lighter and no lag */
+@media(max-width:700px){
+ .options:has(>.ui-selected)>.option:not(.ui-selected),
+ .flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),
+ .material-options:has(>.ui-selected)>.option:not(.ui-selected),
+ .paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){
+   transform:none!important;filter:none!important;opacity:.50!important;
+ }
+ .option.ui-selected,.flag-choice.ui-selected{transform:none!important}
+}
+
+/* Remove ugly browser dark checkbox/radio focus rectangles */
+.option input[type=checkbox],.option input[type=radio],
+.flag-choice input[type=checkbox],.flag-choice input[type=radio]{
+ appearance:none!important;-webkit-appearance:none!important;
+ width:19px!important;height:19px!important;min-width:19px!important;
+ border:1.5px solid #c8ceda!important;border-radius:6px!important;background:#fff!important;
+ outline:none!important;box-shadow:none!important;position:relative!important
+}
+.option input[type=radio],.flag-choice input[type=radio]{border-radius:50%!important}
+.option input:checked,.flag-choice input:checked{background:#ff1688!important;border-color:#ff1688!important}
+.option input[type=checkbox]:checked:after,.flag-choice input[type=checkbox]:checked:after{
+ content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:1000
+}
+.option input[type=radio]:checked:after,.flag-choice input[type=radio]:checked:after{
+ content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;left:4.5px;top:4.5px
+}
+
+/* Any option with a picture = one card, especially postprocessing / printed stickers */
+.ux-post .option:has(.example-thumb),.post-block .option:has(.example-thumb){
+ display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;grid-template-rows:auto auto!important;
+ align-items:center!important;gap:7px!important;height:auto!important;overflow:hidden!important;padding:9px!important
+}
+.ux-post .option:has(.example-thumb)>input,.post-block .option:has(.example-thumb)>input{grid-column:1;grid-row:1}
+.ux-post .option:has(.example-thumb)>span,.post-block .option:has(.example-thumb)>span{grid-column:2;grid-row:1;min-width:0}
+.ux-post .option:has(.example-thumb)>.example-thumb,.post-block .option:has(.example-thumb)>.example-thumb{
+ grid-column:1/-1;grid-row:2;position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;
+ height:125px!important;margin:0!important;border-radius:11px!important;overflow:hidden!important
+}
+.ux-post .option .example-thumb img,.post-block .option .example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
+
+/* FLAGS: each mode is a single button/card containing its own title + its own image */
+.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}
+.flag-mode-unified>.flag-mode-card{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ width:100%!important;min-width:0!important;height:auto!important;padding:8px!important;overflow:hidden!important
+}
+.flag-mode-unified>.flag-mode-card>.flag-mode-label{display:block!important;width:100%!important;min-height:38px!important;margin:0!important;padding:4px 3px 8px!important}
+.flag-mode-unified>.flag-mode-card>.example-thumb{
+ display:block!important;position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;
+ height:145px!important;margin:0!important;flex:0 0 145px!important
+}
+
+/* Fabric custom size: only visible when JS explicitly sets display:grid */
+.fabric-custom-size[style*="display: none"],.fabric-custom-size[style*="display:none"]{display:none!important}
+
+/* Correct bottom cart bar */
+#uxStickyTotal{display:flex!important}
+#uxStickyTotal .ux-prices{min-width:0;margin-right:auto}
+#uxStickyTotal .ux-cat-label{font-size:9px;opacity:.65}
+#uxStickyTotal .ux-sticky-price{display:block;font-size:19px;font-weight:1000;line-height:1.05}
+#uxStickyTotal .ux-order-total{font-size:9px;opacity:.72;margin-top:3px}
+#uxStickyTotal .ux-icon-btn{width:42px;height:42px;flex:0 0 42px;padding:0!important;display:grid;place-items:center}
+@media(max-width:700px){
+ #uxCategoryHud{top:5px;width:calc(100vw - 10px);padding:5px;border-radius:12px}
+ #uxBackCategory{width:34px;height:34px;flex-basis:34px;font-size:18px}
+ #uxCategorySteps .ux-step{font-size:8.5px;padding:5px 7px}
+ body.ux-in-category #product{padding-top:49px!important}
+ .flag-mode-unified{grid-template-columns:1fr!important;gap:6px!important}
+ .flag-mode-unified>.flag-mode-card{padding:7px!important}
+ .flag-mode-unified>.flag-mode-card>.example-thumb{height:145px!important;flex-basis:145px!important}
+ .ux-post .option:has(.example-thumb)>.example-thumb,.post-block .option:has(.example-thumb)>.example-thumb{height:105px!important}
+}
+</style>
+
+<script id="mobile-ux-v12">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const lower=x=>(x?.textContent||'').toLowerCase();
+ function inCategory(){const p=q('#product');return !!p && getComputedStyle(p).display!=='none' && p.offsetParent!==null}
+ function typeOf(b){
+   const t=lower(b);
+   if(/количество|тираж/.test(t))return 'qty';
+   if(/постобработ|дополнительно|ламинац|резк|люверс|скотч|пошив|основан|флагшток/.test(t))return 'post';
+   if(/размер|ширин|высот/.test(t))return 'size';
+   return 'material';
+ }
+ function complete(b,type){
+   if(type==='post')return true;
+   const rs=qa('input[type=radio]',b).filter(x=>x.offsetParent!==null);if(rs.length)return rs.some(x=>x.checked);
+   const ss=qa('select',b).filter(x=>x.offsetParent!==null);if(ss.length)return ss.every(x=>x.value&& !/выберите/i.test(x.options[x.selectedIndex]?.text||''));
+   const ns=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);if(ns.length)return ns.every(x=>String(x.value).trim()!==''&&+x.value>0);
+   return !!q('.ui-selected,.is-choice-selected,input:checked',b);
+ }
+ function hud(){
+   let h=q('#uxCategoryHud');
+   if(!h){h=document.createElement('div');h.id='uxCategoryHud';h.innerHTML='<button id="uxBackCategory" type="button" aria-label="Назад">‹</button><div id="uxCategorySteps"></div>';document.body.appendChild(h);
+     q('#uxBackCategory',h).onclick=()=>{
+       const back=q('#backBtn')||qa('button,a').find(x=>/назад|категори/i.test(x.textContent||''));
+       if(back)back.click(); else if(typeof window.showHome==='function')window.showHome();
+     };
+   }
+   return h;
+ }
+ function refreshHud(){
+   const h=hud(),inside=inCategory();h.classList.toggle('show',inside);document.body.classList.toggle('ux-in-category',inside);if(!inside)return;
+   const form=window.form||q('#form');if(!form)return;
+   const blocks=qa(':scope > .param-block',form).filter(x=>x.offsetParent!==null);
+   blocks.forEach(b=>b.classList.toggle('ux-post',typeOf(b)==='post'));
+   const defs=[['material','Материал'],['size','Размер'],['post','Обработка'],['qty','Количество']];
+   const groups=defs.map(([type,label])=>{const bs=blocks.filter(b=>typeOf(b)===type);return {type,label,bs,done:bs.length&&bs.every(b=>complete(b,type))}}).filter(x=>x.bs.length);
+   let first=groups.findIndex(x=>!x.done&&x.type!=='post');if(first<0)first=groups.length-1;
+   const box=q('#uxCategorySteps',h);box.innerHTML=groups.map((g,i)=>`<button type="button" class="ux-step ${g.done?'done':''} ${i===first?'active':''}" data-i="${i}">${g.done?'✓ ':''}${g.label}</button>`).join('');
+   qa('.ux-step',box).forEach(b=>b.onclick=()=>{const g=groups[+b.dataset.i];g?.bs[0]?.scrollIntoView({behavior:'smooth',block:'center'})});
+ }
+ function numText(x){return String(x||'').replace(/\s/g,'').replace(',','.')}
+ function cartSum(){
+   if(Array.isArray(window.cart)){
+     let n=0,ok=false;window.cart.forEach(x=>{const v=Number(x.adjustedTotal??x.total??x.price);if(Number.isFinite(v)){n+=v;ok=true}});
+     if(ok)return n;
+   }
+   return 0;
+ }
+ function fmt(n){return typeof window.R==='function'?window.R(n):Math.round(n).toLocaleString('ru-RU')+' ₽'}
+ let last='';
+ function refreshBar(){
+   let bar=q('#uxStickyTotal');if(!bar)return;
+   if(!q('.ux-prices',bar))bar.innerHTML='<div class="ux-prices"><div class="ux-cat-label">В выбранной категории</div><span class="ux-sticky-price">—</span><div class="ux-order-total">Общий заказ: 0 ₽</div></div><button class="ux-icon-btn ux-add" type="button" title="Добавить в корзину">＋</button><button class="ux-icon-btn ux-checkout" type="button" title="Перейти к оформлению">🛒</button>';
+   const live=window.liveTotal||q('#liveTotal'),price=(live?.textContent||'—').trim();
+   const pe=q('.ux-sticky-price',bar);if(pe&&price!==last){pe.textContent=price;pe.animate([{transform:'scale(1)'},{transform:'scale(1.13)'},{transform:'scale(1)'}],{duration:280,easing:'ease-out'});last=price}
+   q('.ux-order-total',bar).textContent='Общий заказ: '+fmt(cartSum());
+   q('.ux-add',bar).onclick=()=>{const b=q('#addCart')||qa('button').find(x=>/добавить в корзину/i.test(x.textContent||''));b?.click()};
+   q('.ux-checkout',bar).onclick=()=>{const c=q('#cart')||q('.cart')||q('#cartBox');c?.scrollIntoView({behavior:'smooth',block:'start'})};
+ }
+ function fixFabricCustom(){
+   qa('.fabric-image-item').forEach((el,i)=>{
+     const sel=q('.fabric-size',el),box=q('.fabric-custom-size',el);if(!sel||!box)return;
+     box.style.display=sel.value==='custom'?'grid':'none';
+   });
+ }
+ function fixFlagModeBindings(){
+   qa('.flag-mode-card[data-flag-mode]').forEach(card=>{
+     card.onclick=function(e){
+       if(e.target.closest('.example-thumb'))return;
+       e.preventDefault();
+       const mode=card.dataset.flagMode;
+       if(typeof window.selectFlagMode==='function')window.selectFlagMode(mode);
+     };
+   });
+ }
+ function simplifyAddedModal(){
+   // Keep only the two navigation choices in the post-add modal.
+   qa('.modal,.popup,.add-modal,#addModal,#cartModal').forEach(m=>{
+     if(m.offsetParent===null)return;
+     const t=lower(m);if(!/продолжить в этой категории|выбрать новую категорию/.test(t))return;
+     qa('button,a',m).forEach(b=>{
+       const bt=lower(b);
+       const keep=/продолжить в этой категории|выбрать новую категорию/.test(bt);
+       const close=/^[×x]$/.test((b.textContent||'').trim());
+       if(!keep&&!close)b.style.display='none';
+     });
+   });
+ }
+ let scheduled=false;
+ function tick(){scheduled=false;refreshHud();refreshBar();fixFabricCustom();fixFlagModeBindings();simplifyAddedModal()}
+ function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(tick)}
+ document.addEventListener('change',schedule);document.addEventListener('input',schedule);document.addEventListener('click',()=>setTimeout(schedule,15));
+ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+ setTimeout(schedule,100);
 })();
 </script>
