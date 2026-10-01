@@ -860,7 +860,7 @@ function resolveExampleFolder(folder,title=''){
   'examples/fabric/fabWhite':'examples/fabric/white','examples/fabric/fabColor':'examples/fabric/solid-color','examples/fabric/fabFull':'examples/fabric/full-color',
   'examples/paper/photo':'examples/paper/photo','examples/paper/poster':'examples/paper/poster',
   'examples/canvas/canvas':'examples/canvas/standard',
-  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075',
+  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075','examples/flag/mode-standard':'examples/flag/standard-size','examples/flag/mode-winder':'examples/flag/winder','examples/flag/mode-custom':'examples/flag/custom-size','examples/flag/w220':'examples/flag/winder-60x220','examples/flag/w240':'examples/flag/winder-60x240','examples/flag/w340':'examples/flag/winder-60x340','examples/photos/main':'examples/photos/standard','examples/cards/crease-1':'examples/cards/booklet','examples/cards/crease-2':'examples/cards/leaflet-2fold',
   'examples/flag/mode-standard':'examples/flag/standard-size',
   'examples/flag/mode-winder':'examples/flag/winder',
   'examples/flag/mode-custom':'examples/flag/custom-size',
@@ -921,16 +921,31 @@ function findExampleImage(folder,n){
  const candidates=exampleCandidates(folder,n);
  return new Promise(resolve=>{let i=0;const img=new Image();const next=()=>{if(i>=candidates.length)return resolve(null);const src=candidates[i++];img.onload=()=>resolve(src);img.onerror=next;img.src=src;};next();});
 }
-async function openExampleGallery(folder,title){
+function openExampleGallery(folder,title){
  folder=resolveExampleFolder(folder,title);
  document.querySelector('.example-gallery')?.remove();
- const found=(await Promise.all(Array.from({length:20},(_,i)=>findExampleImage(folder,i+1)))).filter(Boolean);
  const ov=document.createElement('div');ov.className='example-gallery';
- const items=found.length?found.map(src=>`<div class="example-gallery-item"><img src="${src}" alt="${title}"></div>`).join(''):`<div class="example-gallery-item">Фотографии для этого примера пока не загружены</div>`;
- ov.innerHTML=`<div class="example-gallery-inner" role="dialog" aria-label="${title}">${items}</div>`;
- const close=()=>{if(ov.classList.contains('closing'))return;ov.classList.add('closing');setTimeout(()=>ov.remove(),340)};
+ ov.innerHTML=`<div class="example-gallery-inner" role="dialog" aria-label="${title}"><div class="example-gallery-loading">Загрузка фотографий…</div></div>`;
+ const inner=ov.querySelector('.example-gallery-inner');
+ const close=()=>{if(ov.classList.contains('closing'))return;ov.classList.add('closing');setTimeout(()=>ov.remove(),180)};
  ov.addEventListener('click',close);
+ inner.addEventListener('click',e=>e.stopPropagation());
  document.body.appendChild(ov);
+ let loaded=0, finished=0;
+ const total=20;
+ for(let n=1;n<=total;n++){
+   findExampleImage(folder,n).then(src=>{
+     finished++;
+     if(src && ov.isConnected){
+       if(loaded===0) inner.innerHTML='';
+       loaded++;
+       const item=document.createElement('div');item.className='example-gallery-item';
+       const img=document.createElement('img');img.src=src;img.alt=title;img.loading='eager';img.decoding='async';
+       item.appendChild(img);inner.appendChild(item);
+     }
+     if(finished===total && loaded===0 && ov.isConnected) inner.innerHTML='<div class="example-gallery-empty">Фотографии для этого примера пока не загружены</div>';
+   });
+ }
 }
 
 function area(){return (+w.value||0)*(+h.value||0)/10000}
@@ -1571,10 +1586,69 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
 .option .iwrap{margin-left:auto!important}.option>span .iwrap,.flag-mode-label .iwrap{margin-left:6px!important}label>.iwrap{margin-left:5px!important}.option{min-width:0!important}.option>span{min-width:0!important}
 @media(max-width:560px){.iwrap{flex-basis:18px!important;width:18px!important;height:18px!important;margin-left:4px!important}}
 </style>
-<style id="no-layout-jump-fix">
-.option.has-example{display:flex!important;align-items:center!important;min-height:0!important}
-.option.has-example>.example-thumb{margin-left:auto!important;flex:0 0 126px!important}
-.option.has-example:not(:has(.example-thumb[style*="display: flex"]))>.example-thumb{display:none!important}
-.option.has-example:not(:has(.example-thumb[style*="display: flex"])){display:flex!important}
-.option.has-example:not(:has(.example-thumb[style*="display: flex"]))>span{width:auto!important}
+
+
+<style id="gallery-mobile-final-fix">
+.example-thumb{
+ box-sizing:border-box!important;
+ padding:0!important;
+ border:2px solid #ff2d8f!important;
+ background:transparent!important;
+ overflow:hidden!important;
+}
+.example-thumb img{
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ max-height:none!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:11px!important;
+ object-fit:cover!important;
+}
+.example-gallery{animation:galleryFastFade .14s ease!important;backdrop-filter:blur(5px)!important;-webkit-backdrop-filter:blur(5px)!important}
+.example-gallery::before{display:none!important}
+.example-gallery-inner{animation:galleryFastPop .16s ease-out!important;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important}
+.example-gallery.closing{animation:galleryFastFade .16s ease reverse forwards!important}
+.example-gallery.closing .example-gallery-inner{animation:galleryFastClose .16s ease forwards!important}
+.example-gallery-loading,.example-gallery-empty{grid-column:1/-1;padding:34px;text-align:center;font-weight:800;color:#657085}
+@keyframes galleryFastFade{from{opacity:0}to{opacity:1}}
+@keyframes galleryFastPop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes galleryFastClose{to{opacity:0;transform:scale(.97)}}
+
+@media(max-width:700px){
+ .layout{display:block!important}
+ .side{position:static!important;width:auto!important;max-width:none!important;margin-top:14px!important}
+ .grid{grid-template-columns:1fr!important}
+ .two,.three,.cols,.add-cart-actions{grid-template-columns:1fr!important}
+ .option,.option.has-example{
+   display:grid!important;
+   grid-template-columns:24px minmax(0,1fr) auto!important;
+   grid-template-rows:auto!important;
+   align-items:center!important;
+   gap:8px!important;
+   min-height:52px!important;
+   padding:10px 12px!important;
+ }
+ .option>input[type=radio],.option>input[type=checkbox]{grid-column:1!important;grid-row:1!important;margin:0!important}
+ .option>span,.option>b,.option>label{grid-column:2!important;grid-row:1!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ .option>.iwrap{grid-column:3!important;grid-row:1!important;margin:0!important;position:static!important;transform:none!important}
+ .option>.example-thumb{
+   grid-column:1/-1!important;
+   grid-row:2!important;
+   width:100%!important;
+   height:auto!important;
+   aspect-ratio:16/9!important;
+   max-height:180px!important;
+   margin:4px 0 0!important;
+ }
+ .flag-mode-row{grid-template-columns:1fr!important}
+ .flag-mode-row .flag-choice{min-height:52px!important}
+ .product-title-icon{width:40px!important;height:36px!important}
+ .example-gallery{padding:10px!important}
+ .example-gallery-inner{width:100%!important;max-height:94vh!important;padding:8px!important;gap:8px!important;grid-template-columns:1fr!important}
+ .example-gallery-item,.example-gallery-item img{min-height:0!important}
+}
 </style>
