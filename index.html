@@ -336,11 +336,15 @@ function renderFabricMulti(){
  <div class="param-block post-block">
    <label>Дополнительно</label>
    <div class="options"><label class="option"><input type="checkbox" id="needShirt" onchange="fabricMultiCalc()"><span>Нужна футболка <small>(+600 ₽/шт)</small></span></label></div>
-   <div id="shirtQtyBox" style="display:none;margin-top:10px"><div class="muted">Количество футболок = количеству изображений/нанесений.</div><input id="shirtQty" type="hidden" value="1"></div>
+   <div id="shirtQtyBox" style="display:none;margin-top:10px"><div class="muted">Количество футболок = количеству копий такого набора нанесений.</div><input id="shirtQty" type="hidden" value="1"></div>
  </div>
  <div class="param-block qty-block fabric-image-count">
-   <label>Количество изображений ${info('Каждое изображение требует одного прижигания термопрессом — 180 ₽. Печать самого изображения отдельно считается по площади и тарифу ₽/м². Минимальная сумма всего заказа — 350 ₽.')}</label>
+   <label>Количество изображений на одной футболке ${info('Укажите, сколько разных изображений наносится на одну футболку. Если нужны футболки с другими рисунками — добавьте этот вариант в корзину и затем создайте новый.')}</label>
    <input id="fabricImageQty" type="number" min="1" max="20" step="1" value="1" oninput="fabricImageQtyChanged()" onchange="fabricImageQtyChanged()">
+ </div>
+ <div class="param-block qty-block fabric-copy-count">
+   <label>Количество копий ТАКИХ нанесений ${info('Если нужно несколько футболок с точно таким же набором рисунков, укажите количество. Площадь печати, количество прижиганий и стоимость футболок будут умножены на это количество.')}</label>
+   <input id="fabricCopiesQty" type="number" min="1" max="1000" step="1" value="1" oninput="fabricMultiCalc()" onchange="fabricMultiCalc()">
  </div>`;
  const cb=document.getElementById('needShirt');
  cb?.addEventListener('change',()=>{const b=document.getElementById('shirtQtyBox');if(b)b.style.display=cb.checked?'block':'none';fabricMultiCalc()});
@@ -416,6 +420,7 @@ function fabricImageSizeChanged(i,doCalc=true){
 function fabricMultiCalc(){
  const items=[...document.querySelectorAll('.fabric-image-item')];
  const imageCount=items.length||1;
+ const copies=Math.max(1,parseInt(document.getElementById('fabricCopiesQty')?.value||1,10)||1);
 
  const typeLabel={fabWhite:'Белый рисунок',fabColor:'Одноцветный цветной рисунок',fabFull:'Полноцветный рисунок'};
  const sizeLabel={A4:'A4 (21×29,7 см)',A3:'A3 (29,7×42 см)','30x10':'30×10 см','10x10':'10×10 см',custom:'Свой размер'};
@@ -436,7 +441,7 @@ function fabricMultiCalc(){
  ['fabWhite','fabColor','fabFull'].forEach(type=>{
    const group=images.filter(x=>x.type===type);
    if(!group.length)return;
-   const groupArea=group.reduce((a,x)=>a+x.area,0);
+   const groupArea=group.reduce((a,x)=>a+x.area,0)*copies;
    const pf=priceFor(type,groupArea);
    if(!pf){tariffMissing=true;printDetails.push(`${typeLabel[type]}: нет тарифа для ${R(groupArea)} м²`);return;}
    const cost=pf.price*groupArea+(pf.setup||0);
@@ -446,13 +451,13 @@ function fabricMultiCalc(){
 
  // 180 ₽ — стоимость одного прижигания термопрессом.
  // Количество прижиганий всегда равно количеству изображений.
- const pressQty=imageCount;
+ const pressQty=imageCount*copies;
  const pressCost=pressQty*180;
 
  const needShirt=document.getElementById('needShirt')?.checked;
  const shirtQtyEl=document.getElementById('shirtQty');
- if(shirtQtyEl){shirtQtyEl.value=pressQty;shirtQtyEl.readOnly=true;}
- const shirtCost=needShirt ? 600*pressQty : 0;
+ if(shirtQtyEl){shirtQtyEl.value=copies;shirtQtyEl.readOnly=true;}
+ const shirtCost=needShirt ? 600*copies : 0;
 
  // 350 ₽ — НЕ минимум только для прижиганий.
  // Это минимальная стоимость ВСЕГО заказа по категории:
@@ -467,13 +472,13 @@ function fabricMultiCalc(){
       ...printDetails,
       `Печать по площади: ${R(printCost)}`,
       `Прижигание термопрессом: ${pressQty} × 180 ₽ = ${R(pressCost)}`,
-      ...(shirtCost?[`Футболки: ${pressQty} × 600 ₽ = ${R(shirtCost)}`]:[]),
+      ...(shirtCost?[`Футболки: ${copies} × 600 ₽ = ${R(shirtCost)}`]:[]),
       ...(calculatedTotal<350?[`Минимальная сумма заказа: 350 ₽`]:[])
      ].join('<br>');
 
  lastCalcMeta=tariffMissing?null:{
    categoryId:'fabric',fixed:true,qty:pressQty,total,images,
-   printCost,pressQty,pressCost,shirtCost,needShirt,
+   printCost,pressQty,pressCost,shirtCost,needShirt,copies,
    minimumApplied:calculatedTotal<350
  };
 }
@@ -824,28 +829,35 @@ function photoCalc(){
  breakdown.innerHTML=`${size?.value||''} · ${q} шт. × ${R(rate)}/шт.`;
 }
 function renderFlagChooser(){
+ flagMode='';
+ flagFixed=null;
  form.innerHTML=`
- <div class="param-block material-block">
-  <label>Тип изготовления</label>
-  <div class="flag-mode-row flag-mode-unified">
-   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('standard',this)">
-    <input type="radio" name="flagMode" value="standard" hidden>
-    <div class="flag-mode-label"><b>Стандартные размеры</b></div>
-    ${exampleThumbHTML('examples/flag/standard-size','Стандартные размеры','flag-mode-img')}
-   </label>
-   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('winder',this)">
-    <input type="radio" name="flagMode" value="winder" hidden>
-    <div class="flag-mode-label"><b>Виндеры</b></div>
-    ${exampleThumbHTML('examples/flag/winder','Виндеры','flag-mode-img')}
-   </label>
-   <label class="flag-choice flag-mode-card" onclick="selectFlagMode('custom',this)">
-    <input type="radio" name="flagMode" value="custom" hidden>
-    <div class="flag-mode-label"><b>Размер на заказ</b></div>
-    ${exampleThumbHTML('examples/flag/custom-size','Размер на заказ','flag-mode-img')}
-   </label>
-  </div>
+ <label>Вариант изготовления флага</label>
+ <div class="options flag-mode-row flag-mode-unified">
+   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')">
+     <span class="flag-mode-label"><b>Стандартные размеры</b>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>
+     ${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','flag-mode-img')}
+   </button>
+   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')">
+     <span class="flag-mode-label"><b>Виндеры</b>${info('Флаги для мобильных конструкций «виндер» с выбором размера, флагштока и основания.')}</span>
+     ${exampleThumbSpanHTML('examples/flag/winder','Виндеры','flag-mode-img')}
+   </button>
+   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')">
+     <span class="flag-mode-label"><b>Размер на заказ</b>${info('Индивидуальный размер флага: выберите ткань, укажите ширину, высоту, количество и постобработку.')}</span>
+     ${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — размер на заказ','flag-mode-img')}
+   </button>
  </div>
- <div id="flagModeBody"></div>`;
+ <div id="flagModeBox"></div>`;
+ renderFlagMode();
+}
+function selectFlagMode(mode){
+ flagMode=mode;
+ flagFixed=null;
+ winderFixed=null;
+ lastCalcMeta=null;
+ document.querySelectorAll('.flag-choice[data-flag-mode]').forEach(b=>b.classList.toggle('is-choice-selected',b.dataset.flagMode===mode));
+ renderFlagMode();
+ enhanceSelectedBadges();
 }
 function renderFlagMode(){
  const box=document.getElementById('flagModeBox');
@@ -1236,7 +1248,9 @@ function renderCardForm(){
  let t=document.querySelector('input[name=cardtype]:checked').value;
  if(t==='cards'){
    cardform.innerHTML=`
-   <label>Количество ${info('Количество выбирается готовым вариантом — вручную вводить тираж нельзя.')}</label>
+   <label>Постобработка</label>
+   <div class="options"><label class="option"><input type="checkbox" id="cardHole" onchange="cardCalc()"><span>Отверстие</span>${info('Стоимость отверстия — 1 000 ₽ на каждые 1 000 визиток (1 ₽ за визитку).')}</label></div>
+   <div class="param-block qty-block"><label>Количество ${info('Количество выбирается готовым вариантом — вручную вводить тираж нельзя.')}</label>
    <select id="cardVariant" onchange="cardCalc()">
      <option value="1000-23">1000 шт — офсет, 2–3 рабочих дня — 2 000 ₽</option>
      <option value="100-d">100 шт — цифровая, двусторонние — 1 400 ₽</option>
@@ -1245,9 +1259,7 @@ function renderCardForm(){
      <option value="200-s">200 шт — цифровая, односторонние — 1 800 ₽</option>
      <option value="1000-48">1000 шт — офсет, 4–8 рабочих дней — 1 900 ₽</option>
    </select>
-   <div class="note">Варианты тиража и цены взяты непосредственно из прайса. Свободный ввод количества убран.</div>
-   <label>Постобработка</label>
-   <div class="options"><label class="option"><input type="checkbox" id="cardHole" onchange="cardCalc()"><span>Отверстие</span>${info('Стоимость отверстия — 1 000 ₽ на каждые 1 000 визиток (1 ₽ за визитку).')}</label></div>`;
+   <div class="note">Варианты тиража и цены взяты непосредственно из прайса. Свободный ввод количества убран.</div></div>`;
  } else if(t==='cardsEx'){
    const types=[
      ['Ламинация софт тач (Soft Touch)','Софт-тач','Шелковистое матовое покрытие с бархатистым эффектом, приятное на ощупь и защищающее изделие.'],
@@ -1262,13 +1274,13 @@ function renderCardForm(){
    <div class="inline-example-row"><div class="selectInfoRow"><select id="cardExType" onchange="cardCalc()">
      ${types.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}
    </select><span id="cardExTypeInfo">${info(types[0][2])}</span></div><div id="cardExExample"></div></div>
-   <label>Количество визиток ${info('Количество выбирается из доступных вариантов прайса.')}</label>
+   <label>Постобработка</label>
+   <div class="options"><label class="option no-example"><input type="checkbox" id="cardExRound" onchange="cardCalc()"><span>Скругление углов</span>${info('Скругление четырёх углов готовых визиток.')}</label></div>
+   <div class="param-block qty-block"><label>Количество визиток ${info('Количество выбирается из доступных вариантов прайса.')}</label>
    <select id="cardExQty" onchange="cardCalc()">
      ${qtyOptions.map(q=>`<option value="${q}">${q} шт</option>`).join('')}
    </select>
-   <div class="note">Стоимость рассчитывается автоматически по выбранному типу и количеству визиток.</div>
-   <label>Постобработка</label>
-   <div class="options"><label class="option no-example"><input type="checkbox" id="cardExRound" onchange="cardCalc()"><span>Скругление углов</span>${info('Скругление четырёх углов готовых визиток.')}</label></div>`;
+   <div class="note">Стоимость рассчитывается автоматически по выбранному типу и количеству визиток.</div></div>`;
  } else {
    document.getElementById('cardform').innerHTML=`
    <label>Размер</label>
@@ -2136,5 +2148,85 @@ document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName==='SELECT
  .flag-mode-unified .flag-mode-card .example-thumb,
  .flag-mode-unified .flag-mode-card .flag-mode-img{height:190px!important}
  .fabric-type-example .example-thumb,.fabric-type-example .fabric-type-thumb{height:175px!important}
+}
+</style>
+
+<script id="selected-badges-global-v1">
+function enhanceSelectedBadges(root=document){
+ root.querySelectorAll('.option,.flag-choice').forEach(el=>{
+   const checked=el.matches('.is-choice-selected') || !!el.querySelector('input:checked');
+   el.classList.toggle('ui-selected',checked);
+ });
+}
+document.addEventListener('change',()=>requestAnimationFrame(()=>enhanceSelectedBadges()));
+document.addEventListener('click',()=>requestAnimationFrame(()=>enhanceSelectedBadges()));
+new MutationObserver(()=>requestAnimationFrame(()=>enhanceSelectedBadges())).observe(document.body,{childList:true,subtree:true});
+requestAnimationFrame(()=>enhanceSelectedBadges());
+</script>
+
+<style id="selected-badge-shrink-v7">
+/* Плашка ВЫБРАНО — единый стиль во всех группах выбора */
+.option,.flag-choice{position:relative!important;transition:transform .24s ease,opacity .24s ease,filter .24s ease,box-shadow .24s ease!important}
+.option.ui-selected::after,.flag-choice.ui-selected::after{
+ content:"✓ ВЫБРАНО";position:absolute;z-index:12;right:9px;top:8px;
+ padding:5px 10px;border-radius:999px;background:#ff1688;color:#fff;
+ font-size:10px;font-weight:1000;line-height:1;letter-spacing:.15px;
+ box-shadow:0 4px 12px rgba(255,22,136,.28);pointer-events:none;
+}
+/* Если в группе есть выбранный вариант — остальные заметно уменьшаются */
+.options:has(>.ui-selected)>.option:not(.ui-selected),
+.flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),
+.material-options:has(>.ui-selected)>.option:not(.ui-selected),
+.paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){
+ transform:scale(.84)!important;opacity:.55!important;filter:saturate(.62) brightness(.98)!important;
+}
+.option.ui-selected,.flag-choice.ui-selected{transform:scale(1.025)!important;opacity:1!important;filter:none!important;z-index:3!important}
+/* Флаг: название и картинка остаются одним кликабельным элементом */
+.flag-mode-unified .flag-mode-card{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+.flag-mode-unified .flag-mode-label{flex:0 0 auto!important}
+.flag-mode-unified .flag-mode-card .example-thumb{flex:0 0 auto!important;width:100%!important}
+@media(max-width:700px){
+ .options:has(>.ui-selected)>.option:not(.ui-selected),
+ .flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),
+ .material-options:has(>.ui-selected)>.option:not(.ui-selected),
+ .paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){transform:scale(.88)!important}
+ .option.ui-selected::after,.flag-choice.ui-selected::after{right:7px;top:7px;font-size:9px}
+}
+</style>
+
+<style id="gallery-background-blur-v8">
+/* При открытии примера всё содержимое страницы позади изображения размывается */
+body:has(.example-gallery.open) > *:not(.example-gallery),
+body:has(.example-gallery.is-open) > *:not(.example-gallery),
+body:has(.example-lightbox.open) > *:not(.example-lightbox),
+body:has(.example-lightbox.is-open) > *:not(.example-lightbox),
+body:has(.gallery-overlay.open) > *:not(.gallery-overlay),
+body:has(.gallery-overlay.is-open) > *:not(.gallery-overlay){
+ filter:blur(10px)!important;
+ transform:scale(1.01);
+ transition:filter .22s ease,transform .22s ease;
+}
+/* Сам слой галереи не размываем; добавляем матовое затемнение */
+.example-gallery,.example-lightbox,.gallery-overlay{
+ backdrop-filter:blur(12px)!important;
+ -webkit-backdrop-filter:blur(12px)!important;
+ background:rgba(10,14,24,.58)!important;
+}
+</style>
+
+<script id="gallery-body-blur-v1">
+(function(){
+ const sync=()=>{
+   const opened=[...document.querySelectorAll('.example-gallery,.example-lightbox,.gallery-overlay')]
+     .some(x=>x.classList.contains('open')||x.classList.contains('is-open')||getComputedStyle(x).display==='flex');
+   document.body.classList.toggle('gallery-is-open',opened);
+ };
+ new MutationObserver(sync).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style'],childList:true});
+ document.addEventListener('click',()=>requestAnimationFrame(sync));
+})();
+</script>
+<style id="gallery-body-blur-fallback">
+body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.gallery-overlay){
+ filter:blur(10px)!important;transform:scale(1.01);transition:filter .22s ease,transform .22s ease;
 }
 </style>
