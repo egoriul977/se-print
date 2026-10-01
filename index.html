@@ -2267,7 +2267,7 @@ body{padding-bottom:82px!important}
 }
 </style>
 
-<script id="ser-ux-redesign-v10">
+<script id="ser-ux-redesign-v10-disabled" type="text/plain">
 (function(){
  const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>[...r.querySelectorAll(s)];
  function moneyFromLive(){
@@ -2347,5 +2347,175 @@ body{padding-bottom:82px!important}
  document.addEventListener('input',()=>setTimeout(refreshPrice,20));
  new MutationObserver(()=>requestAnimationFrame(()=>{refreshHierarchy();refreshPrice();captionGallery()})).observe(document.body,{childList:true,subtree:true,characterData:true});
  setTimeout(()=>{refreshHierarchy();refreshPrice()},100);
+})();
+</script>
+
+<style id="mobile-ux-v11">
+html,body{max-width:100%;overflow-x:hidden!important}
+*,*::before,*::after{box-sizing:border-box}
+img,video,svg,canvas{max-width:100%}
+#product,#form,.container,.wrap,main{max-width:100%!important;min-width:0!important}
+.param-block{scroll-margin-top:82px}
+#uxProgress{position:sticky;top:0;z-index:55;max-width:100%;overflow:hidden}
+.ux-progress-row{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding-bottom:2px;scrollbar-width:none}
+.ux-step{border:0;cursor:pointer;flex:0 0 auto}
+.ux-step.done{background:#eefaf4;color:#168754}.ux-step.active{background:#fff0f7;color:#ff1688}
+.ux-step.invalid{background:#f3f4f7;color:#8a91a3}
+
+/* Postprocessing cards: text + its matching picture are one visual/clickable card. */
+.post-block .option.has-example,.post-block .option:has(.example-thumb),
+.param-block.ux-post .option.has-example,.param-block.ux-post .option:has(.example-thumb){
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ overflow:hidden!important;height:auto!important;padding:10px!important;gap:8px!important
+}
+.post-block .option .example-thumb,.param-block.ux-post .option .example-thumb{
+ position:relative!important;inset:auto!important;display:block!important;width:100%!important;
+ max-width:none!important;height:120px!important;margin:0!important;order:20!important
+}
+.post-block .option .example-thumb img,.param-block.ux-post .option .example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
+
+/* Flags: force each mode to be ONE card, title and image cannot separate. */
+.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
+.flag-mode-unified>.flag-mode-card{display:grid!important;grid-template-rows:auto 145px!important;width:100%!important;min-width:0!important;height:auto!important;padding:9px!important;overflow:hidden!important}
+.flag-mode-unified>.flag-mode-card>.flag-mode-label{grid-row:1!important;width:100%!important;min-width:0!important;margin:0!important;padding:5px 3px 9px!important}
+.flag-mode-unified>.flag-mode-card>.example-thumb{grid-row:2!important;position:relative!important;inset:auto!important;width:100%!important;height:145px!important;max-width:none!important;margin:0!important;display:block!important}
+.flag-mode-unified>.flag-mode-card>.example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
+
+/* New bottom bar */
+#uxStickyTotal{gap:8px!important}
+#uxStickyTotal .ux-prices{min-width:0;margin-right:auto}
+#uxStickyTotal .ux-cat-label{font-size:9px;opacity:.68;font-weight:750}
+#uxStickyTotal .ux-sticky-price{font-size:20px!important;font-weight:1000;line-height:1.05;display:block}
+#uxStickyTotal .ux-order-total{font-size:10px;opacity:.72;margin-top:3px;white-space:nowrap}
+#uxStickyTotal .ux-icon-btn{width:43px;height:43px;padding:0!important;display:grid;place-items:center;border-radius:13px!important;font-size:19px!important;flex:0 0 43px}
+#uxStickyTotal .ux-checkout{background:#fff!important;color:#ff1688!important;box-shadow:inset 0 0 0 1px rgba(255,22,136,.22)}
+#uxStickyTotal .ux-price-pop{animation:uxPricePop .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes uxPricePop{0%{transform:scale(1);filter:blur(0)}35%{transform:scale(1.16);filter:blur(.2px)}100%{transform:scale(1);filter:blur(0)}}
+
+@media(max-width:700px){
+ html,body{width:100%!important;max-width:100vw!important;overflow-x:hidden!important}
+ body{margin:0!important;padding-left:0!important;padding-right:0!important;padding-bottom:78px!important}
+ .container,.wrap,main,#home,#product{width:100%!important;max-width:100%!important;min-width:0!important}
+ #product,#home{padding-left:8px!important;padding-right:8px!important}
+ #form{width:100%!important;max-width:100%!important;min-width:0!important;gap:7px!important}
+ .param-block{width:100%!important;max-width:100%!important;min-width:0!important;padding:8px!important;margin:6px 0!important;border-radius:12px!important}
+ .param-block>label,.param-block .label{font-size:11px!important;margin-bottom:5px!important}
+ .options{gap:6px!important;width:100%!important;max-width:100%!important}
+ .option{min-width:0!important;max-width:100%!important;padding:7px!important;min-height:38px!important;border-radius:11px!important;font-size:11px!important}
+ input,select,textarea{max-width:100%!important;min-width:0!important;height:38px!important;font-size:13px!important}
+ /* Width + height must remain side by side and visible */
+ .size-row,.dimensions,.dimension-row,.wh-row,.fabric-custom-size{
+   display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;width:100%!important;max-width:100%!important
+ }
+ .size-row>*,.dimensions>*,.dimension-row>*,.wh-row>*,.fabric-custom-size>*{min-width:0!important;max-width:100%!important}
+ #w,#h{width:100%!important;min-width:0!important;max-width:100%!important}
+ #uxProgress{margin:0 0 7px!important;padding:6px!important;border-radius:11px!important}
+ .ux-step{font-size:9px!important;padding:5px 7px!important}
+ .flag-mode-unified{grid-template-columns:1fr!important;gap:7px!important}
+ .flag-mode-unified>.flag-mode-card{grid-template-rows:auto 150px!important;padding:7px!important}
+ .flag-mode-unified>.flag-mode-card>.example-thumb{height:150px!important}
+ .post-block .option .example-thumb,.param-block.ux-post .option .example-thumb{height:105px!important}
+ .example-thumb{max-width:100%!important}
+ #uxStickyTotal{left:6px!important;right:6px!important;bottom:6px!important;transform:none!important;width:auto!important;max-width:calc(100vw - 12px)!important;padding:7px 7px 7px 10px!important;border-radius:15px!important}
+ #uxStickyTotal .ux-sticky-price{font-size:17px!important}
+ #uxStickyTotal .ux-order-total{font-size:9px!important}
+ #uxStickyTotal .ux-icon-btn{width:39px;height:39px;flex-basis:39px;font-size:17px!important}
+}
+</style>
+
+<script id="mobile-ux-v11">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s), qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const txt=x=>(x?.textContent||'').toLowerCase();
+
+ function blockType(b){
+   const t=txt(b);
+   if(/количество|тираж/.test(t))return 'qty';
+   if(/постобработ|дополнительно|ламинац|резк|люверс|скотч|пошив|основан|флагшток/.test(t))return 'post';
+   if(/размер|ширин|высот/.test(t))return 'size';
+   return 'material';
+ }
+ function isComplete(b,type){
+   const radios=qa('input[type=radio]',b); if(radios.length)return radios.some(x=>x.checked);
+   const sels=qa('select',b).filter(x=>x.offsetParent!==null); if(sels.length&&type!=='post')return sels.every(x=>x.value && !/выберите/i.test(x.options[x.selectedIndex]?.text||''));
+   const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);
+   if(type==='size'&&nums.length)return nums.every(x=>String(x.value).trim()!=='' && +x.value>0);
+   if(type==='qty'&&nums.length)return nums.every(x=>+x.value>0);
+   if(type==='post')return true; // optional, never blocks progress
+   return !!q('.ui-selected,.is-choice-selected,input:checked',b);
+ }
+ function buildProgress(){
+   const form=window.form||q('#form');if(!form)return;
+   const blocks=qa(':scope > .param-block',form).filter(b=>b.offsetParent!==null);
+   blocks.forEach(b=>b.classList.toggle('ux-post',blockType(b)==='post'));
+   const groups=[
+    ['material','Материал'],['size','Размер'],['post','Обработка'],['qty','Количество']
+   ].map(([type,label])=>{
+     const bs=blocks.filter(b=>blockType(b)===type);
+     return {type,label,bs,done:bs.length?bs.every(b=>isComplete(b,type)):false};
+   }).filter(g=>g.bs.length);
+   let p=q('#uxProgress');
+   if(!p){p=document.createElement('div');p.id='uxProgress';form.prepend(p)}
+   let activeFound=false;
+   p.innerHTML='<div class="ux-progress-row">'+groups.map(g=>{
+     const active=!g.done&&!activeFound?(activeFound=true,true):false;
+     return `<button type="button" class="ux-step ${g.done?'done':'invalid'} ${active?'active':''}" data-ux-type="${g.type}">${g.done?'✓ ':''}${g.label}</button>`
+   }).join('')+'</div>';
+   qa('.ux-step',p).forEach(btn=>btn.onclick=()=>{
+     const g=groups.find(x=>x.type===btn.dataset.uxType);
+     g?.bs[0]?.scrollIntoView({behavior:'smooth',block:'start'});
+     if(g?.bs[0]){g.bs[0].animate([{boxShadow:'0 0 0 0 rgba(255,22,136,0)'},{boxShadow:'0 0 0 5px rgba(255,22,136,.18)'},{boxShadow:'0 0 0 0 rgba(255,22,136,0)'}],{duration:650})}
+   });
+ }
+ function categoryPrice(){
+   const el=window.liveTotal||q('#liveTotal'); const v=(el?.textContent||'').trim();
+   return v&&!/нет цены/i.test(v)?v:'—';
+ }
+ function cartTotal(){
+   // Prefer actual cart calculation globals/DOM if present.
+   const candidates=['#cartTotal','.cart-total-value','#totalCash','#cashTotal'];
+   for(const sel of candidates){const e=q(sel);if(e&&/\d/.test(e.textContent||''))return (e.textContent||'').trim()}
+   let sum=0,found=false;
+   if(Array.isArray(window.cart)){window.cart.forEach(x=>{const n=+(x.adjustedTotal??x.total??x.price??0);if(Number.isFinite(n)){sum+=n;found=true}})}
+   return found?(typeof window.R==='function'?window.R(sum):Math.round(sum)+' ₽'):'0 ₽';
+ }
+ function ensureBar(){
+   let bar=q('#uxStickyTotal');
+   if(!bar){bar=document.createElement('div');bar.id='uxStickyTotal';document.body.appendChild(bar)}
+   if(!q('.ux-prices',bar)){
+     bar.innerHTML=`<div class="ux-prices"><div class="ux-cat-label">В выбранной категории</div><span class="ux-sticky-price">—</span><div class="ux-order-total">Общий заказ: 0 ₽</div></div>
+       <button class="ux-icon-btn ux-add" type="button" title="Добавить в корзину" aria-label="Добавить в корзину">＋</button>
+       <button class="ux-icon-btn ux-checkout" type="button" title="Перейти к оформлению" aria-label="Перейти к оформлению">🛒</button>`;
+     q('.ux-add',bar).onclick=()=>{
+       const b=q('#addCart')||qa('button').find(x=>/добавить в корзину/i.test(x.textContent||''));b?.click();
+     };
+     q('.ux-checkout',bar).onclick=()=>{
+       const cart=q('#cart')||q('.cart')||q('#cartBox')||qa('section,div').find(x=>/корзин/i.test(x.id+' '+x.className));
+       cart?.scrollIntoView({behavior:'smooth',block:'start'});
+     };
+   }
+   return bar;
+ }
+ let lastPrice='';
+ function updateBar(){
+   const bar=ensureBar(),price=categoryPrice(),el=q('.ux-sticky-price',bar);
+   if(el&&price!==lastPrice){el.textContent=price;el.classList.remove('ux-price-pop');void el.offsetWidth;el.classList.add('ux-price-pop');lastPrice=price}
+   const total=q('.ux-order-total',bar);if(total)total.textContent='Общий заказ: '+cartTotal();
+ }
+ function unifyPostImages(){
+   qa('.param-block').forEach(b=>{
+     if(blockType(b)!=='post')return;
+     b.classList.add('ux-post');
+     qa('.option',b).forEach(o=>{if(q('.example-thumb',o))o.classList.add('has-example')});
+   });
+ }
+ function tick(){
+   buildProgress();updateBar();unifyPostImages();
+ }
+ document.addEventListener('change',()=>setTimeout(tick,20));
+ document.addEventListener('input',()=>setTimeout(tick,20));
+ document.addEventListener('click',()=>setTimeout(tick,30));
+ new MutationObserver(()=>requestAnimationFrame(tick)).observe(document.body,{childList:true,subtree:true,characterData:true});
+ setTimeout(tick,120);
 })();
 </script>
