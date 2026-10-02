@@ -3191,7 +3191,7 @@ body.ux-category-open #uxBackCategoriesV8{display:flex}
 })();
 </script>
 
-<script id="ux-v7-behavior">
+<script id="ux-v7-behavior-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const form=()=>q('#form');
@@ -4210,7 +4210,7 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
 #stickyPriceBarV6 .sp-cart{font-size:20px!important}
 </style>
 
-<script id="ux-v18-safe-behavior-disabled" type="text/plain">
+<script id="ux-v18-safe-behavior">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const form=()=>q('#form'), product=()=>q('#product');
@@ -4351,55 +4351,47 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
 })();
 </script>
 
-<style id="ux-v19-nav-colors">
-/* selected/completed = green */
-#uxCategoryNavV5 button.ux-done:not(.ux-current){
- background:rgba(39,184,90,.11)!important;
- border-color:rgba(39,184,90,.70)!important;
+<style id="ux-v21-nav-state">
+/* We do NOT rebuild the nav in v21. We only paint its existing buttons. */
+#uxCategoryNavV5 button[data-v21-done="1"]:not([data-v21-current="1"]){
+ background:rgba(39,184,90,.12)!important;
+ border-color:rgba(39,184,90,.72)!important;
  color:#187a3d!important;
- box-shadow:0 0 0 1px rgba(39,184,90,.08)!important;
+ box-shadow:none!important;
 }
-/* current viewport section = blue glow. If also completed, blue wins while current. */
-#uxCategoryNavV5 button.ux-current{
- background:inherit!important;
+#uxCategoryNavV5 button[data-v21-current="1"]{
+ background:#fff!important;
+ border-color:#48c4fb!important;
  color:inherit!important;
- border-color:#52c7ff!important;
- box-shadow:0 0 0 2px rgba(82,199,255,.30),0 0 14px rgba(82,199,255,.50)!important;
+ box-shadow:0 0 0 2px rgba(72,196,251,.34),0 0 16px 3px rgba(72,196,251,.55)!important;
 }
 </style>
-<script id="ux-v19-behavior">
+<script id="ux-v21-nav-state-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
- const form=()=>q('#form'), product=()=>q('#product');
- const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null};
- let steps=[],lastActive=-1,raf=0,programmatic=false,manualUntil=0;
+ const nav=()=>q('#uxCategoryNavV5'), form=()=>q('#form');
+ let last=-1, programmatic=false, manualUntil=0, ticking=false;
 
- function ensureNav(){
-   let n=q('#uxCategoryNavV5');
-   if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}
-   return n;
- }
- function visible(el){return !!el&&el.offsetParent!==null&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0}
- function classify(el){
-   const raw=(q(':scope > label',el)?.textContent||'').replace(/[?!！]/g,'').replace(/\s+/g,' ').trim();
-   const t=(raw+' '+(el.id||'')+' '+(el.className||'')).toLowerCase();
-   if(/количество|тираж|qty/.test(t))return ['Количество','qty'];
-   if(/постобработ|postarea|дополнительно|ламинац|резк|люверс|пошив|скотч|отверст/.test(t))return ['Постобработка','post'];
-   if(/размер|формат|ширин|высот/.test(t))return ['Размер','size'];
-   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк|material/.test(t))return ['Материал / печать','choice'];
-   return raw?[raw,'choice']:null;
- }
- function collect(){
-   const f=form();if(!f)return[];
+ function visible(el){return !!el&&el.offsetParent!==null&&el.getBoundingClientRect().height>0}
+ function blocks(){
+   const f=form(); if(!f)return[];
    const a=[];
    qa(':scope > *, #flagModeBox > *, #cardform > *',f).forEach(el=>{
      if(!visible(el)||el.matches('script,style'))return;
-     let c=el.matches('.flag-mode-row')?['Вариант флага','choice']:classify(el);
-     if(el.id==='postArea'&&el.textContent.trim())c=['Постобработка','post'];
-     if(!c||(!q('input,select,button',el)&&!el.matches('.flag-mode-row')))return;
-     a.push({el,label:c[0],type:c[1]});
+     const raw=(q(':scope > label',el)?.textContent||'').replace(/[?!！]/g,'').replace(/\s+/g,' ').trim();
+     const t=(raw+' '+(el.id||'')+' '+(el.className||'')).toLowerCase();
+     let label='';
+     if(el.matches('.flag-mode-row'))label='Вариант флага';
+     else if(el.id==='postArea'&&el.textContent.trim())label='Постобработка';
+     else if(/количество|тираж|qty/.test(t))label='Количество';
+     else if(/постобработ|дополнительно|ламинац|резк|люверс|пошив|скотч|отверст/.test(t))label='Постобработка';
+     else if(/размер|формат|ширин|высот/.test(t))label='Размер';
+     else if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк|material/.test(t))label='Материал / печать';
+     else label=raw;
+     if(!label||(!q('input,select,button',el)&&!el.matches('.flag-mode-row')))return;
+     a.push({el,label});
    });
-   a.sort((a,b)=>a.el.getBoundingClientRect().top-b.el.getBoundingClientRect().top);
+   a.sort((x,y)=>x.el.getBoundingClientRect().top-y.el.getBoundingClientRect().top);
    const out=[];
    for(const x of a){
      if(out.some(y=>y.label===x.label&&(y.el.contains(x.el)||x.el.contains(y.el))))continue;
@@ -4407,127 +4399,175 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
    }
    return out;
  }
- function isDone(x){
-   if(!visible(x.el))return false;
-   if(x.type==='qty'){
-     const i=qa('input[type=number]',x.el).find(visible);return !!i&&i.value!==''&&+i.value>0;
-   }
-   if(x.type==='size'){
-     const nums=qa('input[type=number]',x.el).filter(visible);
-     if(nums.length)return nums.every(i=>i.value!==''&&+i.value>0);
-     const sel=qa('select',x.el).find(visible);return !!sel&&sel.value!=='';
-   }
-   return !!q('input:checked,.is-choice-selected,.ui-selected',x.el) ||
-          qa('select',x.el).filter(visible).some(sel=>sel.value!=='');
+ function isDone(el){
+   if(q('input:checked,.is-choice-selected,.ui-selected',el))return true;
+   const sels=qa('select',el).filter(visible);
+   if(sels.some(x=>x.value!==''))return true;
+   const nums=qa('input[type=number]',el).filter(visible);
+   return nums.length>0 && nums.every(x=>x.value!==''&&+x.value>0);
  }
- function positionNav(){
-   const n=ensureNav(),p=q('#product .card')||product();
-   if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}
-   document.body.classList.add('ux-category-open');
-   const r=p.getBoundingClientRect(),pad=7;
-   n.style.display=steps.length?'flex':'none';
-   n.style.left=Math.max(pad,r.left)+'px';
-   n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px';
- }
- function centerButton(i){
-   const n=ensureNav(),b=q('button[data-v19="'+i+'"]',n);if(!b)return;
-   const max=Math.max(0,n.scrollWidth-n.clientWidth);
-   const left=Math.max(0,Math.min(max,b.offsetLeft+b.offsetWidth/2-n.clientWidth/2));
-   programmatic=true;
-   n.scrollTo({left:left,behavior:'smooth'});
-   setTimeout(()=>programmatic=false,420);
- }
- function updateState(forceCenter=false){
-   const n=ensureNav(),bs=qa('button[data-v19]',n);
-   if(!steps.length||!bs.length)return;
-   bs.forEach((b,i)=>b.classList.toggle('ux-done',!!steps[i]&&isDone(steps[i])));
+ function paint(){
+   ticking=false;
+   const n=nav();if(!n||n.offsetParent===null)return;
+   const bs=qa('button',n), bl=blocks();
+   if(!bs.length||!bl.length)return;
 
-   /* Use the physical center of the usable screen, not scroll position thresholds. */
-   const top=Math.max(n.getBoundingClientRect().bottom+4,0);
-   const bottom=Math.min(q('#stickyPriceBarV6')?.getBoundingClientRect().top||innerHeight,innerHeight);
-   const cy=top+(bottom-top)/2;
-   let best=0,bestDist=Infinity;
-   steps.forEach((x,i)=>{
-     const r=x.el.getBoundingClientRect();
-     const visibleTop=Math.max(r.top,top), visibleBottom=Math.min(r.bottom,bottom);
-     const onScreen=visibleBottom>visibleTop;
-     const blockCenter=onScreen?(visibleTop+visibleBottom)/2:(r.top+r.bottom)/2;
-     const d=Math.abs(blockCenter-cy)+(onScreen?0:innerHeight*2);
-     if(d<bestDist){bestDist=d;best=i}
+   /* Match the EXISTING nav buttons by their text; do not replace them or their click handlers. */
+   const used=new Set(), pairs=[];
+   bs.forEach((b,bi)=>{
+     const txt=(b.textContent||'').replace(/\s+/g,' ').trim();
+     let ix=bl.findIndex((x,i)=>!used.has(i)&&x.label===txt);
+     if(ix<0) ix=bl.findIndex((x,i)=>!used.has(i)&&
+       (x.label.includes(txt)||txt.includes(x.label)));
+     if(ix>=0){used.add(ix);pairs.push({b,block:bl[ix],bi})}
    });
-   bs.forEach((b,i)=>b.classList.toggle('ux-current',i===best));
+   if(!pairs.length)return;
 
-   if((forceCenter||best!==lastActive) && Date.now()>=manualUntil){
-     lastActive=best;
-     centerButton(best);
-   } else {
-     lastActive=best;
+   pairs.forEach(p=>p.b.dataset.v21Done=isDone(p.block.el)?'1':'0');
+
+   const top=n.getBoundingClientRect().bottom+8;
+   const bottom=Math.min(q('#stickyPriceBarV6')?.getBoundingClientRect().top||innerHeight,innerHeight);
+   const center=(top+bottom)/2;
+   let best=null,dist=Infinity;
+   pairs.forEach(p=>{
+     const r=p.block.el.getBoundingClientRect();
+     /* distance from actual viewport center to the block itself:
+        0 when center line is inside the block. */
+     let d=0;
+     if(center<r.top)d=r.top-center;
+     else if(center>r.bottom)d=center-r.bottom;
+     if(d<dist){dist=d;best=p}
+   });
+   pairs.forEach(p=>p.b.dataset.v21Current=(p===best?'1':'0'));
+
+   if(best && best.bi!==last && Date.now()>=manualUntil){
+     last=best.bi;
+     const b=best.b,max=Math.max(0,n.scrollWidth-n.clientWidth);
+     const left=Math.max(0,Math.min(max,b.offsetLeft+b.offsetWidth/2-n.clientWidth/2));
+     programmatic=true;
+     n.scrollTo({left,behavior:'smooth'});
+     setTimeout(()=>programmatic=false,450);
+   } else if(best) last=best.bi;
+ }
+ function requestPaint(){
+   if(ticking)return;ticking=true;requestAnimationFrame(paint);
+ }
+ function bind(){
+   const n=nav();if(!n||n.dataset.v21bound)return;
+   n.dataset.v21bound='1';
+   const manual=()=>{if(!programmatic)manualUntil=Date.now()+2600};
+   n.addEventListener('touchstart',manual,{passive:true});
+   n.addEventListener('wheel',manual,{passive:true});
+   n.addEventListener('scroll',()=>{if(!programmatic)manual()},{passive:true});
+ }
+ window.addEventListener('scroll',requestPaint,{passive:true});
+ window.addEventListener('resize',requestPaint,{passive:true});
+ document.addEventListener('change',()=>setTimeout(requestPaint,20));
+ document.addEventListener('input',requestPaint);
+ document.addEventListener('click',()=>setTimeout(()=>{bind();requestPaint()},30),true);
+ new MutationObserver(()=>{bind();requestPaint()}).observe(document.querySelector('#product')||document.body,{childList:true,subtree:true});
+ setTimeout(()=>{bind();requestPaint()},120);
+})();
+</script>
+
+<style id="ux-v22-nav-state">
+#uxCategoryNavV5 button.ux-done:not(.ux-current){
+ background:rgba(39,184,90,.12)!important;
+ border-color:rgba(39,184,90,.74)!important;
+ color:#187a3d!important;
+ box-shadow:none!important;
+}
+#uxCategoryNavV5 button.ux-current{
+ background:#fff!important;
+ border-color:#48c4fb!important;
+ color:inherit!important;
+ box-shadow:0 0 0 2px rgba(72,196,251,.34),0 0 17px 3px rgba(72,196,251,.58)!important;
+}
+</style>
+
+<script id="ux-v22-compat">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form'), product=()=>q('#product');
+ const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null};
+
+ function ensureBar(){
+   let b=q('#stickyPriceBarV6');
+   if(!b){
+     b=document.createElement('div');b.id='stickyPriceBarV6';
+     b.innerHTML='<div class="sp-main"><div class="sp-current"></div><div class="sp-price">0 ₽</div><div class="sp-total">Общий заказ: 0 ₽</div></div><button type="button" class="sp-add" aria-label="Добавить позицию в заказ">+</button><button type="button" class="sp-cart" title="Перейти в корзину" aria-label="Перейти в корзину">🛒</button>';
+     document.body.appendChild(b);
+   }
+   const cart=q('.sp-cart',b);
+   if(cart&&!cart.dataset.v22bound){
+     cart.dataset.v22bound='1';
+     cart.onclick=()=>q('.cart')?.scrollIntoView({behavior:'smooth',block:'start'});
    }
  }
- function rebuild(force=false){
-   const n=ensureNav();
-   if(!isOpen()){positionNav();return}
-   const next=collect();
-   const sig=next.map((x,i)=>i+':'+x.label+':'+x.type).join('|');
-   if(force||n.dataset.v19sig!==sig){
-     steps=next;n.dataset.v19sig=sig;n.innerHTML='';
-     steps.forEach((x,i)=>{
-       const b=document.createElement('button');b.type='button';b.dataset.v19=i;b.textContent=x.label;
-       b.onclick=()=>scrollTo({top:scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+18),behavior:'smooth'});
-       n.appendChild(b);
-     });
-     lastActive=-1;
-   } else steps=next;
-   positionNav();updateState(force);
+ function unifyPostExamples(){
+   qa('.post-example-row',form()||document).forEach(row=>{
+     const opt=q(':scope>.option',row),thumb=q(':scope>.example-thumb',row);
+     if(opt&&thumb&&!opt.contains(thumb))opt.appendChild(thumb);
+   });
  }
- function schedule(force=false){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>rebuild(force))}
-
- /* Keep v18 bottom bar behavior intact. */
- function cartBase(){try{return volumeAdjustedItems().reduce((s,x)=>s+x.total,0)}catch(e){return (window.cart||[]).reduce((s,x)=>s+(+x.total||0),0)}}
- function currentPrice(){
-   for(const el of [window.liveTotal,q('#liveTotal'),q('.live-total'),q('#resultPrice'),q('.result-price')].filter(Boolean)){
-     const t=(el.textContent||'').trim();if(t&&/\d/.test(t))return t;
-   } return '0 ₽';
+ function shirtTick(){
+   qa('.option',form()||document).forEach(o=>{
+     o.classList.toggle('shirt-extra-selected',
+       /нужна футболка/i.test(o.textContent||'')&&!!q('input:checked',o));
+   });
  }
- function updateBar(){
-   const b=q('#stickyPriceBarV6');if(!b)return;
-   let add=q('.sp-add',b);
-   if(!add){add=document.createElement('button');add.type='button';add.className='sp-add';add.textContent='+';b.insertBefore(add,q('.sp-cart',b)||null)}
-   add.style.display=isOpen()?'flex':'none';
-   add.onclick=e=>{e.preventDefault();e.stopPropagation();const btn=qa('button',product()||document).find(x=>x!==add&&/добавить.*(корз|заказ)/i.test(x.textContent||''));if(btn)btn.click()};
-   const cur=q('.sp-current',b),price=q('.sp-price',b),total=q('.sp-total',b),base=cartBase();
-   if(isOpen()&&window.current){
-     if(cur)cur.textContent=current.name;if(price)price.textContent=currentPrice();
-     if(total){total.style.display='block';total.textContent='Общий заказ: '+R(base)}
-   }else{
-     if(cur)cur.textContent='Общая стоимость заказа';if(price)price.textContent=R(base);if(total)total.style.display='none';
+ function ensureLeafletA6(){
+   if(!window.current||current.id!=='cards')return;
+   const f=form();if(!f||!/листовки офсет/i.test(f.textContent||''))return;
+   const sel=qa('select',f).find(x=>[...x.options].some(o=>/[aа]6/i.test(o.textContent||'')));
+   if(sel&&!sel.value){
+     const a6=[...sel.options].find(o=>/[aа]6/i.test(o.textContent||''));
+     if(a6){sel.value=a6.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}
    }
  }
- function back(){
-   let b=q('#uxBackCategoriesV11');
-   if(!b){b=document.createElement('button');b.id='uxBackCategoriesV11';b.type='button';b.textContent='‹';document.body.appendChild(b)}
-   b.style.display=isOpen()?'flex':'none';b.onclick=()=>{if(typeof goHome==='function')goHome();schedule(true)}
+
+ /* Keep repeat-click deselection, but do not touch nav. */
+ document.addEventListener('pointerdown',e=>{
+   const card=e.target.closest('.option,.flag-mode-card');
+   if(!card||e.target.closest('.example-thumb'))return;
+   if(card.classList.contains('flag-mode-card')){
+     card.dataset.v22was=card.classList.contains('is-choice-selected')?'1':'0';
+     return;
+   }
+   const i=q('input[type=radio],input[type=checkbox]',card);
+   if(i)i.dataset.v22was=i.checked?'1':'0';
+ },true);
+
+ document.addEventListener('click',e=>{
+   const card=e.target.closest('.option,.flag-mode-card');
+   if(!card||e.target.closest('.example-thumb'))return;
+   if(card.classList.contains('flag-mode-card')&&card.dataset.v22was==='1'){
+     e.preventDefault();e.stopImmediatePropagation();
+     flagMode='';flagFixed=null;winderFixed=null;lastCalcMeta=null;
+     qa('.flag-mode-card').forEach(x=>x.classList.remove('is-choice-selected','ui-selected'));
+     const box=q('#flagModeBox');if(box)box.innerHTML='';
+     if(window.liveTotal)liveTotal.textContent='0 ₽';
+     if(window.breakdown)breakdown.textContent='Выберите вариант изготовления флага.';
+     return;
+   }
+   const i=q('input[type=radio],input[type=checkbox]',card);
+   if(i&&i.dataset.v22was==='1'){
+     e.preventDefault();e.stopImmediatePropagation();
+     i.checked=false;i.dataset.v22was='0';
+     card.classList.remove('ui-selected','shirt-extra-selected');
+     i.dispatchEvent(new Event('change',{bubbles:true}));
+   }
+ },true);
+
+ function refresh(){
+   ensureBar();unifyPostExamples();shirtTick();ensureLeafletA6();
+   if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);
  }
- function refresh(){if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);back();updateBar();schedule(false)}
-
- const n=ensureNav();
- const manual=()=>{if(!programmatic)manualUntil=Date.now()+2600};
- n.addEventListener('touchstart',manual,{passive:true});
- n.addEventListener('wheel',manual,{passive:true});
- /* Don't treat our own automatic horizontal scrolling as manual. */
- n.addEventListener('scroll',()=>{if(!programmatic)manual()},{passive:true});
-
- /* Page scrolling ONLY updates active block and centers it; it never rebuilds nav. */
- window.addEventListener('scroll',()=>requestAnimationFrame(()=>{positionNav();updateState(false)}),{passive:true});
- window.addEventListener('resize',()=>schedule(false),{passive:true});
+ ensureBar();
  document.addEventListener('change',()=>requestAnimationFrame(refresh));
  document.addEventListener('input',()=>requestAnimationFrame(refresh));
- document.addEventListener('click',()=>setTimeout(refresh,10),true);
-
- /* Rebuild only when form structure really changes (e.g. material changes post-processing). */
- new MutationObserver(()=>schedule(false)).observe(product()||document.body,{
-   childList:true,subtree:true,attributes:true,attributeFilter:['style','hidden','disabled']
- });
- setTimeout(()=>schedule(true),60);
+ document.addEventListener('click',()=>requestAnimationFrame(refresh),true);
+ new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{childList:true,subtree:true});
+ setTimeout(refresh,30);
 })();
 </script>
