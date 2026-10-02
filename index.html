@@ -2253,3 +2253,300 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
   input,select,textarea{max-width:100%!important}
 }
 </style>
+
+<style id="flags-unified-mobile-icons-v1">
+/* ФЛАГИ: если изображение варианта отрисовано рядом с кнопкой, визуально объединяем
+   кнопку и следующий блок изображения в одну цельную карточку. */
+#form .flag-choice,
+#form .flag-mode-card{
+  overflow:hidden;
+}
+#form .flag-choice:has(+ .example-thumb),
+#form .flag-mode-card:has(+ .example-thumb){
+  margin-bottom:0!important;
+  border-bottom-left-radius:0!important;
+  border-bottom-right-radius:0!important;
+  border-bottom-width:0!important;
+}
+#form .flag-choice + .example-thumb,
+#form .flag-mode-card + .example-thumb{
+  margin-top:0!important;
+  border-top-left-radius:0!important;
+  border-top-right-radius:0!important;
+  border-top:0!important;
+}
+
+/* Если картинка уже находится внутри самой карточки флага — делаем её частью кнопки. */
+#form .flag-choice:has(.example-thumb),
+#form .flag-mode-card:has(.example-thumb){
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  height:auto!important;
+}
+#form .flag-choice>.example-thumb,
+#form .flag-mode-card>.example-thumb{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  position:relative!important;
+  inset:auto!important;
+}
+
+/* МОБИЛЬНАЯ ВЕРСИЯ:
+   невыбранные картинки/иконки вариантов = 50% от прежнего размера;
+   выбранная карточка возвращает прежний размер.
+   Не затрагиваем иконки ? и служебные кнопки. */
+@media(max-width:700px){
+  #form .option .example-thumb,
+  #form .flag-choice .example-thumb,
+  #form .flag-mode-card .example-thumb,
+  #form .option>img:not(.help):not(.info):not(.tip),
+  #form .flag-choice>img,
+  #form .flag-mode-card>img{
+    width:50%!important;
+    max-width:50%!important;
+    height:auto!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    transition:width .16s ease,max-width .16s ease!important;
+  }
+
+  #form .option.ui-selected .example-thumb,
+  #form .option:has(input:checked) .example-thumb,
+  #form .flag-choice.ui-selected .example-thumb,
+  #form .flag-choice.is-choice-selected .example-thumb,
+  #form .flag-choice:has(input:checked) .example-thumb,
+  #form .flag-mode-card.ui-selected .example-thumb,
+  #form .flag-mode-card.is-choice-selected .example-thumb,
+  #form .option.ui-selected>img:not(.help):not(.info):not(.tip),
+  #form .option:has(input:checked)>img:not(.help):not(.info):not(.tip),
+  #form .flag-choice.ui-selected>img,
+  #form .flag-choice.is-choice-selected>img,
+  #form .flag-mode-card.ui-selected>img,
+  #form .flag-mode-card.is-choice-selected>img{
+    width:100%!important;
+    max-width:100%!important;
+  }
+}
+</style>
+
+<script id="flags-unified-mobile-icons-v1-js">
+(function(){
+ function normalizeFlags(root=document){
+   root.querySelectorAll('.flag-choice,.flag-mode-card').forEach(card=>{
+     if(card.dataset.flagImageUnified)return;
+     let img=card.querySelector(':scope > .example-thumb');
+     if(!img){
+       const next=card.nextElementSibling;
+       if(next && next.classList.contains('example-thumb')){
+         card.appendChild(next);
+         img=next;
+       }
+     }
+     if(img) card.dataset.flagImageUnified='1';
+   });
+ }
+ normalizeFlags();
+ document.addEventListener('click',e=>{
+   if(e.target.closest('.flag-choice,.flag-mode-card')) requestAnimationFrame(()=>normalizeFlags());
+ });
+ new MutationObserver(ms=>{
+   let need=false;
+   for(const m of ms) if(m.addedNodes.length){need=true;break}
+   if(need) requestAnimationFrame(()=>normalizeFlags());
+ }).observe(document.getElementById('form')||document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="category-steps-qty-bottom-v1-css">
+/* 2. Более явное разделение смысловых блоков внутри категории */
+#form > .param-block,
+#form > .field,
+#form > .section{
+  border:1px solid #dfe5ee!important;
+  border-radius:14px!important;
+  padding:12px!important;
+  margin:10px 0!important;
+  background:#fff!important;
+  box-shadow:0 3px 12px rgba(26,39,63,.045);
+}
+#form > .param-block > label:first-child,
+#form > .field > label:first-child,
+#form > .section > label:first-child,
+#form .param-title,.form-section-title{
+  display:block!important;
+  font-weight:1000!important;
+  font-size:14px!important;
+  color:#172033!important;
+  margin:0 0 8px!important;
+  letter-spacing:.01em;
+}
+#form .subhead,#form .subtitle,#form .sub-title,#form small.section-note{
+  font-weight:850!important;color:#586579!important;
+}
+
+/* 4. Верхняя навигация по параметрам */
+#categoryStepNav{
+  position:sticky;top:0;z-index:55;
+  display:none;gap:6px;overflow-x:auto;
+  width:100%;padding:7px 5px;margin:0 0 9px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #e8edf3;
+  scrollbar-width:none;
+}
+#categoryStepNav::-webkit-scrollbar{display:none}
+#categoryStepNav button{
+  flex:0 0 auto;border:1px solid #d7dde6;background:#eef1f5;color:#7a8492;
+  border-radius:999px;padding:7px 10px;font-size:10px;font-weight:950;
+  white-space:nowrap;cursor:pointer;transition:.15s ease;
+}
+#categoryStepNav button.done{
+  background:#e7f8ed;border-color:#77d496;color:#16813c;
+}
+#categoryStepNav button.done::before{content:"✓ ";font-weight:1000}
+#product:not(.hidden) #categoryStepNav{display:flex}
+
+/* Количество внизу получает отдельный акцент */
+#form > .ux-qty-last{
+  border-color:#cfd8e5!important;
+  background:#f8fafc!important;
+}
+#form > .ux-qty-last::before{
+  content:"КОЛИЧЕСТВО";display:block;margin-bottom:7px;
+  font-size:9px;font-weight:1000;letter-spacing:.08em;color:#667386;
+}
+@media(max-width:700px){
+ #form > .param-block,#form > .field,#form > .section{padding:9px!important;margin:7px 0!important}
+ #form > .param-block > label:first-child,#form > .field > label:first-child,#form > .section > label:first-child,
+ #form .param-title,.form-section-title{font-size:12px!important;margin-bottom:6px!important}
+ #categoryStepNav{padding:5px 3px;gap:5px}
+ #categoryStepNav button{padding:6px 8px;font-size:9px}
+}
+</style>
+
+<script id="category-steps-qty-bottom-v1-js">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s), qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form');
+
+ function directBlocks(){
+   const f=form(); if(!f)return [];
+   return [...f.children].filter(el=>{
+     if(!(el instanceof HTMLElement))return false;
+     if(el.id==='categoryStepNav')return false;
+     return el.matches('.param-block,.field,.section') || !!el.querySelector('input,select,.option,.flag-choice');
+   });
+ }
+ function text(el){return (el?.textContent||'').replace(/\s+/g,' ').trim()}
+ function isQtyBlock(b){
+   const t=text(b).toLowerCase();
+   const nums=qa('input[type="number"]',b);
+   if(!/количество|тираж/.test(t))return false;
+   // Не считаем блоком количества размеры, если в нём только ширина/высота.
+   const idtxt=nums.map(x=>(x.id||'')+' '+(x.name||'')+' '+(x.placeholder||'')).join(' ').toLowerCase();
+   return !(/ширин|высот|width|height/.test(idtxt) && !/qty|quantity|тираж|количество/.test(idtxt));
+ }
+ function classify(b){
+   const t=text(b).toLowerCase();
+   if(isQtyBlock(b)) return ['Количество','qty'];
+   if(/постобработ|ламинац|люверс|резк|скотч|пошив|фальц|бигов|пружин|скоб|крюч/.test(t)) return ['Постобработка','post'];
+   if(/размер|ширин|высот|формат/.test(t)) return ['Размер','size'];
+   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк|баннер|бэклит|флаговая ткань/.test(t)) return ['Материал / печать','material'];
+   return [text(b.querySelector('label,.param-title,.form-section-title'))||'Параметр','other'];
+ }
+ function moveQtyLast(){
+   const f=form();if(!f)return;
+   const qty=directBlocks().filter(isQtyBlock);
+   qty.forEach(b=>{b.classList.add('ux-qty-last');f.appendChild(b)});
+ }
+ function blankManualQty(){
+   const f=form();if(!f)return;
+   qa('input[type="number"]',f).forEach(inp=>{
+     if(inp.dataset.qtyBlankV1)return;
+     const b=inp.closest('.param-block,.field,.section')||inp.parentElement;
+     if(!b||!isQtyBlock(b))return;
+     const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
+     if(/ширин|высот|width|height/.test(own))return;
+     inp.dataset.qtyBlankV1='1';
+     if(String(inp.value).trim()==='1' || inp.getAttribute('value')==='1'){
+       inp.value=''; inp.removeAttribute('value');
+       // Намеренно НЕ dispatch input/change: расчётная логика не трогается.
+     }
+   });
+ }
+ function blockDone(b,type){
+   if(type==='qty'){
+     const relevant=qa('input[type="number"]',b).filter(x=>{
+       const own=((x.id||'')+' '+(x.name||'')+' '+(x.placeholder||'')).toLowerCase();
+       return !/ширин|высот|width|height/.test(own);
+     });
+     return relevant.length ? relevant.some(x=>String(x.value).trim()!=='' && +x.value>0) : false;
+   }
+   if(b.querySelector('input[type=radio]:checked,input[type=checkbox]:checked'))return true;
+   const sel=qa('select',b).find(x=>x.value && x.selectedIndex>=0); if(sel)return true;
+   const selected=b.querySelector('.ui-selected,.is-choice-selected,.selected'); if(selected)return true;
+   const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);
+   if(type==='size' && nums.length>=1)return nums.every(x=>String(x.value).trim()!=='' && +x.value>0);
+   return false;
+ }
+ function titleFor(b,label){
+   const raw=text(b.querySelector(':scope > label,.param-title,.form-section-title'));
+   return raw && raw.length<35 ? raw.replace(/\?$/,'').trim() : label;
+ }
+ function buildNav(){
+   const f=form();if(!f)return;
+   let nav=q('#categoryStepNav');
+   if(!nav){nav=document.createElement('div');nav.id='categoryStepNav';f.parentNode.insertBefore(nav,f)}
+   const blocks=directBlocks();
+   // Один чип на каждый реальный смысловой блок, а не универсальный фиксированный набор.
+   nav.innerHTML='';
+   blocks.forEach((b,i)=>{
+     const [generic,type]=classify(b);
+     if(!b.id)b.id='uxParamBlock'+i;
+     const btn=document.createElement('button');
+     btn.type='button';btn.textContent=titleFor(b,generic);
+     btn.dataset.target=b.id;
+     btn.classList.toggle('done',blockDone(b,type));
+     btn.onclick=()=>{
+       const target=document.getElementById(btn.dataset.target);
+       if(!target)return;
+       const navH=nav.getBoundingClientRect().height;
+       const y=window.scrollY+target.getBoundingClientRect().top-navH-8;
+       window.scrollTo({top:y,behavior:'smooth'});
+     };
+     nav.appendChild(btn);
+   });
+ }
+ function refreshDone(){
+   const nav=q('#categoryStepNav');if(!nav)return;
+   qa('button',nav).forEach(btn=>{
+     const b=document.getElementById(btn.dataset.target);if(!b)return;
+     const [,type]=classify(b);btn.classList.toggle('done',blockDone(b,type));
+   });
+ }
+ let scheduled=false;
+ function setup(){
+   scheduled=false;
+   moveQtyLast();
+   blankManualQty();
+   buildNav();
+   refreshDone();
+ }
+ function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}
+ document.addEventListener('input',refreshDone);
+ document.addEventListener('change',refreshDone);
+ document.addEventListener('click',e=>{
+   if(e.target.closest('#categoryStepNav'))return;
+   setTimeout(refreshDone,20);
+ });
+ const target=form()||document.body;
+ new MutationObserver(ms=>{
+   // Только структурные изменения формы: открытие новой категории/перерисовка.
+   if(ms.some(m=>m.type==='childList'&&m.addedNodes.length))schedule();
+ }).observe(target,{childList:true,subtree:true});
+ setTimeout(setup,80);
+})();
+</script>
