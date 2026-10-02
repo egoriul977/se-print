@@ -887,7 +887,7 @@ function renderFlagMode(){
    const custom=document.getElementById('flagCustomForm');
    custom.innerHTML=`<div class="options">${current.opts.map((o,i)=>`<label class="option"><input type="radio" name="mat" value="${o[1]}" ${i===0?'checked':''} onchange="matChanged()"><span>${o[0]}</span>${info(o[2])}</label>`).join('')}</div>
    <div class="row"><div><label>Ширина, см ${info('Горизонтальный размер флага в сантиметрах.')}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info('Вертикальный размер флага в сантиметрах.')}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div>
-   <div><label>Количество, шт ${info('Общий тираж изготавливаемых изделий.')}</label><input id="qty" type="number" min="1" step="1" value="1" oninput="recalc()"></div>
+   <div><label>Количество, шт ${info('Общий тираж изготавливаемых изделий.')}</label><input id="qty" type="number" min="1" step="1" placeholder="Введите количество" oninput="recalc()"></div>
    <div id="postArea"></div>`;
    renderPostArea();
    recalc();
@@ -970,7 +970,7 @@ function renderGenericForm(){
  const formatOptions=(paperPhotoSelected?'':`<option value="" selected disabled>Выберите размер</option>`)+Object.entries(formats).map(([k,v],i)=>`<option value="${k}" ${paperPhotoSelected&&i===0?'selected':''}>${k}${k.startsWith('А6')?' — стандартный размер фотографий для фотоальбома':' — '+v[0]+' × '+v[1]+' см'}</option>`).join('');
  form.innerHTML=`<div class="param-block material-block"><label>${isPaperFormat?'Выберите бумагу':'Тип печати / материал'}</label><div class="${isPaperFormat?'paper-material-row':'options material-options'}">${current.opts.map((o,i)=>`<label class="option"><input type="radio" name="mat" value="${o[1]}" ${i===0?'checked':''} onchange="matChanged()"><span>${o[0]}</span>${info(o[2])}</label>`).join('')}</div></div>
  ${(isPaperFormat||isFabricFormat)?`<div class="param-block size-block"><label>Размер печати ${info(isFabricFormat?'Можно выбрать стандартный размер А4, А3, 30×10 см (надпись на спину) или 10×10 см (логотип на грудь), либо ввести произвольный размер.':'Можно выбрать готовый формат А5, А4, А3, А2, А1 или А0 либо ввести произвольные размеры вручную.')}</label><div class="options" style="margin-bottom:10px"><label class="option"><input type="radio" name="paperSizeMode" value="format" checked onchange="paperSizeModeChange()"><span>Выбрать стандартный размер</span></label><label class="option"><input type="radio" name="paperSizeMode" value="custom" onchange="paperSizeModeChange()"><span>Ввести размеры вручную</span></label></div><div id="paperFormatBox"><label>Стандартный размер</label><select id="paperFormat" onchange="paperFormatChange()">${formatOptions}</select>${isFabricFormat?'<div id="fabricSizeExample" class="fabric-size-example"></div>':''}<div class="muted" style="margin-top:7px">${isFabricFormat?'А4, А3, 30×10 см — надпись на спину, 10×10 см — логотип на грудь.':'А5, А4, А3, А2, А1 и А0. Размеры указаны в сантиметрах.'}</div></div><div id="paperCustomBox" style="display:none"><div class="row"><div><label>Ширина, см ${info(widthTip)}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info(heightTip)}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div></div></div>`:`<div class="param-block size-block"><label>Размер изделия</label><div class="row"><div><label>Ширина, см ${info(widthTip)}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info(heightTip)}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div></div>`}
- <div class="param-block qty-block"><label>Количество, шт ${info(qtyTip)}</label><input id="qty" type="number" min="1" step="1" value="1" oninput="recalc()"></div><div id="postArea"></div>`;
+ <div class="param-block qty-block"><label>Количество, шт ${info(qtyTip)}</label><input id="qty" type="number" min="1" step="1" placeholder="Введите количество" oninput="recalc()"></div><div id="postArea"></div>`;
  renderPostArea();
  if(isPaperFormat||isFabricFormat) paperFormatChange();
  updateMatTip(); recalc();
@@ -1176,7 +1176,11 @@ function priceFor(id,a){
 function recalc(){
  if(!current||current.id==='cards'||current.id==='canvas'){lastCalcMeta=null;return;}
  let mat=document.querySelector('select#matSelect')?.value || document.querySelector('input[name=mat]:checked')?.value;
- let q=+document.getElementById('qty').value||1;
+ const qtyInput=document.getElementById('qty');
+ const qtyRaw=String(qtyInput?.value||'').trim();
+ if(!qtyRaw){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}
+ let q=+qtyRaw;
+ if(!Number.isFinite(q)||q<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите корректное количество.';return;}
  let unitArea=area(), a=unitArea*q;
  let pf=priceFor(mat,a);
  if(!pf){liveTotal.textContent='Нет цены';breakdown.innerHTML='Для этой площади в прайсе нет значения.';return}
@@ -2254,563 +2258,215 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
 }
 </style>
 
-<style id="flags-unified-mobile-icons-v1">
-/* ФЛАГИ: если изображение варианта отрисовано рядом с кнопкой, визуально объединяем
-   кнопку и следующий блок изображения в одну цельную карточку. */
-#form .flag-choice,
-#form .flag-mode-card{
-  overflow:hidden;
-}
-#form .flag-choice:has(+ .example-thumb),
-#form .flag-mode-card:has(+ .example-thumb){
-  margin-bottom:0!important;
-  border-bottom-left-radius:0!important;
-  border-bottom-right-radius:0!important;
-  border-bottom-width:0!important;
-}
-#form .flag-choice + .example-thumb,
-#form .flag-mode-card + .example-thumb{
-  margin-top:0!important;
-  border-top-left-radius:0!important;
-  border-top-right-radius:0!important;
-  border-top:0!important;
+<style id="clean-rebuild-ui-v1">
+/* ===== Clear section hierarchy ===== */
+#form>.param-block{border:1px solid #dfe5ee!important;border-radius:14px!important;padding:11px!important;margin:9px 0!important;background:#fff!important}
+#form>.param-block>label:first-child,#flagModeBox>label:first-child,#flagCustomForm>label:first-child{
+ display:block!important;font-weight:950!important;color:#172033!important;font-size:13px!important;margin-bottom:7px!important
 }
 
-/* Если картинка уже находится внутри самой карточки флага — делаем её частью кнопки. */
-#form .flag-choice:has(.example-thumb),
-#form .flag-mode-card:has(.example-thumb){
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  gap:6px!important;
-  height:auto!important;
-}
-#form .flag-choice>.example-thumb,
-#form .flag-mode-card>.example-thumb{
-  width:100%!important;
-  max-width:none!important;
-  margin:0!important;
-  position:relative!important;
-  inset:auto!important;
-}
-
-/* МОБИЛЬНАЯ ВЕРСИЯ:
-   невыбранные картинки/иконки вариантов = 50% от прежнего размера;
-   выбранная карточка возвращает прежний размер.
-   Не затрагиваем иконки ? и служебные кнопки. */
-@media(max-width:700px){
-  #form .option .example-thumb,
-  #form .flag-choice .example-thumb,
-  #form .flag-mode-card .example-thumb,
-  #form .option>img:not(.help):not(.info):not(.tip),
-  #form .flag-choice>img,
-  #form .flag-mode-card>img{
-    width:50%!important;
-    max-width:50%!important;
-    height:auto!important;
-    margin-left:auto!important;
-    margin-right:auto!important;
-    transition:width .16s ease,max-width .16s ease!important;
-  }
-
-  #form .option.ui-selected .example-thumb,
-  #form .option:has(input:checked) .example-thumb,
-  #form .flag-choice.ui-selected .example-thumb,
-  #form .flag-choice.is-choice-selected .example-thumb,
-  #form .flag-choice:has(input:checked) .example-thumb,
-  #form .flag-mode-card.ui-selected .example-thumb,
-  #form .flag-mode-card.is-choice-selected .example-thumb,
-  #form .option.ui-selected>img:not(.help):not(.info):not(.tip),
-  #form .option:has(input:checked)>img:not(.help):not(.info):not(.tip),
-  #form .flag-choice.ui-selected>img,
-  #form .flag-choice.is-choice-selected>img,
-  #form .flag-mode-card.ui-selected>img,
-  #form .flag-mode-card.is-choice-selected>img{
-    width:100%!important;
-    max-width:100%!important;
-  }
-}
-</style>
-
-<script id="flags-unified-mobile-icons-v1-js-disabled" type="text/plain">
-(function(){
- function normalizeFlags(root=document){
-   root.querySelectorAll('.flag-choice,.flag-mode-card').forEach(card=>{
-     if(card.dataset.flagImageUnified)return;
-     let img=card.querySelector(':scope > .example-thumb');
-     if(!img){
-       const next=card.nextElementSibling;
-       if(next && next.classList.contains('example-thumb')){
-         card.appendChild(next);
-         img=next;
-       }
-     }
-     if(img) card.dataset.flagImageUnified='1';
-   });
- }
- normalizeFlags();
- document.addEventListener('click',e=>{
-   if(e.target.closest('.flag-choice,.flag-mode-card')) requestAnimationFrame(()=>normalizeFlags());
- });
- new MutationObserver(ms=>{
-   let need=false;
-   for(const m of ms) if(m.addedNodes.length){need=true;break}
-   if(need) requestAnimationFrame(()=>normalizeFlags());
- }).observe(document.getElementById('form')||document.body,{childList:true,subtree:true});
-})();
-</script>
-
-<style id="category-steps-qty-bottom-v1-css">
-/* 2. Более явное разделение смысловых блоков внутри категории */
-#form > .param-block,
-#form > .field,
-#form > .section{
-  border:1px solid #dfe5ee!important;
-  border-radius:14px!important;
-  padding:12px!important;
-  margin:10px 0!important;
-  background:#fff!important;
-  box-shadow:0 3px 12px rgba(26,39,63,.045);
-}
-#form > .param-block > label:first-child,
-#form > .field > label:first-child,
-#form > .section > label:first-child,
-#form .param-title,.form-section-title{
-  display:block!important;
-  font-weight:1000!important;
-  font-size:14px!important;
-  color:#172033!important;
-  margin:0 0 8px!important;
-  letter-spacing:.01em;
-}
-#form .subhead,#form .subtitle,#form .sub-title,#form small.section-note{
-  font-weight:850!important;color:#586579!important;
-}
-
-/* 4. Верхняя навигация по параметрам */
-#categoryStepNav{
-  position:sticky;top:0;z-index:55;
-  display:none;gap:6px;overflow-x:auto;
-  width:100%;padding:7px 5px;margin:0 0 9px;
-  background:rgba(255,255,255,.94);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid #e8edf3;
-  scrollbar-width:none;
-}
-#categoryStepNav::-webkit-scrollbar{display:none}
-#categoryStepNav button{
-  flex:0 0 auto;border:1px solid #d7dde6;background:#eef1f5;color:#7a8492;
-  border-radius:999px;padding:7px 10px;font-size:10px;font-weight:950;
-  white-space:nowrap;cursor:pointer;transition:.15s ease;
-}
-#categoryStepNav button.done{
-  background:#e7f8ed;border-color:#77d496;color:#16813c;
-}
-#categoryStepNav button.done::before{content:"✓ ";font-weight:1000}
-#product:not(.hidden) #categoryStepNav{display:flex}
-
-/* Количество внизу получает отдельный акцент */
-#form > .ux-qty-last{
-  border-color:#cfd8e5!important;
-  background:#f8fafc!important;
-}
-#form > .ux-qty-last::before{
-  content:"КОЛИЧЕСТВО";display:block;margin-bottom:7px;
-  font-size:9px;font-weight:1000;letter-spacing:.08em;color:#667386;
-}
-@media(max-width:700px){
- #form > .param-block,#form > .field,#form > .section{padding:9px!important;margin:7px 0!important}
- #form > .param-block > label:first-child,#form > .field > label:first-child,#form > .section > label:first-child,
- #form .param-title,.form-section-title{font-size:12px!important;margin-bottom:6px!important}
- #categoryStepNav{padding:5px 3px;gap:5px}
- #categoryStepNav button{padding:6px 8px;font-size:9px}
-}
-</style>
-
-<script id="category-steps-qty-bottom-v1-js">
-(function(){
- const q=(s,r=document)=>r.querySelector(s), qa=(s,r=document)=>[...r.querySelectorAll(s)];
- const form=()=>q('#form');
-
- function directBlocks(){
-   const f=form(); if(!f)return [];
-   return [...f.children].filter(el=>{
-     if(!(el instanceof HTMLElement))return false;
-     if(el.id==='categoryStepNav')return false;
-     return el.matches('.param-block,.field,.section') || !!el.querySelector('input,select,.option,.flag-choice');
-   });
- }
- function text(el){return (el?.textContent||'').replace(/\s+/g,' ').trim()}
- function isQtyBlock(b){
-   const t=text(b).toLowerCase();
-   const nums=qa('input[type="number"]',b);
-   if(!/количество|тираж/.test(t))return false;
-   // Не считаем блоком количества размеры, если в нём только ширина/высота.
-   const idtxt=nums.map(x=>(x.id||'')+' '+(x.name||'')+' '+(x.placeholder||'')).join(' ').toLowerCase();
-   return !(/ширин|высот|width|height/.test(idtxt) && !/qty|quantity|тираж|количество/.test(idtxt));
- }
- function classify(b){
-   const t=text(b).toLowerCase();
-   if(isQtyBlock(b)) return ['Количество','qty'];
-   if(/постобработ|ламинац|люверс|резк|скотч|пошив|фальц|бигов|пружин|скоб|крюч/.test(t)) return ['Постобработка','post'];
-   if(/размер|ширин|высот|формат/.test(t)) return ['Размер','size'];
-   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк|баннер|бэклит|флаговая ткань/.test(t)) return ['Материал / печать','material'];
-   return [text(b.querySelector('label,.param-title,.form-section-title'))||'Параметр','other'];
- }
- function moveQtyLast(){
-   const f=form();if(!f)return;
-   const qty=directBlocks().filter(isQtyBlock);
-   qty.forEach(b=>{b.classList.add('ux-qty-last');f.appendChild(b)});
- }
- function blankManualQty(){
-   const f=form();if(!f)return;
-   qa('input[type="number"]',f).forEach(inp=>{
-     if(inp.dataset.qtyBlankV1)return;
-     const b=inp.closest('.param-block,.field,.section')||inp.parentElement;
-     if(!b||!isQtyBlock(b))return;
-     const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
-     if(/ширин|высот|width|height/.test(own))return;
-     inp.dataset.qtyBlankV1='1';
-     if(String(inp.value).trim()==='1' || inp.getAttribute('value')==='1'){
-       inp.value=''; inp.removeAttribute('value');
-       // Намеренно НЕ dispatch input/change: расчётная логика не трогается.
-     }
-   });
- }
- function blockDone(b,type){
-   if(type==='qty'){
-     const relevant=qa('input[type="number"]',b).filter(x=>{
-       const own=((x.id||'')+' '+(x.name||'')+' '+(x.placeholder||'')).toLowerCase();
-       return !/ширин|высот|width|height/.test(own);
-     });
-     return relevant.length ? relevant.some(x=>String(x.value).trim()!=='' && +x.value>0) : false;
-   }
-   if(b.querySelector('input[type=radio]:checked,input[type=checkbox]:checked'))return true;
-   const sel=qa('select',b).find(x=>x.value && x.selectedIndex>=0); if(sel)return true;
-   const selected=b.querySelector('.ui-selected,.is-choice-selected,.selected'); if(selected)return true;
-   const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);
-   if(type==='size' && nums.length>=1)return nums.every(x=>String(x.value).trim()!=='' && +x.value>0);
-   return false;
- }
- function titleFor(b,label){
-   const raw=text(b.querySelector(':scope > label,.param-title,.form-section-title'));
-   return raw && raw.length<35 ? raw.replace(/\?$/,'').trim() : label;
- }
- function buildNav(){
-   const f=form();if(!f)return;
-   let nav=q('#categoryStepNav');
-   if(!nav){nav=document.createElement('div');nav.id='categoryStepNav';f.parentNode.insertBefore(nav,f)}
-   const blocks=directBlocks();
-   // Один чип на каждый реальный смысловой блок, а не универсальный фиксированный набор.
-   nav.innerHTML='';
-   blocks.forEach((b,i)=>{
-     const [generic,type]=classify(b);
-     if(!b.id)b.id='uxParamBlock'+i;
-     const btn=document.createElement('button');
-     btn.type='button';btn.textContent=titleFor(b,generic);
-     btn.dataset.target=b.id;
-     btn.classList.toggle('done',blockDone(b,type));
-     btn.onclick=()=>{
-       const target=document.getElementById(btn.dataset.target);
-       if(!target)return;
-       const navH=nav.getBoundingClientRect().height;
-       const y=window.scrollY+target.getBoundingClientRect().top-navH-8;
-       window.scrollTo({top:y,behavior:'smooth'});
-     };
-     nav.appendChild(btn);
-   });
- }
- function refreshDone(){
-   const nav=q('#categoryStepNav');if(!nav)return;
-   qa('button',nav).forEach(btn=>{
-     const b=document.getElementById(btn.dataset.target);if(!b)return;
-     const [,type]=classify(b);btn.classList.toggle('done',blockDone(b,type));
-   });
- }
- let scheduled=false;
- function setup(){
-   scheduled=false;
-   moveQtyLast();
-   blankManualQty();
-   buildNav();
-   refreshDone();
- }
- function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}
- document.addEventListener('input',refreshDone);
- document.addEventListener('change',refreshDone);
- document.addEventListener('click',e=>{
-   if(e.target.closest('#categoryStepNav'))return;
-   setTimeout(refreshDone,20);
- });
- const target=form()||document.body;
- new MutationObserver(ms=>{
-   // Только структурные изменения формы: открытие новой категории/перерисовка.
-   if(ms.some(m=>m.type==='childList'&&m.addedNodes.length))schedule();
- }).observe(target,{childList:true,subtree:true});
- setTimeout(setup,80);
-})();
-</script>
-
-<style id="final-flags-nav-icons-v2">
-/* 1) ФЛАГИ — тот же принцип, что у карточек выбора типа печати:
-      название и изображение находятся ВНУТРИ одной цельной кнопки. */
+/* ===== FLAGS: clean, predictable structure from the HTML that already exists ===== */
 #form .flag-mode-row.flag-mode-unified{
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:10px!important;
-  align-items:stretch!important;
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important;width:100%!important
 }
-#form .flag-mode-row.flag-mode-unified > button.flag-mode-card{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 112px!important;
-  grid-template-rows:1fr!important;
-  align-items:center!important;
-  gap:10px!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:92px!important;
-  height:auto!important;
-  margin:0!important;
-  padding:9px!important;
-  overflow:hidden!important;
-  cursor:pointer!important;
-  border-radius:14px!important;
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 116px!important;align-items:center!important;
+ width:100%!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:86px!important;
+ margin:0!important;padding:8px!important;gap:8px!important;border-radius:13px!important;overflow:hidden!important;
+ transform:none!important;filter:none!important
 }
-#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .flag-mode-label{
-  grid-column:1!important;grid-row:1!important;
-  display:flex!important;align-items:center!important;justify-content:flex-start!important;
-  width:auto!important;min-width:0!important;min-height:0!important;
-  margin:0!important;padding:6px!important;border:0!important;
-  text-align:left!important;
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+ display:flex!important;align-items:center!important;justify-content:flex-start!important;
+ min-width:0!important;margin:0!important;padding:3px!important;text-align:left!important;order:unset!important
 }
-#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb{
-  grid-column:2!important;grid-row:1!important;
-  display:block!important;position:relative!important;inset:auto!important;
-  width:112px!important;max-width:112px!important;height:72px!important;
-  margin:0!important;padding:3px!important;flex:none!important;
-  border-radius:11px!important;overflow:hidden!important;
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{
+ display:block!important;position:relative!important;inset:auto!important;order:unset!important;
+ width:116px!important;max-width:116px!important;height:68px!important;margin:0!important;padding:3px!important;
+ border-radius:10px!important;overflow:hidden!important;transform:none!important
 }
-#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb img{
-  display:block!important;width:100%!important;height:100%!important;
-  object-fit:cover!important;border-radius:8px!important;
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;margin:0!important}
+
+/* Winder size image stays inside its own selectable card. */
+#flagModeBox .option:has(input[name="winderSize"]) .example-thumb{
+ width:96px!important;max-width:96px!important;height:62px!important;margin-left:auto!important;flex:0 0 96px!important
 }
+
+/* ===== MOBILE: compact WHOLE cards, not detached images ===== */
 @media(max-width:700px){
- #form .flag-mode-row.flag-mode-unified{grid-template-columns:1fr!important;gap:7px!important}
- #form .flag-mode-row.flag-mode-unified > button.flag-mode-card{
-   grid-template-columns:minmax(0,1fr) 86px!important;
-   min-height:72px!important;padding:7px!important;
+ #form .material-options,
+ #form .paper-material-row,
+ #form .options:has(>.option .example-thumb){
+   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important
  }
- #form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb{
-   width:86px!important;max-width:86px!important;height:56px!important;
+ #form .material-options>.option,
+ #form .paper-material-row>.option,
+ #form .options:has(>.option .example-thumb)>.option{
+   width:100%!important;max-width:100%!important;min-width:0!important;min-height:58px!important;height:auto!important;
+   padding:6px!important;gap:4px!important;border-radius:10px!important;font-size:9px!important;line-height:1.15!important;
+   transform:none!important;filter:none!important;overflow:hidden!important
  }
-}
-
-/* 2) Навигация — одна строка с настоящей горизонтальной прокруткой */
-#categoryStepNav{
- display:flex!important;
- flex-wrap:nowrap!important;
- width:100%!important;
- max-width:100%!important;
- overflow-x:auto!important;
- overflow-y:hidden!important;
- -webkit-overflow-scrolling:touch!important;
- touch-action:pan-x!important;
- overscroll-behavior-x:contain!important;
- scrollbar-width:thin!important;
- scroll-snap-type:x proximity;
-}
-#categoryStepNav button{
- flex:0 0 auto!important;
- width:auto!important;
- max-width:none!important;
- scroll-snap-align:start;
-}
-#categoryStepNav::-webkit-scrollbar{display:block!important;height:4px!important}
-
-/* 3) Мобильные изображения/иконки внутри вариантов — 1/3 прежнего размера.
-      Выбранный вариант возвращается к обычному размеру, как было согласовано ранее.
-      Флаговые три главные карточки выше имеют отдельный компактный размер. */
-@media(max-width:700px){
- #form .option:not(.flag-mode-card) > .example-thumb,
- #form .option:not(.flag-mode-card) .example-thumb,
- #form .fabric-size-example .example-thumb,
- #form .fabric-item-example .example-thumb,
- #form .fabric-type-example .example-thumb,
- #form .post-example-row .example-thumb{
-   width:33.333%!important;
-   max-width:33.333%!important;
-   height:auto!important;
-   max-height:none!important;
-   aspect-ratio:16/9!important;
-   flex:0 0 33.333%!important;
-   margin:5px auto 0!important;
-   transform:none!important;
+ #form .material-options>.option span,
+ #form .paper-material-row>.option span,
+ #form .options:has(>.option .example-thumb)>.option span{
+   min-width:0!important;font-size:9px!important;line-height:1.15!important;white-space:normal!important;overflow-wrap:anywhere!important
  }
- #form .option:not(.flag-mode-card) > .example-thumb img,
- #form .option:not(.flag-mode-card) .example-thumb img,
- #form .fabric-size-example .example-thumb img,
- #form .fabric-item-example .example-thumb img,
- #form .fabric-type-example .example-thumb img,
- #form .post-example-row .example-thumb img{
-   width:100%!important;height:100%!important;object-fit:cover!important;
+ #form .options:has(>.option .example-thumb)>.option .example-thumb{
+   width:44px!important;max-width:44px!important;height:34px!important;flex:0 0 44px!important;margin:2px auto!important;padding:2px!important
+ }
+ /* Selected card: one screen-content width, but still short/compact. */
+ #form .material-options>.option.ui-selected,
+ #form .material-options>.option:has(input:checked),
+ #form .paper-material-row>.option.ui-selected,
+ #form .paper-material-row>.option:has(input:checked),
+ #form .options:has(>.option .example-thumb)>.option.ui-selected,
+ #form .options:has(>.option .example-thumb)>.option:has(input:checked){
+   grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-height:62px!important;
+   display:flex!important;align-items:center!important;padding:7px 8px!important;gap:7px!important;
+   font-size:11px!important;transform:none!important
+ }
+ #form .material-options>.option.ui-selected span,
+ #form .material-options>.option:has(input:checked) span,
+ #form .paper-material-row>.option.ui-selected span,
+ #form .paper-material-row>.option:has(input:checked) span,
+ #form .options:has(>.option .example-thumb)>.option.ui-selected span,
+ #form .options:has(>.option .example-thumb)>.option:has(input:checked) span{font-size:11px!important}
+ #form .options:has(>.option .example-thumb)>.option.ui-selected .example-thumb,
+ #form .options:has(>.option .example-thumb)>.option:has(input:checked) .example-thumb{
+   width:76px!important;max-width:76px!important;height:48px!important;flex:0 0 76px!important;margin:0 0 0 auto!important
  }
 
- #form .option.ui-selected:not(.flag-mode-card) .example-thumb,
- #form .option:has(input:checked):not(.flag-mode-card) .example-thumb{
-   width:100%!important;
-   max-width:100%!important;
-   flex-basis:100%!important;
- }
-}
-</style>
-
-<style id="REBUILT-flags-mobile-nav">
-/* ===== FLAGS: one clean rule set, overriding all old experiments ===== */
-#form .flag-mode-row.flag-mode-unified{
- display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
- gap:10px!important;width:100%!important;
-}
-#form .flag-mode-row.flag-mode-unified > .flag-mode-card{
- display:grid!important;grid-template-columns:minmax(0,1fr) 118px!important;
- align-items:center!important;gap:9px!important;width:100%!important;max-width:none!important;
- min-height:88px!important;height:auto!important;margin:0!important;padding:9px!important;
- border-radius:14px!important;overflow:hidden!important;transform:none!important;
-}
-#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .flag-mode-label{
- grid-column:1!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
- width:auto!important;min-width:0!important;min-height:0!important;margin:0!important;padding:3px!important;
- text-align:left!important;order:unset!important;flex:none!important;
-}
-#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb{
- grid-column:2!important;display:flex!important;position:relative!important;inset:auto!important;
- width:118px!important;max-width:118px!important;height:70px!important;min-height:0!important;
- margin:0!important;padding:3px!important;order:unset!important;flex:none!important;
- border-radius:10px!important;transform:none!important;
-}
-#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb img{
- width:100%!important;height:100%!important;object-fit:cover!important;margin:0!important;
-}
-
-/* Winder size options are normal category cards with their OWN correct image */
-#flagModeBox .options > .option:has(input[name="winderSize"]){
- display:grid!important;grid-template-columns:minmax(0,1fr) 118px!important;
- align-items:center!important;gap:9px!important;overflow:hidden!important;
-}
-#flagModeBox .options > .option:has(input[name="winderSize"]) > .example-thumb{
- grid-column:2!important;width:118px!important;max-width:118px!important;height:70px!important;
- margin:0!important;position:relative!important;inset:auto!important;
-}
-
-/* ===== MOBILE: shrink WHOLE cards, not only pictures ===== */
-@media(max-width:700px){
- #form .options:not(.flag-mode-row){
-   display:flex!important;flex-wrap:wrap!important;gap:6px!important;align-items:stretch!important;
- }
- #form .options:not(.flag-mode-row) > .option{
-   flex:0 0 calc(33.333% - 4px)!important;
-   width:calc(33.333% - 4px)!important;max-width:calc(33.333% - 4px)!important;
-   min-width:0!important;min-height:54px!important;height:auto!important;
-   padding:6px!important;gap:4px!important;border-radius:10px!important;
-   font-size:9px!important;line-height:1.15!important;
-   transform:none!important;filter:none!important;
- }
- #form .options:not(.flag-mode-row) > .option > span:not(.example-thumb){
-   flex:1 1 auto!important;width:auto!important;min-width:0!important;
-   font-size:9px!important;line-height:1.15!important;overflow-wrap:anywhere!important;
- }
- #form .options:not(.flag-mode-row) > .option .info{
-   width:16px!important;height:16px!important;flex:0 0 16px!important;font-size:9px!important;
- }
- #form .options:not(.flag-mode-row) > .option .example-thumb{
-   width:42px!important;max-width:42px!important;height:34px!important;min-height:0!important;
-   flex:0 0 42px!important;margin:2px auto!important;padding:2px!important;
- }
- /* selected card = exactly full available content width, but remains compact */
- #form .options:not(.flag-mode-row) > .option.ui-selected,
- #form .options:not(.flag-mode-row) > .option:has(input:checked){
-   flex:0 0 100%!important;width:100%!important;max-width:100%!important;
-   min-height:62px!important;padding:7px 8px!important;font-size:11px!important;
-   transform:none!important;
- }
- #form .options:not(.flag-mode-row) > .option.ui-selected > span:not(.example-thumb),
- #form .options:not(.flag-mode-row) > .option:has(input:checked) > span:not(.example-thumb){
-   font-size:11px!important;
- }
- #form .options:not(.flag-mode-row) > .option.ui-selected .example-thumb,
- #form .options:not(.flag-mode-row) > .option:has(input:checked) .example-thumb{
-   width:82px!important;max-width:82px!important;height:54px!important;flex:0 0 82px!important;
-   margin:0!important;
- }
-
- /* Top flag modes: also compact, whole card. */
+ /* Main flag mode cards use the same compact behavior. */
  #form .flag-mode-row.flag-mode-unified{
-   display:flex!important;flex-wrap:wrap!important;gap:6px!important;
+   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card{
-   flex:0 0 calc(33.333% - 4px)!important;width:calc(33.333% - 4px)!important;
-   max-width:calc(33.333% - 4px)!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
    display:flex!important;flex-direction:column!important;justify-content:space-between!important;
-   min-height:92px!important;padding:6px!important;gap:4px!important;
+   min-height:94px!important;padding:6px!important;gap:4px!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card > .flag-mode-label{
-   width:100%!important;display:block!important;text-align:center!important;font-size:9px!important;padding:2px!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+   display:block!important;width:100%!important;padding:2px!important;text-align:center!important;font-size:9px!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb{
-   width:58px!important;max-width:58px!important;height:40px!important;margin:0 auto!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{
+   width:58px!important;max-width:58px!important;height:40px!important;margin:0 auto!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected,
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected{
-   flex:0 0 100%!important;width:100%!important;max-width:100%!important;
-   display:grid!important;grid-template-columns:minmax(0,1fr) 92px!important;
-   min-height:70px!important;padding:7px!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{
+   grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) 82px!important;
+   align-items:center!important;min-height:64px!important;padding:7px!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected > .flag-mode-label,
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected > .flag-mode-label{
-   grid-column:1!important;text-align:left!important;font-size:11px!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.flag-mode-label,
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.flag-mode-label{
+   text-align:left!important;font-size:11px!important
  }
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected > .example-thumb,
- #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected > .example-thumb{
-   grid-column:2!important;width:92px!important;max-width:92px!important;height:56px!important;margin:0!important;
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+ #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
+   width:82px!important;max-width:82px!important;height:50px!important;margin:0!important
  }
 }
 
-/* ===== NAVIGATION: truly follows viewport + horizontally scrollable ===== */
-#categoryStepNav{
- position:fixed!important;
- top:0!important;left:50%!important;transform:translateX(-50%)!important;
- z-index:999!important;
- width:min(920px,100vw)!important;max-width:100vw!important;
- display:none!important;flex-wrap:nowrap!important;gap:6px!important;
- overflow-x:scroll!important;overflow-y:hidden!important;
- padding:7px 8px!important;margin:0!important;
- background:rgba(255,255,255,.97)!important;
- border-bottom:1px solid #dfe5ee!important;
- box-shadow:0 4px 14px rgba(24,36,55,.10)!important;
- -webkit-overflow-scrolling:touch!important;
- touch-action:pan-x!important;
- overscroll-behavior-x:contain!important;
- scrollbar-width:auto!important;
+/* ===== Top navigation: fixed to viewport, but constrained to calculator card ===== */
+#categoryStepNavClean{
+ position:fixed!important;z-index:1000!important;display:none;
+ flex-wrap:nowrap!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;
+ padding:6px!important;margin:0!important;background:rgba(255,255,255,.97)!important;
+ border:1px solid #dfe5ee!important;border-radius:12px!important;box-shadow:0 5px 18px rgba(25,38,58,.12)!important;
+ -webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;
+ scrollbar-width:thin!important
 }
-#product:not(.hidden) #categoryStepNav{display:flex!important}
-#categoryStepNav button{
- flex:0 0 auto!important;width:max-content!important;min-width:max-content!important;
- white-space:nowrap!important;touch-action:manipulation!important;
+#categoryStepNavClean::-webkit-scrollbar{height:4px!important}
+#categoryStepNavClean button{
+ flex:0 0 auto!important;width:auto!important;min-width:max-content!important;white-space:nowrap!important;
+ border:1px solid #d9dfe7;background:#f0f2f5;color:#7a8491;border-radius:999px;padding:6px 9px;
+ font-size:9px;font-weight:900;cursor:pointer
 }
-#categoryStepNav::-webkit-scrollbar{display:block!important;height:5px!important}
-#categoryStepNav::-webkit-scrollbar-thumb{background:#b8c1ce!important;border-radius:9px!important}
-#product:not(.hidden) #form{scroll-margin-top:58px}
-body:has(#product:not(.hidden)){padding-top:48px!important}
+#categoryStepNavClean button.done{background:#e8f8ed;border-color:#83d79d;color:#197d3d}
+#categoryStepNavClean button.done:before{content:"✓ "}
+#categoryNavSpacer{display:none;height:48px}
 </style>
 
-<script id="REBUILT-nav-horizontal-wheel">
+<script id="clean-rebuild-ui-v1-js">
 (function(){
- function nav(){return document.getElementById('categoryStepNav')}
- document.addEventListener('wheel',function(e){
-   const n=nav(); if(!n || !n.matches(':hover'))return;
-   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
-     n.scrollLeft+=e.deltaY;
-     e.preventDefault();
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ function productOpen(){const p=q('#product');return !!p&&p.offsetParent!==null}
+ function blocks(){
+   const f=q('#form');if(!f)return [];
+   // Use actual visible top-level blocks; flag chooser itself gets a dedicated first step.
+   const arr=[...f.children].filter(x=>x instanceof HTMLElement && x.offsetParent!==null && x.id!=='categoryNavSpacer');
+   return arr.filter(x=>x.matches('.param-block')||x.id==='flagModeBox'||x.matches('.options.flag-mode-row'));
+ }
+ function kind(b){
+   const t=(b.textContent||'').toLowerCase();
+   if(b.matches('.flag-mode-row'))return ['Вариант флага','flag'];
+   if(/количество|тираж/.test(t)&&!/ширин|высот/.test(t))return ['Количество','qty'];
+   if(/постобработ|ламинац|люверс|резк|скотч|пошив|фальц|бигов|основан|флагшток/.test(t))return ['Постобработка','post'];
+   if(/размер|ширин|высот|формат/.test(t))return ['Размер','size'];
+   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))return ['Материал / печать','material'];
+   return [(b.querySelector('label')?.textContent||'Параметр').replace(/\s+/g,' ').trim().slice(0,28),'other'];
+ }
+ function done(b,k){
+   if(k==='qty'){
+     const inp=qa('input[type=number]',b).find(x=>!/ширин|высот|width|height/.test(((x.id||'')+' '+(x.placeholder||'')).toLowerCase()));
+     return !!inp&&String(inp.value).trim()!==''&&+inp.value>0;
    }
+   if(b.querySelector('input:checked,.ui-selected,.is-choice-selected'))return true;
+   if(k==='size'){
+     const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);
+     return nums.length>0&&nums.every(x=>String(x.value).trim()!==''&&+x.value>0);
+   }
+   return !!qa('select',b).find(x=>x.value);
+ }
+ function moveQty(){
+   const f=q('#form');if(!f)return;
+   const qty=qa(':scope>.qty-block',f);
+   const post=q(':scope>#postArea',f);
+   qty.forEach(x=>f.appendChild(x));
+   // Flag custom quantity isn't a param-block; move its direct wrapper after postArea.
+   const fq=q('#flagCustomForm #qty')?.parentElement;
+   if(fq&&post&&fq.parentElement===q('#flagCustomForm'))fq.parentElement.appendChild(fq);
+ }
+ function ensureNav(){
+   let n=q('#categoryStepNavClean');
+   if(!n){n=document.createElement('div');n.id='categoryStepNavClean';document.body.appendChild(n)}
+   return n;
+ }
+ function positionNav(){
+   const n=ensureNav(),p=q('#product .card')||q('#product');
+   if(!productOpen()||!p){n.style.display='none';return}
+   const r=p.getBoundingClientRect(),pad=6;
+   n.style.display='flex';
+   n.style.left=Math.max(pad,r.left)+'px';
+   n.style.width=Math.max(120,Math.min(window.innerWidth-pad*2,r.width))+'px';
+   n.style.top='6px';
+ }
+ function build(){
+   moveQty();
+   const n=ensureNav(),bs=blocks();n.innerHTML='';
+   bs.forEach((b,i)=>{
+     if(!b.id)b.id='navBlockClean'+i;
+     const [label,k]=kind(b),bt=document.createElement('button');
+     bt.type='button';bt.textContent=label;bt.dataset.target=b.id;bt.dataset.kind=k;bt.classList.toggle('done',done(b,k));
+     bt.onclick=()=>{const el=document.getElementById(bt.dataset.target);if(!el)return;const y=scrollY+el.getBoundingClientRect().top-(n.offsetHeight+14);scrollTo({top:y,behavior:'smooth'})};
+     n.appendChild(bt);
+   });
+   positionNav();
+ }
+ function refresh(){
+   const n=q('#categoryStepNavClean');if(!n)return;
+   qa('button',n).forEach(bt=>{const b=document.getElementById(bt.dataset.target);if(b)bt.classList.toggle('done',done(b,bt.dataset.kind))});
+   positionNav();
+ }
+ let timer;
+ function scheduleBuild(){clearTimeout(timer);timer=setTimeout(build,30)}
+ document.addEventListener('input',refresh);
+ document.addEventListener('change',()=>setTimeout(refresh,0));
+ document.addEventListener('click',e=>{if(!e.target.closest('#categoryStepNavClean'))setTimeout(()=>{scheduleBuild();refresh()},20)});
+ window.addEventListener('scroll',positionNav,{passive:true});
+ window.addEventListener('resize',positionNav,{passive:true});
+ document.addEventListener('wheel',e=>{
+   const n=q('#categoryStepNavClean');if(!n||!n.matches(':hover'))return;
+   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){n.scrollLeft+=e.deltaY;e.preventDefault()}
  },{passive:false});
+ new MutationObserver(ms=>{if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))scheduleBuild()}).observe(q('#form')||document.body,{childList:true,subtree:true});
+ setTimeout(build,100);
 })();
 </script>
