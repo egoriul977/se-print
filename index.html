@@ -4210,7 +4210,7 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
 #stickyPriceBarV6 .sp-cart{font-size:20px!important}
 </style>
 
-<script id="ux-v18-safe-behavior">
+<script id="ux-v18-safe-behavior-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const form=()=>q('#form'), product=()=>q('#product');
@@ -4348,5 +4348,186 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  window.addEventListener('resize',schedule,{passive:true});
  new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden','disabled']});
  setTimeout(refresh,60);
+})();
+</script>
+
+<style id="ux-v19-nav-colors">
+/* selected/completed = green */
+#uxCategoryNavV5 button.ux-done:not(.ux-current){
+ background:rgba(39,184,90,.11)!important;
+ border-color:rgba(39,184,90,.70)!important;
+ color:#187a3d!important;
+ box-shadow:0 0 0 1px rgba(39,184,90,.08)!important;
+}
+/* current viewport section = blue glow. If also completed, blue wins while current. */
+#uxCategoryNavV5 button.ux-current{
+ background:inherit!important;
+ color:inherit!important;
+ border-color:#52c7ff!important;
+ box-shadow:0 0 0 2px rgba(82,199,255,.30),0 0 14px rgba(82,199,255,.50)!important;
+}
+</style>
+<script id="ux-v19-behavior">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form'), product=()=>q('#product');
+ const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null};
+ let steps=[],lastActive=-1,raf=0,programmatic=false,manualUntil=0;
+
+ function ensureNav(){
+   let n=q('#uxCategoryNavV5');
+   if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}
+   return n;
+ }
+ function visible(el){return !!el&&el.offsetParent!==null&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0}
+ function classify(el){
+   const raw=(q(':scope > label',el)?.textContent||'').replace(/[?!！]/g,'').replace(/\s+/g,' ').trim();
+   const t=(raw+' '+(el.id||'')+' '+(el.className||'')).toLowerCase();
+   if(/количество|тираж|qty/.test(t))return ['Количество','qty'];
+   if(/постобработ|postarea|дополнительно|ламинац|резк|люверс|пошив|скотч|отверст/.test(t))return ['Постобработка','post'];
+   if(/размер|формат|ширин|высот/.test(t))return ['Размер','size'];
+   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк|material/.test(t))return ['Материал / печать','choice'];
+   return raw?[raw,'choice']:null;
+ }
+ function collect(){
+   const f=form();if(!f)return[];
+   const a=[];
+   qa(':scope > *, #flagModeBox > *, #cardform > *',f).forEach(el=>{
+     if(!visible(el)||el.matches('script,style'))return;
+     let c=el.matches('.flag-mode-row')?['Вариант флага','choice']:classify(el);
+     if(el.id==='postArea'&&el.textContent.trim())c=['Постобработка','post'];
+     if(!c||(!q('input,select,button',el)&&!el.matches('.flag-mode-row')))return;
+     a.push({el,label:c[0],type:c[1]});
+   });
+   a.sort((a,b)=>a.el.getBoundingClientRect().top-b.el.getBoundingClientRect().top);
+   const out=[];
+   for(const x of a){
+     if(out.some(y=>y.label===x.label&&(y.el.contains(x.el)||x.el.contains(y.el))))continue;
+     out.push(x);
+   }
+   return out;
+ }
+ function isDone(x){
+   if(!visible(x.el))return false;
+   if(x.type==='qty'){
+     const i=qa('input[type=number]',x.el).find(visible);return !!i&&i.value!==''&&+i.value>0;
+   }
+   if(x.type==='size'){
+     const nums=qa('input[type=number]',x.el).filter(visible);
+     if(nums.length)return nums.every(i=>i.value!==''&&+i.value>0);
+     const sel=qa('select',x.el).find(visible);return !!sel&&sel.value!=='';
+   }
+   return !!q('input:checked,.is-choice-selected,.ui-selected',x.el) ||
+          qa('select',x.el).filter(visible).some(sel=>sel.value!=='');
+ }
+ function positionNav(){
+   const n=ensureNav(),p=q('#product .card')||product();
+   if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}
+   document.body.classList.add('ux-category-open');
+   const r=p.getBoundingClientRect(),pad=7;
+   n.style.display=steps.length?'flex':'none';
+   n.style.left=Math.max(pad,r.left)+'px';
+   n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px';
+ }
+ function centerButton(i){
+   const n=ensureNav(),b=q('button[data-v19="'+i+'"]',n);if(!b)return;
+   const max=Math.max(0,n.scrollWidth-n.clientWidth);
+   const left=Math.max(0,Math.min(max,b.offsetLeft+b.offsetWidth/2-n.clientWidth/2));
+   programmatic=true;
+   n.scrollTo({left:left,behavior:'smooth'});
+   setTimeout(()=>programmatic=false,420);
+ }
+ function updateState(forceCenter=false){
+   const n=ensureNav(),bs=qa('button[data-v19]',n);
+   if(!steps.length||!bs.length)return;
+   bs.forEach((b,i)=>b.classList.toggle('ux-done',!!steps[i]&&isDone(steps[i])));
+
+   /* Use the physical center of the usable screen, not scroll position thresholds. */
+   const top=Math.max(n.getBoundingClientRect().bottom+4,0);
+   const bottom=Math.min(q('#stickyPriceBarV6')?.getBoundingClientRect().top||innerHeight,innerHeight);
+   const cy=top+(bottom-top)/2;
+   let best=0,bestDist=Infinity;
+   steps.forEach((x,i)=>{
+     const r=x.el.getBoundingClientRect();
+     const visibleTop=Math.max(r.top,top), visibleBottom=Math.min(r.bottom,bottom);
+     const onScreen=visibleBottom>visibleTop;
+     const blockCenter=onScreen?(visibleTop+visibleBottom)/2:(r.top+r.bottom)/2;
+     const d=Math.abs(blockCenter-cy)+(onScreen?0:innerHeight*2);
+     if(d<bestDist){bestDist=d;best=i}
+   });
+   bs.forEach((b,i)=>b.classList.toggle('ux-current',i===best));
+
+   if((forceCenter||best!==lastActive) && Date.now()>=manualUntil){
+     lastActive=best;
+     centerButton(best);
+   } else {
+     lastActive=best;
+   }
+ }
+ function rebuild(force=false){
+   const n=ensureNav();
+   if(!isOpen()){positionNav();return}
+   const next=collect();
+   const sig=next.map((x,i)=>i+':'+x.label+':'+x.type).join('|');
+   if(force||n.dataset.v19sig!==sig){
+     steps=next;n.dataset.v19sig=sig;n.innerHTML='';
+     steps.forEach((x,i)=>{
+       const b=document.createElement('button');b.type='button';b.dataset.v19=i;b.textContent=x.label;
+       b.onclick=()=>scrollTo({top:scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+18),behavior:'smooth'});
+       n.appendChild(b);
+     });
+     lastActive=-1;
+   } else steps=next;
+   positionNav();updateState(force);
+ }
+ function schedule(force=false){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>rebuild(force))}
+
+ /* Keep v18 bottom bar behavior intact. */
+ function cartBase(){try{return volumeAdjustedItems().reduce((s,x)=>s+x.total,0)}catch(e){return (window.cart||[]).reduce((s,x)=>s+(+x.total||0),0)}}
+ function currentPrice(){
+   for(const el of [window.liveTotal,q('#liveTotal'),q('.live-total'),q('#resultPrice'),q('.result-price')].filter(Boolean)){
+     const t=(el.textContent||'').trim();if(t&&/\d/.test(t))return t;
+   } return '0 ₽';
+ }
+ function updateBar(){
+   const b=q('#stickyPriceBarV6');if(!b)return;
+   let add=q('.sp-add',b);
+   if(!add){add=document.createElement('button');add.type='button';add.className='sp-add';add.textContent='+';b.insertBefore(add,q('.sp-cart',b)||null)}
+   add.style.display=isOpen()?'flex':'none';
+   add.onclick=e=>{e.preventDefault();e.stopPropagation();const btn=qa('button',product()||document).find(x=>x!==add&&/добавить.*(корз|заказ)/i.test(x.textContent||''));if(btn)btn.click()};
+   const cur=q('.sp-current',b),price=q('.sp-price',b),total=q('.sp-total',b),base=cartBase();
+   if(isOpen()&&window.current){
+     if(cur)cur.textContent=current.name;if(price)price.textContent=currentPrice();
+     if(total){total.style.display='block';total.textContent='Общий заказ: '+R(base)}
+   }else{
+     if(cur)cur.textContent='Общая стоимость заказа';if(price)price.textContent=R(base);if(total)total.style.display='none';
+   }
+ }
+ function back(){
+   let b=q('#uxBackCategoriesV11');
+   if(!b){b=document.createElement('button');b.id='uxBackCategoriesV11';b.type='button';b.textContent='‹';document.body.appendChild(b)}
+   b.style.display=isOpen()?'flex':'none';b.onclick=()=>{if(typeof goHome==='function')goHome();schedule(true)}
+ }
+ function refresh(){if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);back();updateBar();schedule(false)}
+
+ const n=ensureNav();
+ const manual=()=>{if(!programmatic)manualUntil=Date.now()+2600};
+ n.addEventListener('touchstart',manual,{passive:true});
+ n.addEventListener('wheel',manual,{passive:true});
+ /* Don't treat our own automatic horizontal scrolling as manual. */
+ n.addEventListener('scroll',()=>{if(!programmatic)manual()},{passive:true});
+
+ /* Page scrolling ONLY updates active block and centers it; it never rebuilds nav. */
+ window.addEventListener('scroll',()=>requestAnimationFrame(()=>{positionNav();updateState(false)}),{passive:true});
+ window.addEventListener('resize',()=>schedule(false),{passive:true});
+ document.addEventListener('change',()=>requestAnimationFrame(refresh));
+ document.addEventListener('input',()=>requestAnimationFrame(refresh));
+ document.addEventListener('click',()=>setTimeout(refresh,10),true);
+
+ /* Rebuild only when form structure really changes (e.g. material changes post-processing). */
+ new MutationObserver(()=>schedule(false)).observe(product()||document.body,{
+   childList:true,subtree:true,attributes:true,attributeFilter:['style','hidden','disabled']
+ });
+ setTimeout(()=>schedule(true),60);
 })();
 </script>
