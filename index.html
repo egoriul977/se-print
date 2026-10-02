@@ -2230,3 +2230,181 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
  filter:blur(10px)!important;transform:scale(1.01);transition:filter .22s ease,transform .22s ease;
 }
 </style>
+
+<style id="safe-mobile-tweaks-v1-css">
+:root{--selected-blue:#39b8ff;--selected-blue-soft:#eaf8ff}
+.option input[type="checkbox"],.option input[type="radio"],.flag-choice input[type="checkbox"],.flag-choice input[type="radio"]{accent-color:var(--selected-blue)!important}
+.option.ui-selected,.flag-choice.ui-selected,.option:has(input:checked){border-color:var(--selected-blue)!important;box-shadow:0 0 0 2px rgba(57,184,255,.12)!important}
+.option.ui-selected::after,.flag-choice.ui-selected::after{content:"✓ ВЫБРАНО"!important;background:var(--selected-blue)!important;color:#fff!important;box-shadow:none!important}
+@media(max-width:700px){html,body{width:100%;max-width:100%;overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box}body{padding-left:0!important;padding-right:0!important}#home,#product,main,.container,.wrap{width:100%!important;max-width:100%!important;min-width:0!important}#home,#product{padding-left:7px!important;padding-right:7px!important}#form{width:100%!important;max-width:100%!important;min-width:0!important;gap:6px!important}.param-block{width:100%!important;max-width:100%!important;min-width:0!important;margin:5px 0!important;padding:8px!important;border-radius:12px!important}.param-block>label,.param-block .label{font-size:11px!important;margin-bottom:5px!important;line-height:1.2!important}.options{gap:6px!important;max-width:100%!important}.option,.flag-choice{min-width:0!important;max-width:100%!important;padding:7px!important;min-height:38px!important;border-radius:11px!important;font-size:11px!important;line-height:1.15!important}input,select,textarea{max-width:100%!important;min-width:0!important;min-height:37px!important;height:37px!important;padding:6px 8px!important;font-size:13px!important}.size-row,.dimensions,.dimension-row,.wh-row,.fabric-custom-size{width:100%!important;max-width:100%!important;gap:6px!important}.example-thumb{max-width:100%!important;border-radius:10px!important}.option.ui-selected::after,.flag-choice.ui-selected::after{font-size:8px!important;padding:3px 6px!important}.options:has(>.ui-selected)>.option:not(.ui-selected),.flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),.material-options:has(>.ui-selected)>.option:not(.ui-selected),.paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){filter:none!important}}
+</style>
+
+<script id="safe-mobile-tweaks-v1">
+(function(){
+ function isManualQty(inp){if(!inp||inp.type!=="number")return false;const box=inp.closest(".param-block,.field,.row,label,div");const t=((box&&box.textContent)||"").toLowerCase();const own=((inp.name||"")+" "+(inp.id||"")+" "+(inp.placeholder||"")).toLowerCase();return /количество|тираж|qty|quantity/.test(t+" "+own)&&!/ширин|высот|размер|width|height|area|площад/.test(own)}
+ function init(root){root.querySelectorAll('input[type="number"]').forEach(inp=>{if(!isManualQty(inp)||inp.dataset.blankQtyInit)return;inp.dataset.blankQtyInit="1";if(inp.value==="1"||inp.getAttribute("value")==="1"){inp.value="";inp.removeAttribute("value")}})}
+ init(document);new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)init(n)}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="safe-ux-improvements-v2">
+:root{--ux-blue:#39b8ff;--ux-pink:#f1268f}
+
+/* Краткая строка текущей конфигурации */
+#uxCurrentSummary{display:none;margin:7px 0 9px;padding:8px 10px;border-radius:11px;background:#f7f9fc;border:1px solid #e7ebf2;color:#596273;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#product:not(.hidden) #uxCurrentSummary{display:block}
+
+/* Выбранные этапы: компактная строка + возможность раскрыть обратно */
+.param-block.ux-collapsible>.ux-collapse-head{display:none}
+@media(max-width:700px){
+ .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head{display:flex;align-items:center;gap:7px;min-height:31px;cursor:pointer}
+ .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head b{font-size:10.5px;color:#263246;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+ .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head .ux-ok{width:17px;height:17px;border-radius:50%;background:var(--ux-blue);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:1000}
+ .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head button{border:0;background:#edf7ff;color:#168bc9;border-radius:8px;padding:5px 7px;font-size:9px;font-weight:900}
+ .param-block.ux-collapsible.ux-collapsed>*:not(.ux-collapse-head){display:none!important}
+}
+
+/* Размеры — компактно в строку */
+@media(max-width:700px){
+ .sizegrid,.size-row,.dimensions,.dimension-row,.wh-row{
+   display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;gap:5px!important;align-items:center!important
+ }
+ .sizegrid:has(>input:nth-child(2))::before,.size-row:has(>input:nth-child(2))::before,
+ .dimensions:has(>input:nth-child(2))::before,.dimension-row:has(>input:nth-child(2))::before,.wh-row:has(>input:nth-child(2))::before{
+   content:"×";grid-column:2;grid-row:1;color:#8b93a1;font-weight:900
+ }
+ .sizegrid>input:first-child,.size-row>input:first-child,.dimensions>input:first-child,.dimension-row>input:first-child,.wh-row>input:first-child{grid-column:1;grid-row:1}
+ .sizegrid>input:nth-child(2),.size-row>input:nth-child(2),.dimensions>input:nth-child(2),.dimension-row>input:nth-child(2),.wh-row>input:nth-child(2){grid-column:3;grid-row:1}
+}
+
+/* Итоговая цена — главный объект */
+.calcbox .total{font-size:clamp(28px,7vw,40px)!important;line-height:1!important;color:var(--ux-pink)!important;letter-spacing:-.7px}
+#uxPriceMeta{margin-top:5px;font-size:10px;color:#7a8392;font-weight:800}
+
+/* Без лишних рамок внутри мобильных блоков */
+@media(max-width:700px){
+ .param-block{box-shadow:none!important}
+ .material-block,.size-block,.qty-block,.post-block{border-color:rgba(31,41,55,.07)!important}
+}
+
+/* Нижняя безопасная панель: ничего не считает сама, только читает штатные значения */
+#uxBottomBar{position:fixed;z-index:90;left:50%;bottom:7px;transform:translateX(-50%);width:min(760px,calc(100vw - 12px));display:none;align-items:center;gap:7px;padding:7px 7px 7px 11px;border-radius:15px;background:rgba(20,27,42,.95);backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(10,15,30,.26);color:#fff}
+#product:not(.hidden)~* #uxBottomBar,#uxBottomBar.show{display:flex}
+#uxBottomBar .uxbp{min-width:0;margin-right:auto}
+#uxBottomBar .uxblabel{font-size:8px;opacity:.62;font-weight:800}
+#uxBottomBar .uxbprice{font-size:18px;font-weight:1000;line-height:1.05;white-space:nowrap}
+#uxBottomBar .uxbcart{font-size:9px;opacity:.72;margin-top:2px;white-space:nowrap}
+#uxBottomBar button{border:0;width:40px;height:40px;flex:0 0 40px;border-radius:11px;display:grid;place-items:center;cursor:pointer;font-size:18px}
+#uxBottomBar .uxAdd{background:var(--ux-pink);color:#fff}
+#uxBottomBar .uxGo{background:#fff;color:#172033}
+#uxBottomBar .uxbprice.bump{animation:uxBump .28s ease-out}
+@keyframes uxBump{40%{transform:scale(1.12)}}
+@media(max-width:700px){body{padding-bottom:66px!important}#uxBottomBar{bottom:5px;width:calc(100vw - 10px)}}
+
+/* Успешное добавление */
+#uxAddedToast{position:fixed;left:50%;bottom:62px;transform:translate(-50%,12px);z-index:110;opacity:0;pointer-events:none;background:#172033;color:#fff;border-radius:11px;padding:8px 12px;font-size:10px;font-weight:900;transition:.18s}
+#uxAddedToast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+
+<script id="safe-ux-improvements-v2-js">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const visible=e=>!!e&&e.offsetParent!==null;
+ function inProduct(){return visible(document.getElementById('product'))}
+ function ensureUI(){
+   const form=document.getElementById('form');
+   if(form&&!document.getElementById('uxCurrentSummary')){
+     const d=document.createElement('div');d.id='uxCurrentSummary';form.parentNode.insertBefore(d,form);
+   }
+   if(!document.getElementById('uxPriceMeta')){
+     const t=document.getElementById('liveTotal');if(t){const d=document.createElement('div');d.id='uxPriceMeta';t.after(d)}
+   }
+   if(!document.getElementById('uxBottomBar')){
+     const b=document.createElement('div');b.id='uxBottomBar';
+     b.innerHTML='<div class="uxbp"><div class="uxblabel">Текущая позиция</div><div class="uxbprice">0 ₽</div><div class="uxbcart">Корзина: 0 ₽</div></div><button class="uxAdd" type="button" title="Добавить в корзину" aria-label="Добавить в корзину">＋</button><button class="uxGo" type="button" title="Перейти к корзине" aria-label="Перейти к корзине">🛒</button>';
+     document.body.appendChild(b);
+     q('.uxAdd',b).onclick=()=>{const x=qa('button').find(z=>/добавить в корзину/i.test(z.textContent||''));x?.click()};
+     q('.uxGo',b).onclick=()=>document.querySelector('.cart')?.scrollIntoView({behavior:'smooth',block:'start'});
+   }
+   if(!document.getElementById('uxAddedToast')){const t=document.createElement('div');t.id='uxAddedToast';t.textContent='✓ Добавлено в корзину';document.body.appendChild(t)}
+ }
+ function labelForBlock(b){
+   const label=b.querySelector(':scope > label')?.textContent?.replace(/\s+/g,' ').trim()||'Параметр';
+   let val='';
+   const checked=b.querySelector('input:checked');
+   if(checked){const l=checked.closest('.option,label,.flag-choice');val=l?.textContent?.replace(/✓ ВЫБРАНО/g,'').replace(/\s+/g,' ').trim()||''}
+   const sel=b.querySelector('select');if(!val&&sel&&sel.value)val=sel.options[sel.selectedIndex]?.text||'';
+   const nums=qa('input[type=number]',b).filter(x=>x.value!=='');
+   if(!val&&nums.length)val=nums.map(x=>x.value).join(' × ');
+   return {label:label.replace(/\?.*$/,'').trim(),val};
+ }
+ function setupCollapsible(){
+   if(innerWidth>700)return;
+   const form=document.getElementById('form');if(!form)return;
+   qa(':scope > .param-block',form).forEach(b=>{
+     // Материал и размер можно сворачивать. Постобработку и количество не трогаем.
+     const cls=b.className;
+     const text=(b.textContent||'').toLowerCase();
+     const allowed=/material-block|size-block|param-material|param-size/.test(cls)||(/материал|тип карты|тип нанесения/.test(text)&&!/постобработ|дополнительно/.test(text));
+     if(!allowed)return;
+     b.classList.add('ux-collapsible');
+     if(!b.querySelector(':scope > .ux-collapse-head')){
+       const h=document.createElement('div');h.className='ux-collapse-head';
+       h.innerHTML='<span class="ux-ok">✓</span><b></b><button type="button">Изменить</button>';
+       b.prepend(h);h.onclick=()=>b.classList.remove('ux-collapsed');
+     }
+     const info=labelForBlock(b),head=b.querySelector('.ux-collapse-head b');
+     if(head)head.textContent=info.val?`${info.label}: ${info.val}`:info.label;
+     const hasChoice=!!b.querySelector('input:checked')||!!(b.querySelector('select')?.value);
+     const nums=qa('input[type=number]',b).filter(x=>visible(x));
+     const numsDone=!nums.length||nums.every(x=>x.value!==''&&+x.value>0);
+     if(hasChoice&&numsDone&&document.activeElement&&!b.contains(document.activeElement))b.classList.add('ux-collapsed');
+   });
+ }
+ function currentSummary(){
+   const el=document.getElementById('uxCurrentSummary');if(!el)return;
+   const bits=[];
+   const mat=(typeof window.currentMaterialLabel==='function'?window.currentMaterialLabel():'');if(mat)bits.push(mat);
+   const m=window.lastCalcMeta;
+   if(m?.wCm!=null&&m?.hCm!=null)bits.push(`${m.wCm}×${m.hCm} см`);
+   if(m?.qty)bits.push(`${m.qty} шт.`);
+   if(typeof window.selectedPostNames==='function'){const p=window.selectedPostNames();if(p?.length)bits.push(p.join(', '))}
+   el.textContent=bits.length?bits.join(' • '):'Выберите параметры текущей позиции';
+ }
+ function priceMeta(){
+   const el=document.getElementById('uxPriceMeta'),m=window.lastCalcMeta;if(!el)return;
+   const bits=[];
+   if(m?.qty>1&&m?.total)bits.push(`${Math.round(m.total/m.qty).toLocaleString('ru-RU')} ₽/шт.`);
+   if(m?.area)bits.push(`${Number(m.area).toFixed(3).replace('.',',')} м²`);
+   if(m?.baseRate)bits.push(`${Math.round(m.baseRate).toLocaleString('ru-RU')} ₽/м²`);
+   el.textContent=bits.join(' · ');
+ }
+ let oldPrice='';
+ function bottom(){
+   const b=document.getElementById('uxBottomBar');if(!b)return;
+   b.classList.toggle('show',inProduct());
+   const live=document.getElementById('liveTotal'),cur=(live?.textContent||'0 ₽').trim();
+   const pe=q('.uxbprice',b);
+   if(pe&&cur!==oldPrice){pe.textContent=cur;pe.classList.remove('bump');void pe.offsetWidth;pe.classList.add('bump');oldPrice=cur}
+   // Read the calculator's own cash total. No duplicate cart math.
+   const cash=document.getElementById('grandCash');
+   q('.uxbcart',b).textContent='Корзина: '+((cash?.textContent||'0 ₽').trim());
+ }
+ let lastCartCount=0;
+ function addedToast(){
+   const c=window.cart;if(!Array.isArray(c))return;
+   if(c.length>lastCartCount){
+     const t=document.getElementById('uxAddedToast');t?.classList.add('show');setTimeout(()=>t?.classList.remove('show'),1100)
+   }
+   lastCartCount=c.length;
+ }
+ let pending=false;
+ function tick(){pending=false;ensureUI();setupCollapsible();currentSummary();priceMeta();bottom();addedToast()}
+ function schedule(){if(!pending){pending=true;requestAnimationFrame(tick)}}
+ document.addEventListener('change',()=>setTimeout(schedule,20));
+ document.addEventListener('input',schedule);
+ document.addEventListener('click',()=>setTimeout(schedule,25));
+ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
+ setTimeout(schedule,120);
+})();
+</script>
