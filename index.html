@@ -3769,7 +3769,15 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  }
  function buildNav(){
    const n=nav();steps=collect();n.innerHTML='';
-   steps.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.dataset.step=i;b.textContent=x.label;b.onclick=()=>scrollTo({top:scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+18),behavior:'smooth'});n.appendChild(b)});
+   steps.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.dataset.step=i;b.textContent=x.label;b.onclick=()=>{
+       /* Find the current step again at click time so a re-render cannot leave a stale target. */
+       const fresh=collect();
+       const target=fresh[i]&&fresh[i].el;
+       if(!target)return;
+       const navBottom=n.getBoundingClientRect().bottom;
+       const y=Math.max(0,scrollY+target.getBoundingClientRect().top-navBottom-12);
+       scrollTo({top:y,behavior:'smooth'});
+     };n.appendChild(b)});
    positionNav();currentStep();
  }
 
@@ -4264,12 +4272,21 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  }
  function positionNav(){
    const n=ensureNav(),p=q('#product .card')||product();
-   if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}
+   const canvasNoNav=!!(window.current&&current.id==='canvas');
+   if(!isOpen()||!p||canvasNoNav){
+     n.style.display='none';
+     document.body.classList.remove('ux-category-open');
+     return;
+   }
    document.body.classList.add('ux-category-open');
    const r=p.getBoundingClientRect(),pad=7;
    n.style.display=steps.length?'flex':'none';
    n.style.left=Math.max(pad,r.left)+'px';
    n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px';
+ }
+ function setNavTail(px=0){
+   const v=Math.max(0,Math.ceil(px));
+   document.documentElement.style.setProperty('--ux-nav-tail',v+'px');
  }
  function updateActive(force=false){
    const n=ensureNav(),bs=qa('button[data-v18]',n);if(!bs.length)return;
@@ -4289,13 +4306,82 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  }
  function rebuild(){
    const n=ensureNav();
-   if(!isOpen()){positionNav();return}
+   if(!isOpen()||(window.current&&current.id==='canvas')){
+     steps=[];
+     positionNav();
+     return;
+   }
    const next=collect(),sig=next.map((x,i)=>i+':'+x.label+':'+x.type).join('|');
    if(n.dataset.v18sig!==sig){
      steps=next;n.dataset.v18sig=sig;n.innerHTML='';
      steps.forEach((x,i)=>{
        const b=document.createElement('button');b.type='button';b.dataset.v18=i;b.textContent=x.label;
-       b.onclick=()=>scrollTo({top:scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+18),behavior:'smooth'});
+       b.dataset.v18label=x.label;
+       b.dataset.v18type=x.type;
+       b.onclick=(ev)=>{
+         ev.preventDefault();
+         ev.stopPropagation();
+
+         /* Never use the old element captured when the nav was built.
+            Re-read the current form at the exact moment of the click. */
+         const fresh=collect();
+         let target=fresh[i];
+
+         if(!target ||
+            target.label!==b.dataset.v18label ||
+            target.type!==b.dataset.v18type){
+           target=fresh.find(z=>
+             z.label===b.dataset.v18label &&
+             z.type===b.dataset.v18type
+           );
+         }
+         if(!target || !visible(target.el)) return;
+
+         /* Keep this nav item visibly active immediately while the page moves. */
+         qa('button[data-v18]',n).forEach(x=>x.classList.remove('ux-current'));
+         b.classList.add('ux-current');
+
+         /* Put the TARGET BLOCK in the middle of the usable screen:
+            below the top nav and above the sticky bottom bar. */
+         const navBottom=n.getBoundingClientRect().bottom;
+         const bar=q('#stickyPriceBarV6');
+         const barTop=Math.min(
+           bar ? bar.getBoundingClientRect().top : innerHeight,
+           innerHeight
+         );
+         const usableTop=navBottom+8;
+         const usableBottom=Math.max(usableTop+80,barTop-8);
+         const usableCenter=usableTop+(usableBottom-usableTop)/2;
+
+         const tr=target.el.getBoundingClientRect();
+         const targetCenter=tr.top+tr.height/2;
+
+         /* First remove any old extra tail and calculate the real desired Y. */
+         setNavTail(0);
+         const desiredY=Math.max(0,scrollY+(targetCenter-usableCenter));
+         let maxScroll=Math.max(
+           0,
+           document.documentElement.scrollHeight-innerHeight
+         );
+
+         /* If the target is too close to the end of the page (often "Количество"),
+            create exactly enough invisible scroll room for it to reach the center. */
+         if(desiredY>maxScroll){
+           setNavTail(desiredY-maxScroll+24);
+           maxScroll=Math.max(
+             0,
+             document.documentElement.scrollHeight-innerHeight
+           );
+         }
+
+         const y=Math.max(0,Math.min(maxScroll,desiredY));
+         window.scrollTo({top:y,behavior:'smooth'});
+
+         /* Re-check the active zone while/after smooth scrolling. */
+         [120,280,520,820].forEach(ms=>
+           setTimeout(()=>updateActive(false),ms)
+         );
+       };
        n.appendChild(b);
      });lastActive=-1;
    }else steps=next;
@@ -4335,7 +4421,11 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  function back(){
    let b=q('#uxBackCategoriesV11');
    if(!b){b=document.createElement('button');b.id='uxBackCategoriesV11';b.type='button';b.textContent='‹';document.body.appendChild(b)}
-   b.style.display=isOpen()?'flex':'none';b.onclick=()=>{if(typeof goHome==='function')goHome();requestAnimationFrame(refresh)}
+   b.style.display=isOpen()?'flex':'none';b.onclick=()=>{
+     setNavTail(0);
+     if(typeof goHome==='function')goHome();
+     requestAnimationFrame(refresh)
+   }
  }
  function refresh(){if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);back();updateBar();schedule()}
 
@@ -4571,3 +4661,55 @@ body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex!important}
  setTimeout(refresh,30);
 })();
 </script>
+
+<style id="ux-v24-nav-colors">
+/* Default incomplete button keeps its existing neutral appearance. */
+#uxCategoryNavV5 button.ux-done{
+ background:rgba(39,184,90,.12)!important;
+ color:#187a3d!important;
+ border-color:rgba(39,184,90,.74)!important;
+}
+/* Current = blue glow ONLY. Do not replace the button's green/neutral fill. */
+#uxCategoryNavV5 button.ux-current{
+ box-shadow:0 0 0 2px rgba(72,196,251,.38),0 0 17px 4px rgba(72,196,251,.60)!important;
+ border-color:#48c4fb!important;
+}
+#uxCategoryNavV5 button.ux-done.ux-current{
+ background:rgba(39,184,90,.12)!important;
+ color:#187a3d!important;
+}
+</style>
+
+<style id="ux-v26-nav-state-final">
+#uxCategoryNavV5 button.ux-done{
+  background:#e6f8ec!important;
+  border-color:#7bd398!important;
+  color:#177b3a!important;
+}
+#uxCategoryNavV5 button:not(.ux-done){
+  background:#eff2f5!important;
+  border-color:#d7dee8!important;
+  color:#7c8592!important;
+}
+#uxCategoryNavV5 button.ux-current{
+  box-shadow:
+    0 0 0 2px rgba(72,196,251,.40),
+    0 0 17px 4px rgba(72,196,251,.62)!important;
+}
+/* Current state MUST NOT replace base green/neutral styling. */
+#uxCategoryNavV5 button.ux-done.ux-current{
+  background:#e6f8ec!important;
+  border-color:#7bd398!important;
+  color:#177b3a!important;
+}
+#uxCategoryNavV5 button:not(.ux-done).ux-current{
+  background:#eff2f5!important;
+  border-color:#d7dee8!important;
+  color:#7c8592!important;
+}
+</style>
+
+<style id="ux-v27-nav-tail">
+:root{--ux-nav-tail:0px}
+body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
+</style>
