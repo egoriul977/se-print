@@ -2290,6 +2290,38 @@ document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName==='SELECT
 }
 </style>
 
+<style id="flag-mode-inline-unified-v31">
+/* ФЛАГИ: три основных варианта должны быть единой карточкой — текст слева, картинка справа */
+.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+.flag-mode-unified .flag-mode-card{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 124px!important;grid-template-areas:"label thumb"!important;
+ align-items:center!important;gap:12px!important;width:100%!important;min-width:0!important;
+ min-height:104px!important;padding:12px!important;border-radius:16px!important;overflow:hidden!important;
+}
+.flag-mode-unified .flag-mode-card .flag-mode-label{
+ grid-area:label!important;display:flex!important;align-items:flex-start!important;justify-content:flex-start!important;
+ text-align:left!important;min-height:auto!important;width:100%!important;margin:0!important;padding:0!important;gap:6px!important;
+}
+.flag-mode-unified .flag-mode-card .flag-mode-label b{display:block!important;line-height:1.25!important}
+.flag-mode-unified .flag-mode-card .example-thumb,
+.flag-mode-unified .flag-mode-card .flag-mode-img{
+ grid-area:thumb!important;display:block!important;position:relative!important;inset:auto!important;
+ width:124px!important;max-width:none!important;height:84px!important;margin:0!important;
+ justify-self:end!important;align-self:center!important;border-radius:12px!important;overflow:hidden!important;flex:none!important;
+}
+.flag-mode-unified .flag-mode-card .example-thumb img,
+.flag-mode-unified .flag-mode-card .flag-mode-img img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.flag-mode-unified .flag-mode-card.is-choice-selected .example-thumb,
+.flag-mode-unified .flag-mode-card.is-choice-selected .flag-mode-img{transform:scale(1.04)!important;transition:transform .22s ease!important}
+@media(max-width:700px){
+ .flag-mode-unified{grid-template-columns:1fr!important;gap:10px!important}
+ .flag-mode-unified .flag-mode-card{grid-template-columns:minmax(0,1fr) 112px!important;gap:10px!important;min-height:88px!important;padding:10px 12px!important}
+ .flag-mode-unified .flag-mode-card .flag-mode-label{font-size:14px!important}
+ .flag-mode-unified .flag-mode-card .example-thumb,
+ .flag-mode-unified .flag-mode-card .flag-mode-img{width:112px!important;height:74px!important}
+}
+</style>
+
 <script id="selected-badges-global-v1">
 function enhanceSelectedBadges(root=document){
  root.querySelectorAll('.option,.flag-choice').forEach(el=>{
@@ -4923,4 +4955,39 @@ body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
 #form .flag-winder-row{align-items:stretch!important} 
 #form .flag-winder-row .example-thumb{flex:0 0 94px!important;max-width:94px!important;height:72px!important} 
 @media(max-width:700px){#form .flag-winder-row .example-thumb{flex:0 0 72px!important;max-width:72px!important;height:56px!important}}
+</style>
+
+<style id="ux-v31-flag-mode-card-final-fix">
+/* Финальный жёсткий фикс: три режима флагов — одна цельная карточка с текстом слева и картинкой справа */
+#form .flag-mode-row.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+  display:grid!important;grid-template-columns:minmax(0,1fr) 124px!important;grid-template-areas:"label thumb"!important;
+  align-items:center!important;gap:12px!important;min-height:104px!important;
+  padding:12px!important;overflow:hidden!important;width:100%!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+  grid-area:label!important;display:flex!important;align-items:flex-start!important;justify-content:flex-start!important;
+  text-align:left!important;min-height:auto!important;padding:0!important;margin:0!important;width:100%!important;gap:6px!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{
+  grid-area:thumb!important;display:block!important;position:relative!important;inset:auto!important;
+  width:124px!important;max-width:124px!important;height:84px!important;justify-self:end!important;align-self:center!important;
+  margin:0!important;flex:none!important;border-radius:12px!important;overflow:hidden!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
+  width:124px!important;max-width:124px!important;height:84px!important;transform:scale(1.04)!important;
+}
+@media(max-width:700px){
+  #form .flag-mode-row.flag-mode-unified{grid-template-columns:1fr!important;gap:10px!important}
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{grid-template-columns:minmax(0,1fr) 112px!important;min-height:88px!important;padding:10px 12px!important;gap:10px!important}
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{font-size:14px!important}
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{width:112px!important;max-width:112px!important;height:74px!important}
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{width:112px!important;max-width:112px!important;height:74px!important}
+}
 </style>
