@@ -2887,6 +2887,310 @@ button[aria-label*="подсказ" i],button[title*="подсказ" i]{
 }
 </style>
 
+<script id="ux-v7-behavior-disabled" type="text/plain">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form');
+ const product=()=>q('#product');
+ const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null};
+
+ function unifyPostExamples(root=document){
+   qa('.post-example-row',root).forEach(row=>{
+     const opt=q(':scope>.option',row),thumb=q(':scope>.example-thumb',row);
+     if(opt&&thumb&&!opt.contains(thumb))opt.appendChild(thumb);
+   });
+ }
+
+ /* 1) Leaflets default to A6 whenever leaflet mode is chosen and no explicit size exists. */
+ function ensureLeafletA6(){
+   if(!current||current.id!=='cards')return;
+   const leafletSelected=!!q('input[value*="leaf" i]:checked,input[id*="leaf" i]:checked,input[data-*="leaf"]');
+   const text=(form()?.textContent||'').toLowerCase();
+   if(!leafletSelected && !/листовки офсет/.test(text))return;
+   const sel=qa('select',form()).find(x=>/размер|формат/.test((x.closest('label,div')?.textContent||'').toLowerCase()) &&
+      [...x.options].some(o=>/a6|а6/i.test(o.textContent)));
+   if(sel){
+     const a6=[...sel.options].find(o=>/^\s*[aа]6\b/i.test(o.textContent)||/[aа]6/i.test(o.textContent));
+     if(a6 && sel.value!==a6.value){sel.value=a6.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+   }
+   const radios=qa('input[type=radio]',form());
+   const a6r=radios.find(r=>/[aа]6/i.test((r.closest('label')?.textContent||'')));
+   if(a6r&&!a6r.checked){a6r.checked=true;a6r.dispatchEvent(new Event('change',{bubbles:true}))}
+ }
+
+ /* Repeat-click deselection */
+ document.addEventListener('pointerdown',e=>{
+   const card=e.target.closest('.option,.flag-mode-card');
+   if(!card || e.target.closest('.example-thumb'))return;
+   if(card.classList.contains('flag-mode-card')){
+     if(card.classList.contains('is-choice-selected')){
+       e.preventDefault();flagMode='';flagFixed=null;winderFixed=null;lastCalcMeta=null;
+       qa('.flag-mode-card').forEach(x=>x.classList.remove('is-choice-selected','ui-selected'));
+       const box=q('#flagModeBox');if(box)box.innerHTML='';
+       liveTotal.textContent='0 ₽';breakdown.textContent='Выберите вариант изготовления флага.';
+       setTimeout(refresh,0);
+     }
+     return;
+   }
+   const r=q('input[type=radio]',card);
+   if(r&&r.checked){e.preventDefault();r.checked=false;r.dispatchEvent(new Event('change',{bubbles:true}));card.classList.remove('ui-selected');setTimeout(refresh,0)}
+ },true);
+
+ function nav(){let n=q('#uxCategoryNavV5');if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}return n}
+
+ /* 5) One nav item per semantic parameter, de-duplicated by type. */
+ function getSteps(){
+   const f=form();if(!f)return[];
+   const out=[],used=new Set();
+   const add=(el,label,key,type='choice')=>{
+     if(!el||el.offsetParent===null||used.has(key))return;
+     used.add(key);out.push({el,label,key,type});
+   };
+   const flag=q('.flag-mode-row.flag-mode-unified',f);
+   if(flag)add(flag,'Вариант флага','flag');
+
+   qa(':scope > .param-block',f).forEach(b=>{
+     const t=((q(':scope > label',b)?.textContent||'')+' '+(b.className||'')).toLowerCase();
+     if(/qty|количество|тираж/.test(t))add(b,'Количество','qty','qty');
+     else if(/post|постобработ|дополнительно/.test(t))add(b,'Постобработка','post');
+     else if(/размер|формат|ширин|высот/.test(t))add(b,'Размер','size','size');
+     else if(/material|материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))add(b,'Материал / печать','material');
+   });
+
+   /* Specialized forms: only fill missing semantic slots. */
+   const visible=[...f.querySelectorAll('label,.options,.row')].filter(x=>x.offsetParent!==null);
+   const byText=(rx)=>visible.find(x=>rx.test((x.textContent||'').toLowerCase()));
+   add(byText(/материал|тип печати|тип нанесения/),'Материал / печать','material');
+   add(byText(/размер|формат|ширина/),'Размер','size','size');
+   const pa=q('#postArea',f);if(pa&&pa.textContent.trim())add(pa,'Постобработка','post');
+   const qi=q('#qty',f);if(qi)add(qi.closest('.param-block,div')||qi,'Количество','qty','qty');
+   return out;
+ }
+ function completed(x){
+   if(x.type==='qty'){const i=q('input[type=number]',x.el);return !!i&&+i.value>0}
+   if(x.type==='size'){const ins=qa('input[type=number]',x.el).filter(i=>i.offsetParent!==null);return ins.length?ins.every(i=>+i.value>0):!!q('select',x.el)?.value}
+   return !!q('input:checked,.ui-selected,.is-choice-selected',x.el)||qa('select',x.el).some(x=>x.value);
+ }
+ function positionNav(){
+   const n=nav(),p=q('#product .card')||product();
+   if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}
+   document.body.classList.add('ux-category-open');
+   const r=p.getBoundingClientRect(),pad=7;
+   n.style.display='flex';n.style.left=Math.max(pad,r.left)+'px';
+   n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px';
+ }
+ function buildNav(){
+   const n=nav();
+   if(!isOpen()){n.innerHTML='';n.style.display='none';return}
+   n.innerHTML='';
+   getSteps().forEach((x,i)=>{
+     if(!x.el.id)x.el.id='uxV7Step'+i;
+     const b=document.createElement('button');b.type='button';b.textContent=x.label;b.classList.toggle('done',completed(x));
+     b.onclick=()=>{const y=scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+16);scrollTo({top:y,behavior:'smooth'})};
+     n.appendChild(b);
+   });
+   positionNav();
+ }
+
+ function cartBase(){
+   try{return volumeAdjustedItems().reduce((sum,x)=>sum+x.total,0)}
+   catch(e){return (window.cart||[]).reduce((sum,x)=>sum+(+x.total||0),0)}
+ }
+ function bar(){
+   let b=q('#stickyPriceBarV6');
+   if(!b){
+     b=document.createElement('div');b.id='stickyPriceBarV6';
+     b.innerHTML='<div class="sp-main"><div class="sp-current"></div><div class="sp-price">0 ₽</div><div class="sp-total">Общий заказ: 0 ₽</div></div><button type="button" class="sp-cart" title="Перейти в корзину" aria-label="Перейти в корзину">🛒</button>';
+     document.body.appendChild(b);
+   }
+   const btn=q('.sp-cart',b);
+   if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.onclick=()=>{const c=q('.cart');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})}}
+   return b;
+ }
+ function updateBar(){
+   const b=bar(),open=isOpen(),base=cartBase(),cur=q('.sp-current',b),price=q('.sp-price',b),total=q('.sp-total',b);
+   if(open&&current){
+     cur.textContent=current.name;price.textContent=(liveTotal?.textContent||'0 ₽').trim()||'0 ₽';
+     total.style.display='block';total.textContent='Общий заказ: '+R(base);
+   }else{
+     cur.textContent='Общая стоимость заказа';price.textContent=R(base);total.style.display='none';
+   }
+ }
+
+ /* 3) Pink tick for the shirt add-on only. */
+ function shirtTick(){
+   qa('.option',form()||document).forEach(o=>{
+     const t=(o.textContent||'').toLowerCase();
+     o.classList.toggle('shirt-extra-selected',/нужна футболка/.test(t)&&!!q('input:checked',o));
+   });
+ }
+
+ function refresh(){
+   unifyPostExamples(form()||document);
+   if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);
+   shirtTick();ensureLeafletA6();buildNav();updateBar();
+ }
+
+ /* 2,4) Observe visibility/state directly; no waiting for a later click. */
+ const immediate=()=>{positionNav();updateBar()};
+ document.addEventListener('change',()=>setTimeout(refresh,0));
+ document.addEventListener('input',()=>setTimeout(()=>{shirtTick();updateBar();buildNav()},0));
+ document.addEventListener('click',()=>{immediate();requestAnimationFrame(()=>{immediate();refresh()})},true);
+ window.addEventListener('popstate',()=>requestAnimationFrame(refresh));
+ window.addEventListener('scroll',positionNav,{passive:true});
+ window.addEventListener('resize',positionNav,{passive:true});
+ new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{attributes:true,attributeFilter:['style','class','hidden'],childList:true,subtree:true,characterData:true});
+ setInterval(immediate,250);
+ setTimeout(refresh,50);
+})();
+</script>
+
+<style id="ux-v8-style">
+/* Quick add button inside bottom price panel */
+#stickyPriceBarV6{grid-template-columns:minmax(0,1fr) auto auto!important}
+#stickyPriceBarV6 .sp-add{
+ width:44px;height:44px;border:0;border-radius:12px;background:#27b85a;color:#fff;
+ font-size:29px;line-height:1;font-weight:900;display:none;align-items:center;justify-content:center;
+ cursor:pointer;box-shadow:0 5px 15px rgba(39,184,90,.25);padding:0
+}
+#stickyPriceBarV6 .sp-add:active{transform:scale(.94)}
+body.ux-category-open #stickyPriceBarV6 .sp-add{display:flex}
+
+/* Persistent back-to-categories button */
+#uxBackCategoriesV8{
+ position:fixed;left:8px;top:8px;z-index:1300;
+ width:38px;height:38px;border:1px solid rgba(255,255,255,.92);border-radius:12px;
+ background:rgba(255,255,255,.96);backdrop-filter:blur(14px);
+ box-shadow:0 5px 18px rgba(25,39,62,.18);
+ color:#20242a;font-size:23px;font-weight:900;line-height:1;
+ display:none;align-items:center;justify-content:center;cursor:pointer;padding:0
+}
+body.ux-category-open #uxBackCategoriesV8{display:flex}
+#uxCategoryNavV5{padding-left:47px!important}
+</style>
+
+<script id="ux-v8-behavior">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form'), product=()=>q('#product');
+ const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null};
+
+ function unifyPostExamples(root=document){
+   qa('.post-example-row',root).forEach(row=>{
+     const opt=q(':scope>.option',row),thumb=q(':scope>.example-thumb',row);
+     if(opt&&thumb&&!opt.contains(thumb))opt.appendChild(thumb);
+   });
+ }
+ function ensureLeafletA6(){
+   if(!current||current.id!=='cards')return;
+   const txt=(form()?.textContent||'').toLowerCase();
+   if(!/листовки офсет/.test(txt))return;
+   const sel=qa('select',form()).find(x=>[...x.options].some(o=>/[aа]6/i.test(o.textContent)));
+   if(sel){const a6=[...sel.options].find(o=>/[aа]6/i.test(o.textContent));if(a6&&!sel.value){sel.value=a6.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}}
+ }
+
+ function nav(){let n=q('#uxCategoryNavV5');if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}return n}
+ function getSteps(){
+   const f=form();if(!f)return[];const out=[],used=new Set();
+   const add=(el,label,key,type='choice')=>{if(!el||el.offsetParent===null||used.has(key))return;used.add(key);out.push({el,label,key,type})};
+   const flag=q('.flag-mode-row.flag-mode-unified',f);if(flag)add(flag,'Вариант флага','flag');
+   qa(':scope > .param-block',f).forEach(b=>{
+     const t=((q(':scope > label',b)?.textContent||'')+' '+b.className).toLowerCase();
+     if(/qty|количество|тираж/.test(t))add(b,'Количество','qty','qty');
+     else if(/post|постобработ|дополнительно/.test(t))add(b,'Постобработка','post');
+     else if(/размер|формат|ширин|высот/.test(t))add(b,'Размер','size','size');
+     else if(/material|материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))add(b,'Материал / печать','material');
+   });
+   const pa=q('#postArea',f);if(pa&&pa.textContent.trim())add(pa,'Постобработка','post');
+   const qi=q('#qty',f);if(qi)add(qi.closest('.param-block,div')||qi,'Количество','qty','qty');
+   return out;
+ }
+ function completed(x){
+   if(x.type==='qty'){const i=q('input[type=number]',x.el);return !!i&&+i.value>0}
+   if(x.type==='size'){const ins=qa('input[type=number]',x.el).filter(i=>i.offsetParent!==null);return ins.length?ins.every(i=>+i.value>0):!!q('select',x.el)?.value}
+   return !!q('input:checked,.ui-selected,.is-choice-selected',x.el)||qa('select',x.el).some(x=>x.value);
+ }
+ function positionNav(){
+   const n=nav(),p=q('#product .card')||product();
+   if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}
+   document.body.classList.add('ux-category-open');
+   const r=p.getBoundingClientRect(),pad=7;n.style.display='flex';
+   n.style.left=Math.max(pad,r.left)+'px';n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px';
+ }
+ function buildNav(){
+   const n=nav();if(!isOpen()){n.innerHTML='';n.style.display='none';return}
+   n.innerHTML='';getSteps().forEach((x,i)=>{
+     const b=document.createElement('button');b.type='button';b.textContent=x.label;b.classList.toggle('done',completed(x));
+     b.onclick=()=>{const y=scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+16);scrollTo({top:y,behavior:'smooth'})};n.appendChild(b);
+   });positionNav();
+ }
+
+ function cartBase(){
+   try{return volumeAdjustedItems().reduce((sum,x)=>sum+x.total,0)}
+   catch(e){return (window.cart||[]).reduce((sum,x)=>sum+(+x.total||0),0)}
+ }
+ function findNativeAdd(){
+   const f=form();if(!f)return null;
+   return qa('button',f).find(b=>/добавить.*корз|добавить.*заказ/i.test((b.textContent||'').trim()))||null;
+ }
+ function bar(){
+   let b=q('#stickyPriceBarV6');
+   if(!b){b=document.createElement('div');b.id='stickyPriceBarV6';document.body.appendChild(b)}
+   if(!q('.sp-main',b))b.innerHTML='<div class="sp-main"><div class="sp-current"></div><div class="sp-price">0 ₽</div><div class="sp-total">Общий заказ: 0 ₽</div></div>';
+   let add=q('.sp-add',b);if(!add){add=document.createElement('button');add.type='button';add.className='sp-add';add.title='Добавить позицию в заказ';add.setAttribute('aria-label','Добавить позицию в заказ');add.textContent='+';b.appendChild(add)}
+   let cartBtn=q('.sp-cart',b);if(!cartBtn){cartBtn=document.createElement('button');cartBtn.type='button';cartBtn.className='sp-cart';cartBtn.textContent='🛒';b.appendChild(cartBtn)}
+   cartBtn.onclick=()=>{const c=q('.cart');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})};
+   add.onclick=()=>{
+     if(!isOpen())return;
+     const native=findNativeAdd();
+     if(native){native.click();return}
+     /* Fallback for categories whose native button is outside #form. */
+     const all=qa('button',product()||document);
+     const btn=all.find(x=>/добавить.*корз|добавить.*заказ/i.test((x.textContent||'').trim()));
+     if(btn)btn.click();
+   };
+   return b;
+ }
+ function updateBar(){
+   const b=bar(),open=isOpen(),base=cartBase(),cur=q('.sp-current',b),price=q('.sp-price',b),total=q('.sp-total',b),add=q('.sp-add',b);
+   if(open&&current){
+     cur.textContent=current.name;price.textContent=(liveTotal?.textContent||'0 ₽').trim()||'0 ₽';
+     total.style.display='block';total.textContent='Общий заказ: '+R(base);
+     add.style.display='flex';
+   }else{
+     cur.textContent='Общая стоимость заказа';price.textContent=R(base);total.style.display='none';add.style.display='none';
+   }
+ }
+
+ function backButton(){
+   let b=q('#uxBackCategoriesV8');if(!b){b=document.createElement('button');b.id='uxBackCategoriesV8';b.type='button';b.title='Назад к категориям';b.setAttribute('aria-label','Назад к категориям');b.textContent='‹';document.body.appendChild(b)}
+   b.onclick=()=>{
+     /* Prefer the calculator's own back/category button so all internal state is reset normally. */
+     const candidates=qa('button,a',product()||document);
+     const native=candidates.find(x=>/назад|категори|главн/i.test((x.textContent||'').trim()) && x!==b);
+     if(native){native.click();requestAnimationFrame(refresh);return}
+     /* Common calculator helper, if present. */
+     if(typeof window.showCategories==='function'){window.showCategories();requestAnimationFrame(refresh);return}
+     if(typeof window.goHome==='function'){window.goHome();requestAnimationFrame(refresh);return}
+   };
+   return b;
+ }
+ function shirtTick(){qa('.option',form()||document).forEach(o=>o.classList.toggle('shirt-extra-selected',/нужна футболка/i.test(o.textContent||'')&&!!q('input:checked',o)))}
+
+ function refresh(){
+   backButton();unifyPostExamples(form()||document);
+   if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);
+   shirtTick();ensureLeafletA6();buildNav();updateBar();positionNav();
+ }
+ document.addEventListener('change',()=>requestAnimationFrame(refresh));
+ document.addEventListener('input',()=>requestAnimationFrame(refresh));
+ document.addEventListener('click',()=>requestAnimationFrame(refresh),true);
+ window.addEventListener('scroll',positionNav,{passive:true});window.addEventListener('resize',positionNav,{passive:true});
+ new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{attributes:true,attributeFilter:['style','class','hidden'],childList:true,subtree:true,characterData:true});
+ setInterval(()=>{positionNav();updateBar()},250);setTimeout(refresh,40);
+})();
+</script>
+
 <script id="ux-v7-behavior">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3042,5 +3346,108 @@ button[aria-label*="подсказ" i],button[title*="подсказ" i]{
  new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{attributes:true,attributeFilter:['style','class','hidden'],childList:true,subtree:true,characterData:true});
  setInterval(immediate,250);
  setTimeout(refresh,50);
+})();
+</script>
+
+<style id="ux-v9-smooth">
+@media(max-width:700px){
+  /* Remove costly width/grid interpolation. Layout changes happen instantly;
+     perceived motion comes from GPU transform/opacity. */
+  #form .material-options>.option,
+  #form .paper-material-row>.option,
+  #form .options:has(>.option .example-thumb)>.option,
+  #form .post-block .options>.option,
+  #form .post-example-row>.option,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+    will-change:transform,opacity,box-shadow!important;
+    contain:layout paint!important;
+    backface-visibility:hidden!important;
+    transform:translateZ(0) scale(.965)!important;
+    transition:transform .30s cubic-bezier(.2,.75,.2,1),
+               box-shadow .26s ease,
+               border-color .22s ease,
+               opacity .22s ease!important;
+  }
+
+  /* Keep the same compact/expanded dimensions, but do not tween them.
+     This avoids recalculating multi-line text on every animation frame. */
+  #form .material-options>.option,
+  #form .paper-material-row>.option,
+  #form .options:has(>.option .example-thumb)>.option,
+  #form .post-block .options>.option,
+  #form .post-example-row>.option,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+    transition-property:transform,box-shadow,border-color,opacity!important;
+  }
+
+  #form .material-options>.option.ui-selected,
+  #form .material-options>.option:has(input:checked),
+  #form .paper-material-row>.option.ui-selected,
+  #form .paper-material-row>.option:has(input:checked),
+  #form .options:has(>.option .example-thumb)>.option.ui-selected,
+  #form .options:has(>.option .example-thumb)>.option:has(input:checked),
+  #form .post-block .options>.option.ui-selected,
+  #form .post-block .options>.option:has(input:checked),
+  #form .post-example-row>.option:has(input:checked),
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{
+    transform:translateZ(0) scale(1)!important;
+  }
+
+  #form .example-thumb{
+    will-change:transform!important;
+    transform:translateZ(0)!important;
+    backface-visibility:hidden!important;
+  }
+}
+
+/* 2) Click/tap image zoom overlay */
+#uxImageZoomV9{
+ position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;
+ padding:22px;background:rgba(16,20,27,.72);backdrop-filter:blur(8px);
+ opacity:0;transition:opacity .22s ease;
+}
+#uxImageZoomV9.open{display:flex;opacity:1}
+#uxImageZoomV9 img{
+ max-width:min(92vw,900px);max-height:88vh;width:auto;height:auto;object-fit:contain;
+ border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.38);
+ transform:translateZ(0) scale(.82);opacity:.3;
+ transition:transform .32s cubic-bezier(.18,.8,.2,1),opacity .22s ease;
+ will-change:transform,opacity;backface-visibility:hidden;
+}
+#uxImageZoomV9.shown img{transform:translateZ(0) scale(1);opacity:1}
+#uxImageZoomV9 .ux-close{
+ position:absolute;right:14px;top:14px;width:40px;height:40px;border:0;border-radius:50%;
+ background:rgba(255,255,255,.95);font-size:25px;line-height:1;cursor:pointer;color:#1d2229;
+ box-shadow:0 5px 18px rgba(0,0,0,.18)
+}
+</style>
+
+<script id="ux-v9-image-zoom">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s);
+ function overlay(){
+   let o=q('#uxImageZoomV9');
+   if(o)return o;
+   o=document.createElement('div');o.id='uxImageZoomV9';
+   o.innerHTML='<button type="button" class="ux-close" aria-label="Закрыть">×</button><img alt="">';
+   document.body.appendChild(o);
+   const close=()=>{
+     o.classList.remove('shown');
+     setTimeout(()=>o.classList.remove('open'),210);
+   };
+   o.addEventListener('click',e=>{if(e.target===o||e.target.closest('.ux-close'))close()});
+   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&o.classList.contains('open'))close()});
+   return o;
+ }
+ document.addEventListener('click',e=>{
+   const img=e.target.closest('.example-thumb img');
+   if(!img)return;
+   e.preventDefault();e.stopPropagation();
+   const o=overlay(),big=q('img',o);
+   big.src=img.currentSrc||img.src;big.alt=img.alt||'Пример';
+   o.classList.add('open');
+   requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('shown')));
+ },true);
 })();
 </script>
