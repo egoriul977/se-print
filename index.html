@@ -5217,3 +5217,102 @@ body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
   }
 }
 </style>
+
+<style id="ux-v35-smoother-animations">
+/* Общая оптимизация карточек: анимируем только дешёвые свойства GPU. */
+.option,
+.flag-choice,
+.cat,
+.example-thumb,
+.post-example-row,
+#uxCategoryNavV5 button{
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transform:translateZ(0);
+}
+
+/* Старые слои иногда анимировали filter/width/height и из-за этого появлялись рывки.
+   Оставляем тот же визуальный смысл, но только transform/opacity/shadow. */
+.option,
+.flag-choice{
+  transition:
+    transform .18s cubic-bezier(.2,.7,.2,1),
+    opacity .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background-color .18s ease!important;
+}
+
+/* Не анимировать filter — он особенно тяжёлый на телефонах. */
+.options:has(>.ui-selected)>.option:not(.ui-selected),
+.flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),
+.material-options:has(>.ui-selected)>.option:not(.ui-selected),
+.paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){
+  filter:none!important;
+}
+
+/* У флагов вообще не меняем геометрию при выборе — только подсветка. */
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected{
+  transform:translateZ(0)!important;
+  transition:
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background-color .18s ease!important;
+}
+
+/* Картинки не должны плавно менять width/height — это вызывает reflow. */
+.example-thumb,
+.example-thumb img,
+.flag-mode-img,
+.flag-mode-img img{
+  transition:transform .18s ease, opacity .18s ease!important;
+}
+
+/* Навигация сверху — короткая и лёгкая анимация свечения. */
+#uxCategoryNavV5 button{
+  transition:
+    box-shadow .14s ease,
+    border-color .14s ease,
+    background-color .14s ease,
+    color .14s ease!important;
+}
+
+/* На мобильных ещё сильнее уменьшаем стоимость анимаций. */
+@media(max-width:700px){
+  .option,
+  .flag-choice,
+  .cat,
+  .example-thumb,
+  #uxCategoryNavV5 button{
+    transition-duration:.14s!important;
+  }
+
+  /* backdrop-filter у фиксированных панелей даёт заметные просадки на слабых устройствах */
+  #uxCategoryNavV5{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  /* Уменьшенные соседние карточки оставляем, но без фильтров */
+  .options:has(>.ui-selected)>.option:not(.ui-selected),
+  .material-options:has(>.ui-selected)>.option:not(.ui-selected),
+  .paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){
+    opacity:.62!important;
+  }
+}
+
+/* Уважение системной настройки уменьшения движения. */
+@media(prefers-reduced-motion:reduce){
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto!important;
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+}
+</style>
