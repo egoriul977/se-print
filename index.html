@@ -836,29 +836,39 @@ function renderFlagChooser(){
  form.innerHTML=`
  <label>Вариант изготовления флага</label>
  <div class="options flag-mode-row flag-mode-unified">
-   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="standard" onclick="selectFlagMode('standard')">
+   <label class="option flag-choice flag-mode-card has-example" data-flag-mode="standard">
+     <input class="flag-mode-radio" type="radio" name="flagModeChoice" value="standard" onchange="selectFlagMode(this.value)">
      <span class="flag-mode-label"><b>Стандартные размеры</b>${info('Готовые стандартные размеры флагов с фиксированной ценой из прайса.')}</span>
      ${exampleThumbSpanHTML('examples/flag/standard-size','Стандартные флаги','flag-mode-img')}
-   </button>
-   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="winder" onclick="selectFlagMode('winder')">
+   </label>
+
+   <label class="option flag-choice flag-mode-card has-example" data-flag-mode="winder">
+     <input class="flag-mode-radio" type="radio" name="flagModeChoice" value="winder" onchange="selectFlagMode(this.value)">
      <span class="flag-mode-label"><b>Виндеры</b>${info('Флаги для мобильных конструкций «виндер». Выберите размер флага, затем при необходимости флагшток и наливное основание.')}</span>
      ${exampleThumbSpanHTML('examples/flag/winder','Виндеры','flag-mode-img')}
-   </button>
-   <button type="button" class="option flag-choice flag-mode-card has-mode-example" data-flag-mode="custom" onclick="selectFlagMode('custom')">
+   </label>
+
+   <label class="option flag-choice flag-mode-card has-example" data-flag-mode="custom">
+     <input class="flag-mode-radio" type="radio" name="flagModeChoice" value="custom" onchange="selectFlagMode(this.value)">
      <span class="flag-mode-label"><b>Свой размер</b>${info('Индивидуальный размер флага: материал, размер, постобработка и количество.')}</span>
      ${exampleThumbSpanHTML('examples/flag/custom-size','Флаг — свой размер','flag-mode-img')}
-   </button>
+   </label>
  </div>
  <div id="flagModeBox"></div>`;
  renderFlagMode();
+ enhanceSelectedBadges();
 }
 function selectFlagMode(mode){
  flagMode=mode;
  flagFixed=null;
  winderFixed=null;
  lastCalcMeta=null;
- document.querySelectorAll('.flag-choice[data-flag-mode]').forEach(b=>{
-   b.classList.toggle('is-choice-selected',b.dataset.flagMode===mode);
+ document.querySelectorAll('.flag-choice[data-flag-mode]').forEach(card=>{
+   const selected=card.dataset.flagMode===mode;
+   card.classList.toggle('is-choice-selected',selected);
+   card.classList.toggle('ui-selected',selected);
+   const radio=card.querySelector('.flag-mode-radio');
+   if(radio) radio.checked=selected;
  });
  renderFlagMode();
  enhanceSelectedBadges();
@@ -5095,6 +5105,115 @@ body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
     max-width:126px!important;
     height:84px!important;
     min-height:84px!important;
+  }
+}
+</style>
+
+<style id="ux-v34-flags-exact-plastic-card">
+/* Главные три режима флагов используют ту же структуру, что обычные карточки
+   материала с картинкой: одна .option.has-example на всю ширину. */
+#form .flag-mode-row.flag-mode-unified{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:10px!important;
+  width:100%!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 126px!important;
+  grid-template-rows:auto!important;
+  align-items:center!important;
+  gap:12px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  min-height:98px!important;
+  margin:0!important;
+  padding:10px 12px!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-radio{
+  position:absolute!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  width:1px!important;
+  height:1px!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+  grid-column:1!important;
+  grid-row:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  min-width:0!important;
+  width:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  background:transparent!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{
+  grid-column:2!important;
+  grid-row:1!important;
+  display:flex!important;
+  position:relative!important;
+  inset:auto!important;
+  justify-self:end!important;
+  align-self:center!important;
+  width:126px!important;
+  max-width:126px!important;
+  height:78px!important;
+  min-height:78px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+/* Не даём старой анимации уменьшать соседние флаговые карточки. */
+#form .flag-mode-row.flag-mode-unified:has(>.ui-selected)>.flag-mode-card:not(.ui-selected),
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected{
+  transform:none!important;
+  opacity:1!important;
+  filter:none!important;
+  width:100%!important;
+  max-width:none!important;
+}
+/* Рамка/градиент относятся ко всей карточке, как у пластиковых материалов. */
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card:has(.flag-mode-radio:checked),
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected{
+  border-color:#ff2d8f!important;
+  background:linear-gradient(115deg,rgba(255,45,143,.18),rgba(255,255,255,.96),rgba(0,190,255,.10))!important;
+  box-shadow:0 0 0 2px rgba(255,45,143,.16),0 0 24px rgba(255,45,143,.30),0 10px 28px rgba(31,41,55,.10)!important;
+}
+@media(max-width:700px){
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+    grid-template-columns:minmax(0,1fr) 96px!important;
+    min-height:88px!important;
+    padding:9px 10px!important;
+    gap:10px!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{
+    width:96px!important;
+    max-width:96px!important;
+    height:70px!important;
+    min-height:70px!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+    font-size:13px!important;
   }
 }
 </style>
