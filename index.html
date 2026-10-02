@@ -3069,7 +3069,7 @@ body.ux-category-open #uxBackCategoriesV8{display:flex}
 #uxCategoryNavV5{padding-left:47px!important}
 </style>
 
-<script id="ux-v8-behavior">
+<script id="ux-v8-behavior-disabled" type="text/plain">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
  const form=()=>q('#form'), product=()=>q('#product');
@@ -3449,5 +3449,55 @@ body.ux-category-open #uxBackCategoriesV8{display:flex}
    o.classList.add('open');
    requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('shown')));
  },true);
+})();
+</script>
+
+<style id="ux-v10-style">
+@media(max-width:700px){
+ #form .option,#form .flag-mode-card{backface-visibility:hidden!important;-webkit-font-smoothing:antialiased;transition:transform .46s cubic-bezier(.16,1,.3,1),box-shadow .34s ease,border-color .28s ease,opacity .28s ease!important}
+ #form .option .example-thumb,#form .flag-mode-card .example-thumb{transform:translate3d(0,0,0) scale(.965)!important;transform-origin:center!important;transition:transform .46s cubic-bezier(.16,1,.3,1),opacity .30s ease!important;will-change:transform!important;backface-visibility:hidden!important}
+ #form .option.ui-selected .example-thumb,#form .option:has(input:checked) .example-thumb,#form .flag-mode-card.ui-selected .example-thumb,#form .flag-mode-card.is-choice-selected .example-thumb{transform:translate3d(0,0,0) scale(1)!important}
+}
+#uxCategoryNavV5 button.ux-current{border-color:#42bdff!important;box-shadow:inset 0 0 0 1px rgba(66,189,255,.48),0 0 11px rgba(66,189,255,.34)!important;color:#167bb1!important;background:#f2fbff!important}
+</style>
+<script id="ux-v10-behavior">
+(function(){
+ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],form=()=>q('#form'),product=()=>q('#product');
+ const isOpen=()=>{const p=product();return !!p&&p.offsetParent!==null}; let stepMap=[];
+ function unifyPostExamples(root=document){qa('.post-example-row',root).forEach(row=>{const opt=q(':scope>.option',row),thumb=q(':scope>.example-thumb',row);if(opt&&thumb&&!opt.contains(thumb))opt.appendChild(thumb)})}
+ document.addEventListener('pointerdown',e=>{
+   const card=e.target.closest('.option,.flag-mode-card'); if(!card||e.target.closest('.example-thumb'))return;
+   if(card.classList.contains('flag-mode-card')){
+     if(card.classList.contains('is-choice-selected')){e.preventDefault();e.stopPropagation();flagMode='';flagFixed=null;winderFixed=null;lastCalcMeta=null;qa('.flag-mode-card').forEach(x=>x.classList.remove('is-choice-selected','ui-selected'));const box=q('#flagModeBox');if(box)box.innerHTML='';if(window.liveTotal)liveTotal.textContent='0 ₽';if(window.breakdown)breakdown.textContent='Выберите вариант изготовления флага.';requestAnimationFrame(refresh)} return;
+   }
+   const radio=q('input[type="radio"]',card);
+   if(radio&&radio.checked){e.preventDefault();e.stopPropagation();radio.checked=false;card.classList.remove('ui-selected');radio.dispatchEvent(new Event('change',{bubbles:true}));requestAnimationFrame(refresh);return}
+   const check=q('input[type="checkbox"]',card);
+   if(check&&check.checked){e.preventDefault();e.stopPropagation();check.checked=false;card.classList.remove('ui-selected','shirt-extra-selected');check.dispatchEvent(new Event('change',{bubbles:true}));requestAnimationFrame(refresh)}
+ },true);
+ function nav(){let n=q('#uxCategoryNavV5');if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}return n}
+ function semantic(el){
+   const t=((q(':scope > label',el)?.textContent||'')+' '+(el.className||'')).toLowerCase();
+   if(/qty|количество|тираж/.test(t))return ['Количество','qty','qty'];
+   if(/post|постобработ|дополнительно|ламинац|резк|люверс|пошив|скотч/.test(t))return ['Постобработка','post','choice'];
+   if(/размер|формат|ширин|высот/.test(t))return ['Размер','size','size'];
+   if(/material|материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))return ['Материал / печать','material','choice'];
+   return null;
+ }
+ function getSteps(){
+   const f=form();if(!f)return[];const candidates=[];
+   qa(':scope > *',f).forEach(el=>{if(el.offsetParent===null)return;if(el.matches('.flag-mode-row.flag-mode-unified'))candidates.push({el,label:'Вариант флага',key:'flag',type:'choice'});const z=semantic(el);if(z)candidates.push({el,label:z[0],key:z[1],type:z[2]});if(el.id==='postArea'&&el.textContent.trim())candidates.push({el,label:'Постобработка',key:'post',type:'choice'})});
+   qa('#flagModeBox > *, #postArea',f).forEach(el=>{if(el.offsetParent===null)return;let z=semantic(el);if(el.id==='postArea'&&el.textContent.trim())z=['Постобработка','post','choice'];if(z)candidates.push({el,label:z[0],key:z[1],type:z[2]})});
+   candidates.sort((a,b)=>a.el.getBoundingClientRect().top-b.el.getBoundingClientRect().top);
+   const used=new Set(),out=[];for(const x of candidates){if(!used.has(x.key)){used.add(x.key);out.push(x)}} return out;
+ }
+ function completed(x){if(x.type==='qty'){const i=q('input[type=number]',x.el);return !!i&&+i.value>0}if(x.type==='size'){const ins=qa('input[type=number]',x.el).filter(i=>i.offsetParent!==null);return ins.length?ins.every(i=>+i.value>0):!!q('select',x.el)?.value}return !!q('input:checked,.ui-selected,.is-choice-selected',x.el)||qa('select',x.el).some(x=>x.value)}
+ function positionNav(){const n=nav(),p=q('#product .card')||product();if(!isOpen()||!p){n.style.display='none';document.body.classList.remove('ux-category-open');return}document.body.classList.add('ux-category-open');const r=p.getBoundingClientRect(),pad=7;n.style.display='flex';n.style.left=Math.max(pad,r.left)+'px';n.style.width=Math.max(140,Math.min(innerWidth-pad*2,r.width))+'px'}
+ function updateCurrentStep(){if(!isOpen())return;const n=nav(),bs=qa('button[data-step]',n);if(!bs.length||!stepMap.length)return;const line=n.getBoundingClientRect().bottom+24;let idx=0,best=1e9;stepMap.forEach((x,i)=>{const r=x.el.getBoundingClientRect();const d=r.top<=line&&r.bottom>=line?0:(r.top>line?r.top-line:line-r.bottom+80);if(d<best){best=d;idx=i}});bs.forEach((b,i)=>b.classList.toggle('ux-current',i===idx));const a=bs[idx],nr=n.getBoundingClientRect(),br=a.getBoundingClientRect();if(br.left<nr.left+4||br.right>nr.right-4)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}
+ function buildNav(){const n=nav();if(!isOpen()){n.innerHTML='';n.style.display='none';stepMap=[];return}stepMap=getSteps();n.innerHTML='';stepMap.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.dataset.step=i;b.textContent=x.label;b.classList.toggle('done',completed(x));b.onclick=()=>{const y=scrollY+x.el.getBoundingClientRect().top-(n.offsetHeight+16);scrollTo({top:y,behavior:'smooth'})};n.appendChild(b)});positionNav();updateCurrentStep()}
+ function cartBase(){try{return volumeAdjustedItems().reduce((sum,x)=>sum+x.total,0)}catch(e){return (window.cart||[]).reduce((sum,x)=>sum+(+x.total||0),0)}}
+ function updateBar(){const b=q('#stickyPriceBarV6');if(!b)return;const open=isOpen(),base=cartBase(),cur=q('.sp-current',b),price=q('.sp-price',b),total=q('.sp-total',b),add=q('.sp-add',b);if(open&&current){cur.textContent=current.name;price.textContent=(liveTotal?.textContent||'0 ₽').trim()||'0 ₽';total.style.display='block';total.textContent='Общий заказ: '+R(base);if(add)add.style.display='flex'}else{cur.textContent='Общая стоимость заказа';price.textContent=R(base);total.style.display='none';if(add)add.style.display='none'}}
+ function refresh(){unifyPostExamples(form()||document);if(typeof enhanceSelectedBadges==='function')enhanceSelectedBadges(form()||document);buildNav();updateBar();positionNav()}
+ document.addEventListener('change',()=>requestAnimationFrame(refresh));document.addEventListener('input',()=>requestAnimationFrame(refresh));document.addEventListener('click',()=>requestAnimationFrame(refresh),true);window.addEventListener('scroll',()=>{positionNav();updateCurrentStep()},{passive:true});window.addEventListener('resize',()=>{positionNav();buildNav()},{passive:true});new MutationObserver(()=>requestAnimationFrame(refresh)).observe(product()||document.body,{attributes:true,attributeFilter:['style','class','hidden'],childList:true,subtree:true});setTimeout(refresh,50);
 })();
 </script>
