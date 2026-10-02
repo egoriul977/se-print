@@ -1092,7 +1092,7 @@ function exampleThumbFallback(img,folder,step){
 }
 function decorateExampleOptions(){
  if(!current)return;
- const options=[...form.querySelectorAll('.option')].filter(o=>{const r=o.querySelector('input[type="radio"]');return r && r.name!=='paperSizeMode' && !o.classList.contains('no-example');});
+ const options=[...form.querySelectorAll('.option')].filter(o=>{const r=o.querySelector('input[type="radio"]');return r && r.name!=='paperSizeMode' && r.name!=='cardtype' && !o.classList.contains('no-example');});
  options.forEach((opt,i)=>{
    if(opt.querySelector('.example-thumb'))return;
    const key=exampleKeyFromOption(opt,i), folder=`examples/${current.id}/${key}`;
@@ -1176,8 +1176,8 @@ function priceFor(id,a){
 function recalc(){
  if(!current||current.id==='cards'||current.id==='canvas'){lastCalcMeta=null;return;}
  let mat=document.querySelector('select#matSelect')?.value || document.querySelector('input[name=mat]:checked')?.value;
- const qtyInput=document.getElementById('qty');
- const qtyRaw=String(qtyInput?.value||'').trim();
+ const qtyEl=document.getElementById('qty');
+ const qtyRaw=String(qtyEl?.value||'').trim();
  if(!qtyRaw){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}
  let q=+qtyRaw;
  if(!Number.isFinite(q)||q<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите корректное количество.';return;}
@@ -2258,218 +2258,161 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
 }
 </style>
 
-<style id="clean-rebuild-ui-v1">
-/* ===== Clear section hierarchy ===== */
-#form>.param-block{border:1px solid #dfe5ee!important;border-radius:14px!important;padding:11px!important;margin:9px 0!important;background:#fff!important}
-#form>.param-block>label:first-child,#flagModeBox>label:first-child,#flagCustomForm>label:first-child{
- display:block!important;font-weight:950!important;color:#172033!important;font-size:13px!important;margin-bottom:7px!important
+<style id="ux-v5-final">
+.option:has(input:checked)::after,.flag-choice.is-choice-selected::after,.flag-choice:has(input:checked)::after{
+  animation:none!important;background:none!important;display:none!important;
 }
 
-/* ===== FLAGS: clean, predictable structure from the HTML that already exists ===== */
-#form .flag-mode-row.flag-mode-unified{
- display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important;width:100%!important
-}
-#form .flag-mode-row.flag-mode-unified>.flag-mode-card{
- display:grid!important;grid-template-columns:minmax(0,1fr) 116px!important;align-items:center!important;
- width:100%!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:86px!important;
- margin:0!important;padding:8px!important;gap:8px!important;border-radius:13px!important;overflow:hidden!important;
- transform:none!important;filter:none!important
-}
-#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
- display:flex!important;align-items:center!important;justify-content:flex-start!important;
- min-width:0!important;margin:0!important;padding:3px!important;text-align:left!important;order:unset!important
-}
-#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{
- display:block!important;position:relative!important;inset:auto!important;order:unset!important;
- width:116px!important;max-width:116px!important;height:68px!important;margin:0!important;padding:3px!important;
- border-radius:10px!important;overflow:hidden!important;transform:none!important
-}
-#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;margin:0!important}
-
-/* Winder size image stays inside its own selectable card. */
-#flagModeBox .option:has(input[name="winderSize"]) .example-thumb{
- width:96px!important;max-width:96px!important;height:62px!important;margin-left:auto!important;flex:0 0 96px!important
-}
-
-/* ===== MOBILE: compact WHOLE cards, not detached images ===== */
+/* 1,3,8) Smooth compact horizontal cards on mobile */
 @media(max-width:700px){
- #form .material-options,
- #form .paper-material-row,
- #form .options:has(>.option .example-thumb){
-   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important
- }
- #form .material-options>.option,
- #form .paper-material-row>.option,
- #form .options:has(>.option .example-thumb)>.option{
-   width:100%!important;max-width:100%!important;min-width:0!important;min-height:58px!important;height:auto!important;
-   padding:6px!important;gap:4px!important;border-radius:10px!important;font-size:9px!important;line-height:1.15!important;
-   transform:none!important;filter:none!important;overflow:hidden!important
- }
- #form .material-options>.option span,
- #form .paper-material-row>.option span,
- #form .options:has(>.option .example-thumb)>.option span{
-   min-width:0!important;font-size:9px!important;line-height:1.15!important;white-space:normal!important;overflow-wrap:anywhere!important
- }
- #form .options:has(>.option .example-thumb)>.option .example-thumb{
-   width:44px!important;max-width:44px!important;height:34px!important;flex:0 0 44px!important;margin:2px auto!important;padding:2px!important
- }
- /* Selected card: one screen-content width, but still short/compact. */
- #form .material-options>.option.ui-selected,
- #form .material-options>.option:has(input:checked),
- #form .paper-material-row>.option.ui-selected,
- #form .paper-material-row>.option:has(input:checked),
- #form .options:has(>.option .example-thumb)>.option.ui-selected,
- #form .options:has(>.option .example-thumb)>.option:has(input:checked){
-   grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-height:62px!important;
-   display:flex!important;align-items:center!important;padding:7px 8px!important;gap:7px!important;
-   font-size:11px!important;transform:none!important
- }
- #form .material-options>.option.ui-selected span,
- #form .material-options>.option:has(input:checked) span,
- #form .paper-material-row>.option.ui-selected span,
- #form .paper-material-row>.option:has(input:checked) span,
- #form .options:has(>.option .example-thumb)>.option.ui-selected span,
- #form .options:has(>.option .example-thumb)>.option:has(input:checked) span{font-size:11px!important}
- #form .options:has(>.option .example-thumb)>.option.ui-selected .example-thumb,
- #form .options:has(>.option .example-thumb)>.option:has(input:checked) .example-thumb{
-   width:76px!important;max-width:76px!important;height:48px!important;flex:0 0 76px!important;margin:0 0 0 auto!important
- }
+  #form .material-options,
+  #form .paper-material-row,
+  #form .options:has(>.option .example-thumb),
+  #form .post-block .options{
+    display:flex!important;flex-direction:column!important;gap:7px!important;width:100%!important;
+  }
 
- /* Main flag mode cards use the same compact behavior. */
- #form .flag-mode-row.flag-mode-unified{
-   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
-   display:flex!important;flex-direction:column!important;justify-content:space-between!important;
-   min-height:94px!important;padding:6px!important;gap:4px!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
-   display:block!important;width:100%!important;padding:2px!important;text-align:center!important;font-size:9px!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{
-   width:58px!important;max-width:58px!important;height:40px!important;margin:0 auto!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{
-   grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) 82px!important;
-   align-items:center!important;min-height:64px!important;padding:7px!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.flag-mode-label,
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.flag-mode-label{
-   text-align:left!important;font-size:11px!important
- }
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
- #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
-   width:82px!important;max-width:82px!important;height:50px!important;margin:0!important
- }
+  #form .material-options>.option,
+  #form .paper-material-row>.option,
+  #form .options:has(>.option .example-thumb)>.option,
+  #form .post-block .options>.option{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 78px!important;
+    align-items:start!important;
+    width:72%!important;max-width:72%!important;min-width:0!important;
+    min-height:60px!important;height:auto!important;
+    margin:0 auto!important;padding:7px 8px!important;gap:7px!important;
+    border-radius:11px!important;overflow:hidden!important;
+    transform:scale(.965)!important;transform-origin:center!important;filter:none!important;
+    transition:
+      width .34s cubic-bezier(.22,.8,.2,1),
+      max-width .34s cubic-bezier(.22,.8,.2,1),
+      min-height .34s cubic-bezier(.22,.8,.2,1),
+      transform .34s cubic-bezier(.22,.8,.2,1),
+      box-shadow .34s ease,
+      border-color .34s ease!important;
+  }
+
+  /* text = top-left */
+  #form .material-options>.option>span:not(.example-thumb),
+  #form .paper-material-row>.option>span:not(.example-thumb),
+  #form .options:has(>.option .example-thumb)>.option>span:not(.example-thumb),
+  #form .post-block .options>.option>span:not(.example-thumb){
+    grid-column:1!important;grid-row:1!important;align-self:start!important;
+    min-width:0!important;width:auto!important;margin:0!important;padding:0!important;
+    font-size:11px!important;line-height:1.18!important;text-align:left!important;
+    white-space:normal!important;overflow-wrap:anywhere!important;
+  }
+
+  /* image = top-right */
+  #form .material-options>.option .example-thumb,
+  #form .paper-material-row>.option .example-thumb,
+  #form .options:has(>.option .example-thumb)>.option .example-thumb,
+  #form .post-block .options>.option .example-thumb{
+    grid-column:2!important;grid-row:1!important;align-self:start!important;
+    position:relative!important;inset:auto!important;
+    width:78px!important;max-width:78px!important;height:50px!important;
+    min-height:0!important;margin:0!important;padding:2px!important;transform:none!important;
+    transition:width .34s cubic-bezier(.22,.8,.2,1),max-width .34s cubic-bezier(.22,.8,.2,1),height .34s cubic-bezier(.22,.8,.2,1)!important;
+  }
+  #form .example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
+
+  /* selected = full CONTENT width, modest height, bigger picture */
+  #form .material-options>.option.ui-selected,
+  #form .material-options>.option:has(input:checked),
+  #form .paper-material-row>.option.ui-selected,
+  #form .paper-material-row>.option:has(input:checked),
+  #form .options:has(>.option .example-thumb)>.option.ui-selected,
+  #form .options:has(>.option .example-thumb)>.option:has(input:checked),
+  #form .post-block .options>.option.ui-selected,
+  #form .post-block .options>.option:has(input:checked){
+    width:100%!important;max-width:100%!important;min-height:82px!important;
+    grid-template-columns:minmax(0,1fr) 132px!important;
+    padding:9px 10px!important;transform:scale(1)!important;
+    box-shadow:0 6px 18px rgba(30,43,64,.12)!important;
+  }
+  #form .material-options>.option.ui-selected .example-thumb,
+  #form .material-options>.option:has(input:checked) .example-thumb,
+  #form .paper-material-row>.option.ui-selected .example-thumb,
+  #form .paper-material-row>.option:has(input:checked) .example-thumb,
+  #form .options:has(>.option .example-thumb)>.option.ui-selected .example-thumb,
+  #form .options:has(>.option .example-thumb)>.option:has(input:checked) .example-thumb,
+  #form .post-block .options>.option.ui-selected .example-thumb,
+  #form .post-block .options>.option:has(input:checked) .example-thumb{
+    width:132px!important;max-width:132px!important;height:74px!important;
+  }
+
+  /* 5) Sticker post-processing rows become the same card structure */
+  #form .post-example-row{
+    display:block!important;width:100%!important;margin:0!important;
+  }
+  #form .post-example-row>.option{
+    display:grid!important;grid-template-columns:minmax(0,1fr) 78px!important;
+    align-items:start!important;width:72%!important;max-width:72%!important;
+    min-height:60px!important;margin:0 auto!important;padding:7px 8px!important;gap:7px!important;
+    transition:width .34s cubic-bezier(.22,.8,.2,1),max-width .34s cubic-bezier(.22,.8,.2,1),min-height .34s cubic-bezier(.22,.8,.2,1)!important;
+  }
+  #form .post-example-row>.option>.example-thumb{
+    grid-column:2!important;grid-row:1!important;width:78px!important;max-width:78px!important;height:50px!important;margin:0!important;
+  }
+  #form .post-example-row>.option:has(input:checked){
+    width:100%!important;max-width:100%!important;min-height:82px!important;grid-template-columns:minmax(0,1fr) 132px!important;
+  }
+  #form .post-example-row>.option:has(input:checked)>.example-thumb{
+    width:132px!important;max-width:132px!important;height:74px!important;
+  }
+
+  /* 6) Flags use the same visual logic as banners/stickers */
+  #form .flag-mode-row.flag-mode-unified{
+    display:flex!important;flex-direction:column!important;gap:7px!important;width:100%!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+    display:grid!important;grid-template-columns:minmax(0,1fr) 78px!important;
+    align-items:start!important;width:72%!important;max-width:72%!important;
+    min-height:60px!important;height:auto!important;margin:0 auto!important;padding:7px 8px!important;gap:7px!important;
+    border-radius:11px!important;overflow:hidden!important;transform:scale(.965)!important;filter:none!important;
+    transition:width .34s cubic-bezier(.22,.8,.2,1),max-width .34s cubic-bezier(.22,.8,.2,1),min-height .34s cubic-bezier(.22,.8,.2,1),transform .34s cubic-bezier(.22,.8,.2,1)!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+    grid-column:1!important;grid-row:1!important;display:block!important;align-self:start!important;
+    width:auto!important;min-width:0!important;margin:0!important;padding:0!important;
+    text-align:left!important;font-size:11px!important;line-height:1.18!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{
+    grid-column:2!important;grid-row:1!important;position:relative!important;inset:auto!important;
+    width:78px!important;max-width:78px!important;height:50px!important;margin:0!important;padding:2px!important;
+    transition:width .34s cubic-bezier(.22,.8,.2,1),max-width .34s cubic-bezier(.22,.8,.2,1),height .34s cubic-bezier(.22,.8,.2,1)!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{
+    width:100%!important;max-width:100%!important;min-height:82px!important;
+    grid-template-columns:minmax(0,1fr) 132px!important;padding:9px 10px!important;transform:scale(1)!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
+    width:132px!important;max-width:132px!important;height:74px!important;
+  }
 }
 
-/* ===== Top navigation: fixed to viewport, but constrained to calculator card ===== */
-#categoryStepNavClean{
- position:fixed!important;z-index:1000!important;display:none;
- flex-wrap:nowrap!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;
- padding:6px!important;margin:0!important;background:rgba(255,255,255,.97)!important;
- border:1px solid #dfe5ee!important;border-radius:12px!important;box-shadow:0 5px 18px rgba(25,38,58,.12)!important;
- -webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;
- scrollbar-width:thin!important
+/* 9) Fixed navigation, constrained to calculator width */
+#uxCategoryNavV5{
+  position:fixed;z-index:1000;top:7px;display:none;align-items:center;
+  gap:6px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;
+  padding:6px;background:rgba(255,255,255,.97);border:1px solid #dce3ec;border-radius:12px;
+  box-shadow:0 5px 18px rgba(27,39,59,.13);
+  -webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;
+  scrollbar-width:thin;
 }
-#categoryStepNavClean::-webkit-scrollbar{height:4px!important}
-#categoryStepNavClean button{
- flex:0 0 auto!important;width:auto!important;min-width:max-content!important;white-space:nowrap!important;
- border:1px solid #d9dfe7;background:#f0f2f5;color:#7a8491;border-radius:999px;padding:6px 9px;
- font-size:9px;font-weight:900;cursor:pointer
+#uxCategoryNavV5::-webkit-scrollbar{height:4px}
+#uxCategoryNavV5 button{
+  flex:0 0 auto;width:max-content;min-width:max-content;white-space:nowrap;
+  border:1px solid #d7dee8;background:#eff2f5;color:#7c8592;border-radius:999px;
+  padding:6px 9px;font-size:9px;font-weight:900;cursor:pointer;
 }
-#categoryStepNavClean button.done{background:#e8f8ed;border-color:#83d79d;color:#197d3d}
-#categoryStepNavClean button.done:before{content:"✓ "}
-#categoryNavSpacer{display:none;height:48px}
+#uxCategoryNavV5 button.done{background:#e6f8ec;border-color:#7bd398;color:#177b3a}
+#uxCategoryNavV5 button.done:before{content:"✓ "}
+body.ux-category-open #product{padding-top:50px!important}
 </style>
-
-<script id="clean-rebuild-ui-v1-js-disabled" type="text/plain">
-(function(){
- const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
- function productOpen(){const p=q('#product');return !!p&&p.offsetParent!==null}
- function blocks(){
-   const f=q('#form');if(!f)return [];
-   // Use actual visible top-level blocks; flag chooser itself gets a dedicated first step.
-   const arr=[...f.children].filter(x=>x instanceof HTMLElement && x.offsetParent!==null && x.id!=='categoryNavSpacer');
-   return arr.filter(x=>x.matches('.param-block')||x.id==='flagModeBox'||x.matches('.options.flag-mode-row'));
- }
- function kind(b){
-   const t=(b.textContent||'').toLowerCase();
-   if(b.matches('.flag-mode-row'))return ['Вариант флага','flag'];
-   if(/количество|тираж/.test(t)&&!/ширин|высот/.test(t))return ['Количество','qty'];
-   if(/постобработ|ламинац|люверс|резк|скотч|пошив|фальц|бигов|основан|флагшток/.test(t))return ['Постобработка','post'];
-   if(/размер|ширин|высот|формат/.test(t))return ['Размер','size'];
-   if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))return ['Материал / печать','material'];
-   return [(b.querySelector('label')?.textContent||'Параметр').replace(/\s+/g,' ').trim().slice(0,28),'other'];
- }
- function done(b,k){
-   if(k==='qty'){
-     const inp=qa('input[type=number]',b).find(x=>!/ширин|высот|width|height/.test(((x.id||'')+' '+(x.placeholder||'')).toLowerCase()));
-     return !!inp&&String(inp.value).trim()!==''&&+inp.value>0;
-   }
-   if(b.querySelector('input:checked,.ui-selected,.is-choice-selected'))return true;
-   if(k==='size'){
-     const nums=qa('input[type=number]',b).filter(x=>x.offsetParent!==null);
-     return nums.length>0&&nums.every(x=>String(x.value).trim()!==''&&+x.value>0);
-   }
-   return !!qa('select',b).find(x=>x.value);
- }
- function moveQty(){
-   const f=q('#form');if(!f)return;
-   const qty=qa(':scope>.qty-block',f);
-   const post=q(':scope>#postArea',f);
-   qty.forEach(x=>f.appendChild(x));
-   // Flag custom quantity isn't a param-block; move its direct wrapper after postArea.
-   const fq=q('#flagCustomForm #qty')?.parentElement;
-   if(fq&&post&&fq.parentElement===q('#flagCustomForm'))fq.parentElement.appendChild(fq);
- }
- function ensureNav(){
-   let n=q('#categoryStepNavClean');
-   if(!n){n=document.createElement('div');n.id='categoryStepNavClean';document.body.appendChild(n)}
-   return n;
- }
- function positionNav(){
-   const n=ensureNav(),p=q('#product .card')||q('#product');
-   if(!productOpen()||!p){n.style.display='none';return}
-   const r=p.getBoundingClientRect(),pad=6;
-   n.style.display='flex';
-   n.style.left=Math.max(pad,r.left)+'px';
-   n.style.width=Math.max(120,Math.min(window.innerWidth-pad*2,r.width))+'px';
-   n.style.top='6px';
- }
- function build(){
-   moveQty();
-   const n=ensureNav(),bs=blocks();n.innerHTML='';
-   bs.forEach((b,i)=>{
-     if(!b.id)b.id='navBlockClean'+i;
-     const [label,k]=kind(b),bt=document.createElement('button');
-     bt.type='button';bt.textContent=label;bt.dataset.target=b.id;bt.dataset.kind=k;bt.classList.toggle('done',done(b,k));
-     bt.onclick=()=>{const el=document.getElementById(bt.dataset.target);if(!el)return;const y=scrollY+el.getBoundingClientRect().top-(n.offsetHeight+14);scrollTo({top:y,behavior:'smooth'})};
-     n.appendChild(bt);
-   });
-   positionNav();
- }
- function refresh(){
-   const n=q('#categoryStepNavClean');if(!n)return;
-   qa('button',n).forEach(bt=>{const b=document.getElementById(bt.dataset.target);if(b)bt.classList.toggle('done',done(b,bt.dataset.kind))});
-   positionNav();
- }
- let timer;
- function scheduleBuild(){clearTimeout(timer);timer=setTimeout(build,30)}
- document.addEventListener('input',refresh);
- document.addEventListener('change',()=>setTimeout(refresh,0));
- document.addEventListener('click',e=>{if(!e.target.closest('#categoryStepNavClean'))setTimeout(()=>{scheduleBuild();refresh()},20)});
- window.addEventListener('scroll',positionNav,{passive:true});
- window.addEventListener('resize',positionNav,{passive:true});
- document.addEventListener('wheel',e=>{
-   const n=q('#categoryStepNavClean');if(!n||!n.matches(':hover'))return;
-   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){n.scrollLeft+=e.deltaY;e.preventDefault()}
- },{passive:false});
- new MutationObserver(ms=>{if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))scheduleBuild()}).observe(q('#form')||document.body,{childList:true,subtree:true});
- setTimeout(build,100);
-})();
-</script>
 
 <style id="mobile-horizontal-cards-qty-fixed-css">
 /* QUANTITY: never shrink the field or treat it as an option card */
@@ -2613,50 +2556,132 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
 }
 </style>
 
-<script id="mobile-horizontal-cards-qty-fixed-js">
+<script id="ux-v5-behavior">
 (function(){
  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
+ const form=()=>q('#form');
+ function open(){const p=q('#product');return !!p&&p.offsetParent!==null}
 
- function isQtyInput(inp){
-   const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
-   if(/width|height|ширин|высот/.test(own))return false;
-   if(/qty|quantity|тираж|количество/.test(own))return true;
-   const lab=inp.closest('label,.param-block,.field,div');
-   return /количество|тираж/.test((lab?.textContent||'').toLowerCase()) &&
-          !/ширина|высота/.test((lab?.textContent||'').toLowerCase());
+ /* 5: move a post-processing example image into its own option card */
+ function unifyPostExamples(root=document){
+   qa('.post-example-row',root).forEach(row=>{
+     const opt=q(':scope>.option',row),thumb=q(':scope>.example-thumb',row);
+     if(opt&&thumb&&!opt.contains(thumb))opt.appendChild(thumb);
+   });
  }
- function initQty(root=document){
-   qa('input[type="number"]',root).forEach(inp=>{
-     if(!isQtyInput(inp)||inp.dataset.qtySafeInit)return;
-     inp.dataset.qtySafeInit='1';
-     // Visual/default reset only; no synthetic input/change event.
-     if(inp.value==='1' || inp.getAttribute('value')==='1'){
-       inp.value='';inp.removeAttribute('value');
+
+ /* 4: click an already-selected radio/card again = unselect it */
+ document.addEventListener('pointerdown',e=>{
+   const card=e.target.closest('.option,.flag-mode-card');
+   if(!card || e.target.closest('.example-thumb,.info,.iwrap'))return;
+   if(card.classList.contains('flag-mode-card')){
+     if(card.classList.contains('is-choice-selected')){
+       e.preventDefault();
+       flagMode='';flagFixed=null;winderFixed=null;lastCalcMeta=null;
+       qa('.flag-mode-card').forEach(x=>x.classList.remove('is-choice-selected','ui-selected'));
+       const box=q('#flagModeBox');if(box)box.innerHTML='';
+       if(window.liveTotal)liveTotal.textContent='0 ₽';
+       if(window.breakdown)breakdown.textContent='Выберите вариант изготовления флага.';
+       setTimeout(refresh,0);
      }
+     return;
+   }
+   const r=q('input[type=radio]',card);
+   if(r&&r.checked){
+     e.preventDefault();
+     r.checked=false;
+     r.dispatchEvent(new Event('change',{bubbles:true}));
+     card.classList.remove('ui-selected');
+     setTimeout(refresh,0);
+   }
+ },true);
+
+ function blockInfo(){
+   const f=form();if(!f)return [];
+   const blocks=[...f.children].filter(x=>x instanceof HTMLElement && x.offsetParent!==null);
+   const result=[];
+   const push=(el,label,type)=>{if(el&&!result.some(x=>x.el===el))result.push({el,label,type})};
+   blocks.forEach(b=>{
+     const t=(b.textContent||'').toLowerCase();
+     if(b.matches('.flag-mode-row'))push(b,'Вариант флага','choice');
+     else if(/количество|тираж/.test(t)&&!/ширин|высот/.test(t))push(b,'Количество','qty');
+     else if(/постобработ|ламинац|люверс|резк|скотч|пошив|фальц|бигов|основан|флагшток/.test(t))push(b,'Постобработка','choice');
+     else if(/размер|ширин|высот|формат/.test(t))push(b,'Размер','size');
+     else if(/материал|тип печати|тип нанесения|бумаг|плёнк|пленк/.test(t))push(b,'Материал / печать','choice');
    });
+   // Flag chooser is nested: add its main row explicitly.
+   const fr=q('.flag-mode-row.flag-mode-unified',f);if(fr)result.unshift({el:fr,label:'Вариант флага',type:'choice'});
+   return result;
  }
- function moveQtyLast(){
-   const f=q('#form');if(!f)return;
-   // Move the TOP-LEVEL block containing the visible quantity input.
-   const qtyInputs=qa('input[type="number"]',f).filter(x=>x.offsetParent!==null&&isQtyInput(x));
-   qtyInputs.forEach(inp=>{
-     let b=inp;
-     while(b.parentElement && b.parentElement!==f)b=b.parentElement;
-     if(b.parentElement===f)f.appendChild(b);
+ function done(x){
+   if(x.type==='qty'){
+     const ins=qa('input[type=number]',x.el).filter(i=>!/ширин|высот|width|height/.test(((i.id||'')+' '+(i.placeholder||'')).toLowerCase()));
+     return ins.some(i=>String(i.value).trim()!==''&&+i.value>0);
+   }
+   if(x.type==='size'){
+     const ins=qa('input[type=number]',x.el).filter(i=>i.offsetParent!==null);
+     return ins.length?ins.every(i=>String(i.value).trim()!==''&&+i.value>0):!!q('select',x.el)?.value;
+   }
+   return !!q('input:checked,.ui-selected,.is-choice-selected',x.el)||!!qa('select',x.el).find(s=>s.value);
+ }
+ function nav(){
+   let n=q('#uxCategoryNavV5');
+   if(!n){n=document.createElement('div');n.id='uxCategoryNavV5';document.body.appendChild(n)}
+   return n;
+ }
+ function positionNav(){
+   const n=nav(),p=q('#product .card')||q('#product');
+   document.body.classList.toggle('ux-category-open',open());
+   if(!open()||!p){n.style.display='none';return}
+   const r=p.getBoundingClientRect(),pad=7;
+   n.style.display='flex';
+   n.style.left=Math.max(pad,r.left)+'px';
+   n.style.width=Math.max(140,Math.min(window.innerWidth-pad*2,r.width))+'px';
+ }
+ function buildNav(){
+   const n=nav(),items=blockInfo();n.innerHTML='';
+   items.forEach((x,i)=>{
+     if(!x.el.id)x.el.id='uxV5Block'+i;
+     const b=document.createElement('button');b.type='button';b.textContent=x.label;b.dataset.target=x.el.id;
+     b.classList.toggle('done',done(x));
+     b.onclick=()=>{
+       const el=document.getElementById(b.dataset.target);if(!el)return;
+       const y=scrollY+el.getBoundingClientRect().top-(n.offsetHeight+16);
+       scrollTo({top:y,behavior:'smooth'});
+     };
+     n.appendChild(b);
    });
+   positionNav();
  }
- function refreshSelected(root=document){
-   qa('.option,.flag-mode-card',root).forEach(card=>{
-     const yes=!!card.querySelector('input:checked')||card.classList.contains('is-choice-selected');
-     card.classList.toggle('ui-selected',yes);
-   });
+ function refresh(){
+   unifyPostExamples(form()||document);
+   enhanceSelectedBadges(form()||document);
+   buildNav();
  }
- initQty();moveQtyLast();refreshSelected();
- document.addEventListener('change',e=>{refreshSelected(e.target.closest('#form')||document);});
- document.addEventListener('click',e=>setTimeout(()=>refreshSelected(e.target.closest('#form')||document),10));
+
+ /* robust horizontal drag for nav on desktop + native swipe on mobile */
+ let dragging=false,startX=0,startScroll=0;
+ document.addEventListener('pointerdown',e=>{
+   const n=e.target.closest('#uxCategoryNavV5');if(!n)return;
+   if(e.target.closest('button'))return;
+   dragging=true;startX=e.clientX;startScroll=n.scrollLeft;n.setPointerCapture?.(e.pointerId);
+ },true);
+ document.addEventListener('pointermove',e=>{
+   if(!dragging)return;const n=nav();n.scrollLeft=startScroll-(e.clientX-startX);
+ },true);
+ document.addEventListener('pointerup',()=>dragging=false,true);
+ document.addEventListener('wheel',e=>{
+   const n=e.target.closest?.('#uxCategoryNavV5');if(!n)return;
+   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){n.scrollLeft+=e.deltaY;e.preventDefault()}
+ },{passive:false});
+
+ document.addEventListener('change',()=>setTimeout(refresh,0));
+ document.addEventListener('click',()=>setTimeout(refresh,20));
+ window.addEventListener('scroll',positionNav,{passive:true});
+ window.addEventListener('resize',positionNav,{passive:true});
  new MutationObserver(ms=>{
-   for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)initQty(n);
-   setTimeout(()=>{moveQtyLast();refreshSelected(q('#form')||document)},0);
- }).observe(q('#form')||document.body,{childList:true,subtree:true});
+   if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))setTimeout(refresh,0);
+ }).observe(form()||document.body,{childList:true,subtree:true});
+ setTimeout(refresh,100);
 })();
 </script>
