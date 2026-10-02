@@ -903,7 +903,7 @@ function renderWinders(){
  ];
  box.innerHTML=`
   <label>Размер флага для виндера</label>
-  <div class="options">${rows.map(r=>`<label class="option"><input type="radio" name="winderSize" value="${r.id}" onchange="winderSizeChanged()"><span>${r.label}</span>${exampleThumbSpanHTML(`examples/flag/${r.id}`,r.label,'')}</label>`).join('')}</div>
+  <div class="options">${rows.map(r=>`<label class="option"><input type="radio" name="winderSize" value="${r.id}" onchange="winderSizeChanged()"><span>${r.label}</span>${exampleThumbSpanHTML(`examples/flag/${({w220:'winder-60x220',w240:'winder-60x240',w340:'winder-60x340'}[r.id]||r.id)}`,r.label,'')}</label>`).join('')}</div>
   <div id="winderOptions"></div>
   <div class="note">Стоимость самого флага рассчитывается по стандартному тарифу флаговой ткани. Флагшток и основание добавляются отдельно по выбранным опциям.</div>`;
  liveTotal.textContent='0 ₽';
@@ -2332,7 +2332,7 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
 }
 </style>
 
-<script id="flags-unified-mobile-icons-v1-js">
+<script id="flags-unified-mobile-icons-v1-js-disabled" type="text/plain">
 (function(){
  function normalizeFlags(root=document){
    root.querySelectorAll('.flag-choice,.flag-mode-card').forEach(card=>{
@@ -2663,3 +2663,154 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
  }
 }
 </style>
+
+<style id="REBUILT-flags-mobile-nav">
+/* ===== FLAGS: one clean rule set, overriding all old experiments ===== */
+#form .flag-mode-row.flag-mode-unified{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:10px!important;width:100%!important;
+}
+#form .flag-mode-row.flag-mode-unified > .flag-mode-card{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 118px!important;
+ align-items:center!important;gap:9px!important;width:100%!important;max-width:none!important;
+ min-height:88px!important;height:auto!important;margin:0!important;padding:9px!important;
+ border-radius:14px!important;overflow:hidden!important;transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .flag-mode-label{
+ grid-column:1!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+ width:auto!important;min-width:0!important;min-height:0!important;margin:0!important;padding:3px!important;
+ text-align:left!important;order:unset!important;flex:none!important;
+}
+#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb{
+ grid-column:2!important;display:flex!important;position:relative!important;inset:auto!important;
+ width:118px!important;max-width:118px!important;height:70px!important;min-height:0!important;
+ margin:0!important;padding:3px!important;order:unset!important;flex:none!important;
+ border-radius:10px!important;transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb img{
+ width:100%!important;height:100%!important;object-fit:cover!important;margin:0!important;
+}
+
+/* Winder size options are normal category cards with their OWN correct image */
+#flagModeBox .options > .option:has(input[name="winderSize"]){
+ display:grid!important;grid-template-columns:minmax(0,1fr) 118px!important;
+ align-items:center!important;gap:9px!important;overflow:hidden!important;
+}
+#flagModeBox .options > .option:has(input[name="winderSize"]) > .example-thumb{
+ grid-column:2!important;width:118px!important;max-width:118px!important;height:70px!important;
+ margin:0!important;position:relative!important;inset:auto!important;
+}
+
+/* ===== MOBILE: shrink WHOLE cards, not only pictures ===== */
+@media(max-width:700px){
+ #form .options:not(.flag-mode-row){
+   display:flex!important;flex-wrap:wrap!important;gap:6px!important;align-items:stretch!important;
+ }
+ #form .options:not(.flag-mode-row) > .option{
+   flex:0 0 calc(33.333% - 4px)!important;
+   width:calc(33.333% - 4px)!important;max-width:calc(33.333% - 4px)!important;
+   min-width:0!important;min-height:54px!important;height:auto!important;
+   padding:6px!important;gap:4px!important;border-radius:10px!important;
+   font-size:9px!important;line-height:1.15!important;
+   transform:none!important;filter:none!important;
+ }
+ #form .options:not(.flag-mode-row) > .option > span:not(.example-thumb){
+   flex:1 1 auto!important;width:auto!important;min-width:0!important;
+   font-size:9px!important;line-height:1.15!important;overflow-wrap:anywhere!important;
+ }
+ #form .options:not(.flag-mode-row) > .option .info{
+   width:16px!important;height:16px!important;flex:0 0 16px!important;font-size:9px!important;
+ }
+ #form .options:not(.flag-mode-row) > .option .example-thumb{
+   width:42px!important;max-width:42px!important;height:34px!important;min-height:0!important;
+   flex:0 0 42px!important;margin:2px auto!important;padding:2px!important;
+ }
+ /* selected card = exactly full available content width, but remains compact */
+ #form .options:not(.flag-mode-row) > .option.ui-selected,
+ #form .options:not(.flag-mode-row) > .option:has(input:checked){
+   flex:0 0 100%!important;width:100%!important;max-width:100%!important;
+   min-height:62px!important;padding:7px 8px!important;font-size:11px!important;
+   transform:none!important;
+ }
+ #form .options:not(.flag-mode-row) > .option.ui-selected > span:not(.example-thumb),
+ #form .options:not(.flag-mode-row) > .option:has(input:checked) > span:not(.example-thumb){
+   font-size:11px!important;
+ }
+ #form .options:not(.flag-mode-row) > .option.ui-selected .example-thumb,
+ #form .options:not(.flag-mode-row) > .option:has(input:checked) .example-thumb{
+   width:82px!important;max-width:82px!important;height:54px!important;flex:0 0 82px!important;
+   margin:0!important;
+ }
+
+ /* Top flag modes: also compact, whole card. */
+ #form .flag-mode-row.flag-mode-unified{
+   display:flex!important;flex-wrap:wrap!important;gap:6px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card{
+   flex:0 0 calc(33.333% - 4px)!important;width:calc(33.333% - 4px)!important;
+   max-width:calc(33.333% - 4px)!important;
+   display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+   min-height:92px!important;padding:6px!important;gap:4px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card > .flag-mode-label{
+   width:100%!important;display:block!important;text-align:center!important;font-size:9px!important;padding:2px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card > .example-thumb{
+   width:58px!important;max-width:58px!important;height:40px!important;margin:0 auto!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected,
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected{
+   flex:0 0 100%!important;width:100%!important;max-width:100%!important;
+   display:grid!important;grid-template-columns:minmax(0,1fr) 92px!important;
+   min-height:70px!important;padding:7px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected > .flag-mode-label,
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected > .flag-mode-label{
+   grid-column:1!important;text-align:left!important;font-size:11px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.is-choice-selected > .example-thumb,
+ #form .flag-mode-row.flag-mode-unified > .flag-mode-card.ui-selected > .example-thumb{
+   grid-column:2!important;width:92px!important;max-width:92px!important;height:56px!important;margin:0!important;
+ }
+}
+
+/* ===== NAVIGATION: truly follows viewport + horizontally scrollable ===== */
+#categoryStepNav{
+ position:fixed!important;
+ top:0!important;left:50%!important;transform:translateX(-50%)!important;
+ z-index:999!important;
+ width:min(920px,100vw)!important;max-width:100vw!important;
+ display:none!important;flex-wrap:nowrap!important;gap:6px!important;
+ overflow-x:scroll!important;overflow-y:hidden!important;
+ padding:7px 8px!important;margin:0!important;
+ background:rgba(255,255,255,.97)!important;
+ border-bottom:1px solid #dfe5ee!important;
+ box-shadow:0 4px 14px rgba(24,36,55,.10)!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-x!important;
+ overscroll-behavior-x:contain!important;
+ scrollbar-width:auto!important;
+}
+#product:not(.hidden) #categoryStepNav{display:flex!important}
+#categoryStepNav button{
+ flex:0 0 auto!important;width:max-content!important;min-width:max-content!important;
+ white-space:nowrap!important;touch-action:manipulation!important;
+}
+#categoryStepNav::-webkit-scrollbar{display:block!important;height:5px!important}
+#categoryStepNav::-webkit-scrollbar-thumb{background:#b8c1ce!important;border-radius:9px!important}
+#product:not(.hidden) #form{scroll-margin-top:58px}
+body:has(#product:not(.hidden)){padding-top:48px!important}
+</style>
+
+<script id="REBUILT-nav-horizontal-wheel">
+(function(){
+ function nav(){return document.getElementById('categoryStepNav')}
+ document.addEventListener('wheel',function(e){
+   const n=nav(); if(!n || !n.matches(':hover'))return;
+   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){
+     n.scrollLeft+=e.deltaY;
+     e.preventDefault();
+   }
+ },{passive:false});
+})();
+</script>
