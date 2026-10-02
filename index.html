@@ -2550,3 +2550,116 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
  setTimeout(setup,80);
 })();
 </script>
+
+<style id="final-flags-nav-icons-v2">
+/* 1) ФЛАГИ — тот же принцип, что у карточек выбора типа печати:
+      название и изображение находятся ВНУТРИ одной цельной кнопки. */
+#form .flag-mode-row.flag-mode-unified{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+#form .flag-mode-row.flag-mode-unified > button.flag-mode-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 112px!important;
+  grid-template-rows:1fr!important;
+  align-items:center!important;
+  gap:10px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:92px!important;
+  height:auto!important;
+  margin:0!important;
+  padding:9px!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+  border-radius:14px!important;
+}
+#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .flag-mode-label{
+  grid-column:1!important;grid-row:1!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  width:auto!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:6px!important;border:0!important;
+  text-align:left!important;
+}
+#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb{
+  grid-column:2!important;grid-row:1!important;
+  display:block!important;position:relative!important;inset:auto!important;
+  width:112px!important;max-width:112px!important;height:72px!important;
+  margin:0!important;padding:3px!important;flex:none!important;
+  border-radius:11px!important;overflow:hidden!important;
+}
+#form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:cover!important;border-radius:8px!important;
+}
+@media(max-width:700px){
+ #form .flag-mode-row.flag-mode-unified{grid-template-columns:1fr!important;gap:7px!important}
+ #form .flag-mode-row.flag-mode-unified > button.flag-mode-card{
+   grid-template-columns:minmax(0,1fr) 86px!important;
+   min-height:72px!important;padding:7px!important;
+ }
+ #form .flag-mode-row.flag-mode-unified > button.flag-mode-card > .example-thumb{
+   width:86px!important;max-width:86px!important;height:56px!important;
+ }
+}
+
+/* 2) Навигация — одна строка с настоящей горизонтальной прокруткой */
+#categoryStepNav{
+ display:flex!important;
+ flex-wrap:nowrap!important;
+ width:100%!important;
+ max-width:100%!important;
+ overflow-x:auto!important;
+ overflow-y:hidden!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-x!important;
+ overscroll-behavior-x:contain!important;
+ scrollbar-width:thin!important;
+ scroll-snap-type:x proximity;
+}
+#categoryStepNav button{
+ flex:0 0 auto!important;
+ width:auto!important;
+ max-width:none!important;
+ scroll-snap-align:start;
+}
+#categoryStepNav::-webkit-scrollbar{display:block!important;height:4px!important}
+
+/* 3) Мобильные изображения/иконки внутри вариантов — 1/3 прежнего размера.
+      Выбранный вариант возвращается к обычному размеру, как было согласовано ранее.
+      Флаговые три главные карточки выше имеют отдельный компактный размер. */
+@media(max-width:700px){
+ #form .option:not(.flag-mode-card) > .example-thumb,
+ #form .option:not(.flag-mode-card) .example-thumb,
+ #form .fabric-size-example .example-thumb,
+ #form .fabric-item-example .example-thumb,
+ #form .fabric-type-example .example-thumb,
+ #form .post-example-row .example-thumb{
+   width:33.333%!important;
+   max-width:33.333%!important;
+   height:auto!important;
+   max-height:none!important;
+   aspect-ratio:16/9!important;
+   flex:0 0 33.333%!important;
+   margin:5px auto 0!important;
+   transform:none!important;
+ }
+ #form .option:not(.flag-mode-card) > .example-thumb img,
+ #form .option:not(.flag-mode-card) .example-thumb img,
+ #form .fabric-size-example .example-thumb img,
+ #form .fabric-item-example .example-thumb img,
+ #form .fabric-type-example .example-thumb img,
+ #form .post-example-row .example-thumb img{
+   width:100%!important;height:100%!important;object-fit:cover!important;
+ }
+
+ #form .option.ui-selected:not(.flag-mode-card) .example-thumb,
+ #form .option:has(input:checked):not(.flag-mode-card) .example-thumb{
+   width:100%!important;
+   max-width:100%!important;
+   flex-basis:100%!important;
+ }
+}
+</style>
