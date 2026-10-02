@@ -4991,3 +4991,110 @@ body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
   #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{width:112px!important;max-width:112px!important;height:74px!important}
 }
 </style>
+\n<style id="ux-v32-flags-single-card-final">\n/* ФЛАГИ — заголовок и изображение визуально являются ОДНОЙ кнопкой.\n   У изображения больше нет собственной рамки/фона/свечения. */\n#form .flag-mode-row.flag-mode-unified{\n display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;\n}\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card{\n display:grid!important;grid-template-columns:minmax(0,1fr) 118px!important;grid-template-areas:"label image"!important;\n align-items:stretch!important;gap:0!important;width:100%!important;min-width:0!important;min-height:92px!important;\n padding:0!important;border-radius:14px!important;overflow:hidden!important;position:relative!important;\n background:#fff!important;\n}\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{\n grid-area:label!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;\n width:100%!important;min-width:0!important;min-height:92px!important;margin:0!important;padding:14px 12px!important;\n text-align:left!important;background:transparent!important;border:0!important;border-radius:0!important;\n}\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{\n grid-area:image!important;display:block!important;position:relative!important;inset:auto!important;\n width:118px!important;max-width:118px!important;height:92px!important;min-height:92px!important;\n margin:0!important;padding:0!important;justify-self:stretch!important;align-self:stretch!important;\n border:0!important;border-left:1px solid rgba(20,38,60,.08)!important;border-radius:0!important;\n background:transparent!important;box-shadow:none!important;outline:0!important;transform:none!important;overflow:hidden!important;\n}\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img,\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img img{\n display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;\n border:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important;transform:none!important;\n}\n/* Выделяется ВСЯ карточка, а не картинка отдельно */\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{\n background:#fff!important;transform:none!important;border-color:#ff1688!important;\n box-shadow:0 0 0 2px rgba(255,22,136,.38),0 0 15px rgba(255,22,136,.32)!important;\n}\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,\n#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{\n width:118px!important;max-width:118px!important;height:92px!important;min-height:92px!important;\n border-radius:0!important;box-shadow:none!important;transform:none!important;\n}\n@media(max-width:700px){\n #form .flag-mode-row.flag-mode-unified{grid-template-columns:1fr!important;gap:8px!important}\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card{grid-template-columns:minmax(0,1fr) 124px!important;min-height:86px!important}\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{min-height:86px!important;padding:12px!important;font-size:14px!important}\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img,\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,\n #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{\n   width:124px!important;max-width:124px!important;height:86px!important;min-height:86px!important;\n }\n}\n</style>\n
+<style id="ux-v33-flags-like-plastic">
+/* Флаги: каждый из трёх вариантов выглядит как обычная широкая карточка параметра:
+   название слева, изображение внутри этой же кнопки справа. */
+#form .flag-mode-row.flag-mode-unified{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  width:100%!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 130px!important;
+  grid-template-areas:"label image"!important;
+  align-items:center!important;
+  gap:12px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  min-height:108px!important;
+  padding:10px 12px!important;
+  margin:0!important;
+  border-radius:14px!important;
+  overflow:visible!important;
+  transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+  grid-area:label!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  background:transparent!important;
+  border:0!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img{
+  grid-area:image!important;
+  display:flex!important;
+  position:relative!important;
+  inset:auto!important;
+  justify-self:end!important;
+  align-self:center!important;
+  width:130px!important;
+  max-width:130px!important;
+  height:88px!important;
+  min-height:88px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb img,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+  border-radius:10px!important;
+}
+/* Выбранное состояние применяется к общей карточке; геометрия не меняется. */
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected{
+  width:100%!important;
+  max-width:none!important;
+  min-height:108px!important;
+  transform:none!important;
+}
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+#form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
+  width:130px!important;
+  max-width:130px!important;
+  height:88px!important;
+  min-height:88px!important;
+  transform:none!important;
+}
+@media(max-width:700px){
+  #form .flag-mode-row.flag-mode-unified{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card{
+    grid-template-columns:minmax(0,1fr) 126px!important;
+    min-height:104px!important;
+    padding:10px 12px!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{
+    font-size:13px!important;
+  }
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-img,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.is-choice-selected>.example-thumb,
+  #form .flag-mode-row.flag-mode-unified>.flag-mode-card.ui-selected>.example-thumb{
+    width:126px!important;
+    max-width:126px!important;
+    height:84px!important;
+    min-height:84px!important;
+  }
+}
+</style>
