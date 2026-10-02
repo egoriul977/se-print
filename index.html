@@ -340,11 +340,11 @@ function renderFabricMulti(){
  </div>
  <div class="param-block qty-block fabric-image-count">
    <label>Количество изображений на одной футболке ${info('Укажите, сколько разных изображений наносится на одну футболку. Если нужны футболки с другими рисунками — добавьте этот вариант в корзину и затем создайте новый.')}</label>
-   <input id="fabricImageQty" type="number" min="1" max="20" step="1" oninput="fabricImageQtyChanged()" onchange="fabricImageQtyChanged()">
+   <input id="fabricImageQty" type="number" min="1" max="20" step="1" value="1" oninput="fabricImageQtyChanged()" onchange="fabricImageQtyChanged()">
  </div>
  <div class="param-block qty-block fabric-copy-count">
    <label>Количество копий ТАКИХ нанесений ${info('Если нужно несколько футболок с точно таким же набором рисунков, укажите количество. Площадь печати, количество прижиганий и стоимость футболок будут умножены на это количество.')}</label>
-   <input id="fabricCopiesQty" type="number" min="1" max="1000" step="1" oninput="fabricMultiCalc()" onchange="fabricMultiCalc()">
+   <input id="fabricCopiesQty" type="number" min="1" max="1000" step="1" value="1" oninput="fabricMultiCalc()" onchange="fabricMultiCalc()">
  </div>`;
  const cb=document.getElementById('needShirt');
  cb?.addEventListener('change',()=>{const b=document.getElementById('shirtQtyBox');if(b)b.style.display=cb.checked?'block':'none';fabricMultiCalc()});
@@ -354,10 +354,7 @@ function fabricImageQtyChanged(){
  const inp=document.getElementById('fabricImageQty');
  if(!inp)return;
  const raw=String(inp.value).trim();
- if(raw===''){
-   const box=document.getElementById('fabricImages'); if(box)box.innerHTML='';
-   fabricMultiCalc(); return;
- }
+ if(raw==='')return;
  let n=parseInt(raw,10);
  if(!Number.isFinite(n))return;
  n=Math.max(1,Math.min(20,n));
@@ -422,14 +419,8 @@ function fabricImageSizeChanged(i,doCalc=true){
 }
 function fabricMultiCalc(){
  const items=[...document.querySelectorAll('.fabric-image-item')];
- const imageCount=items.length;
- const copiesRaw=String(document.getElementById('fabricCopiesQty')?.value||'').trim();
- const copies=parseInt(copiesRaw,10);
- if(!imageCount || !Number.isFinite(copies) || copies<1){
-   lastCalcMeta=null; liveTotal.textContent='0 ₽';
-   breakdown.textContent=!imageCount?'Укажите количество изображений.':'Укажите количество копий.';
-   return;
- }
+ const imageCount=items.length||1;
+ const copies=Math.max(1,parseInt(document.getElementById('fabricCopiesQty')?.value||1,10)||1);
 
  const typeLabel={fabWhite:'Белый рисунок',fabColor:'Одноцветный цветной рисунок',fabFull:'Полноцветный рисунок'};
  const sizeLabel={A4:'A4 (21×29,7 см)',A3:'A3 (29,7×42 см)','30x10':'30×10 см','10x10':'10×10 см',custom:'Свой размер'};
@@ -501,16 +492,14 @@ function renderPlasticCards(){
   <label class="option"><input type="radio" name="plasticCardSizeMode" value="standard" checked onchange="plasticCardSizeChange()"><span>Стандартный размер — 8,5 × 5,4 см</span></label>
   <label class="option"><input type="radio" name="plasticCardSizeMode" value="custom" onchange="plasticCardSizeChange()"><span>Размер на заказ</span>${info('Нестандартный размер карты. Стоимость такого заказа рассчитывается индивидуально у менеджера.')}</label>
  </div><div id="plasticCardCustomFields" class="plastic-card-custom-size" style="display:none"><label>Ширина, см<input id="plasticCardCustomW" type="number" min="0.1" step="0.1" placeholder="Введите ширину" oninput="plasticCardCalc()"></label><label>Высота, см<input id="plasticCardCustomH" type="number" min="0.1" step="0.1" placeholder="Введите высоту" oninput="plasticCardCalc()"></label></div></div>
- <div class="param-block qty-block"><label>Количество, шт ${info('Укажите необходимое количество пластиковых карт.')}</label><input id="plasticCardQty" type="number" min="1" step="1" oninput="plasticCardCalc()"></div>
+ <div class="param-block qty-block"><label>Количество, шт ${info('Укажите необходимое количество пластиковых карт.')}</label><input id="plasticCardQty" type="number" min="1" step="1" value="1" oninput="plasticCardCalc()"></div>
  <div class="param-block post-block"><label>Постобработка</label><div class="options"><label class="option"><input id="plasticCardRound" type="checkbox" onchange="plasticCardCalc()"><span>Скругление углов — 4 ₽/шт</span>${info('Скругление четырёх углов пластиковой карты. Стоимость — 4 ₽ за одну карту.')}</label></div></div>`;
  plasticCardCalc();
 }
 function plasticCardSizeChange(){const mode=document.querySelector('input[name="plasticCardSizeMode"]:checked')?.value||'standard';const f=document.getElementById('plasticCardCustomFields');if(f)f.style.display=mode==='custom'?'grid':'none';plasticCardCalc()}
 function plasticCardCalc(){
  const mode=document.querySelector('input[name="plasticCardSizeMode"]:checked')?.value||'standard';
- const qtyRaw=String(document.getElementById('plasticCardQty')?.value||'').trim();
- const qty=+qtyRaw;
- if(!qtyRaw || !Number.isFinite(qty) || qty<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}
+ const qty=Math.max(1,+(document.getElementById('plasticCardQty')?.value||1));
  if(mode==='custom'){const w=+(document.getElementById('plasticCardCustomW')?.value||0),h=+(document.getElementById('plasticCardCustomH')?.value||0);lastCalcMeta={categoryId:'plasticCards',fixed:true,qty,total:0,customSize:true,w,h};liveTotal.textContent='Уточнить';breakdown.textContent=w&&h?`Размер на заказ: ${w} × ${h} см · ${qty} шт. — стоимость уточняется у менеджера.`:'Введите ширину и высоту изделия — стоимость размера на заказ уточняется у менеджера.';return;}
  const finish=document.querySelector('input[name="plasticCardFinish"]:checked')?.value||'matte';
  const rate=finish==='matte'?44:38;const round=document.getElementById('plasticCardRound')?.checked;const roundRate=round?4:0;const total=qty*(rate+roundRate);
@@ -560,7 +549,7 @@ function digitalTypeChange(){
    <div id="digitalPostWrap"></div>
    <div class="param-block param-qty">
      <label>Количество, шт. ${info('Укажите тираж одностраничной продукции.')}</label>
-     <input id="digitalQty" type="number" min="1" step="1" oninput="digitalSingleCalc()">
+     <input id="digitalQty" type="number" min="1" step="1" value="1" oninput="digitalSingleCalc()">
    </div>
    <div class="note"><b>Стоимость:</b> по запросу. В загруженном прайсе отдельная таблица цен на цифровую печать карточек не указана.</div>
    </div>`;
@@ -592,7 +581,7 @@ function digitalTypeChange(){
    <div id="digitalMultiCustomSize"></div>
    <div class="param-block param-qty">
      <label>Количество, шт.</label>
-     <input id="digitalMultiQty" type="number" min="1" step="1" oninput="digitalMultiCalc()">
+     <input id="digitalMultiQty" type="number" min="1" step="1" value="1" oninput="digitalMultiCalc()">
    </div>
    <div class="param-block param-post">
      <label>Сшивание страниц</label>
@@ -694,9 +683,7 @@ function getDigitalPostMeta(){
 }
 function digitalSingleCalc(){
  const size=document.getElementById('digitalSingleSize')?.value||'A6';
- const qRaw=String(document.getElementById('digitalQty')?.value||'').trim();
- const q=+qRaw;
- if(!qRaw || !Number.isFinite(q) || q<1){lastCalcMeta=null;liveTotal.textContent='По запросу';breakdown.textContent='Укажите количество.';return;}
+ const q=Math.max(1,+(document.getElementById('digitalQty')?.value||1));
  let label='';
  if(size==='custom'){
    const w=+(document.getElementById('digitalW')?.value||0),h=+(document.getElementById('digitalH')?.value||0);
@@ -721,9 +708,7 @@ function digitalMultiSizeChange(){
 }
 function digitalMultiCalc(){
  const size=document.getElementById('digitalMultiSize')?.value||'A6';
- const qRaw=String(document.getElementById('digitalMultiQty')?.value||'').trim();
- const q=+qRaw;
- if(!qRaw || !Number.isFinite(q) || q<1){lastCalcMeta=null;liveTotal.textContent='По запросу';breakdown.textContent='Укажите количество.';return;}
+ const q=Math.max(1,+(document.getElementById('digitalMultiQty')?.value||1));
  const labels={A6:'А6 — 10,5 × 14,8 см',A5:'А5 — 14,8 × 21 см',A4:'А4 — 21 × 29,7 см',A3:'А3 — 29,7 × 42 см',euro:'Евро — 9,9 × 21 см'};
  let label='';
  let w=0,h=0;
@@ -806,14 +791,13 @@ function renderStand(){
    <label class="option"><input type="radio" name="standSide" value="double" checked onchange="standCalc()"><span>Двусторонний пластик</span></label>
    <label class="option"><input type="radio" name="standSide" value="single" onchange="standCalc()"><span>Односторонний пластик</span></label>
  </div></div>
- <div class="param-block param-qty"><label>Количество, шт. ${info('Количество одинаковых штендеров в заказе.')}</label><input id="standQty" type="number" min="1" step="1" oninput="standCalc()"></div>`;
+ <div class="param-block param-qty"><label>Количество, шт. ${info('Количество одинаковых штендеров в заказе.')}</label><input id="standQty" type="number" min="1" step="1" value="1" oninput="standCalc()"></div>`;
  standCalc();
 }
 function standCalc(){
  const shape=document.querySelector('input[name=standShape]:checked')?.value||'rect';
  const side=document.querySelector('input[name=standSide]:checked')?.value||'double';
- const qRaw=String(document.getElementById('standQty')?.value||'').trim(); const q=+qRaw;
- if(!qRaw || !Number.isFinite(q) || q<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}
+ const q=Math.max(1,+(document.getElementById('standQty')?.value||1));
  const price=shape==='arch'?(side==='double'?7600:5700):(side==='double'?7300:5500);
  const total=price*q;
  liveTotal.textContent=R(total);
@@ -830,14 +814,13 @@ function renderPhotos(){
    <option value="21×30 см (А4)" data-price="60">21×30 см (А4) — 60 ₽/шт.</option>
    <option value="30×42 см (А3)" data-price="250">30×42 см (А3) — 250 ₽/шт.</option>
  </select>${exampleThumbHTML('examples/photos/standard','Печать фотографий')}</div>
- <div style="margin-top:12px"><label>Количество, шт.</label><input id="photoQty" type="number" min="1" step="1" oninput="photoCalc()"></div>
+ <div style="margin-top:12px"><label>Количество, шт.</label><input id="photoQty" type="number" min="1" step="1" value="1" oninput="photoCalc()"></div>
  <div class="note" style="margin-top:12px">Для формата 10×15 см: при тираже от 100 шт. применяется цена 12 ₽/шт.</div>`;
  photoCalc();
 }
 function photoCalc(){
  const size=document.getElementById('photoSize');
- const qRaw=String(document.getElementById('photoQty')?.value||'').trim(); const q=+qRaw;
- if(!qRaw || !Number.isFinite(q) || q<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}
+ const q=Math.max(1,+(document.getElementById('photoQty')?.value||1));
  const base=+(size?.selectedOptions?.[0]?.dataset.price||0);
  const rate=(size?.value==='10×15 см (А6)' && q>=100)?12:base;
  const total=rate*q;
@@ -904,7 +887,7 @@ function renderFlagMode(){
    const custom=document.getElementById('flagCustomForm');
    custom.innerHTML=`<div class="options">${current.opts.map((o,i)=>`<label class="option"><input type="radio" name="mat" value="${o[1]}" ${i===0?'checked':''} onchange="matChanged()"><span>${o[0]}</span>${info(o[2])}</label>`).join('')}</div>
    <div class="row"><div><label>Ширина, см ${info('Горизонтальный размер флага в сантиметрах.')}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info('Вертикальный размер флага в сантиметрах.')}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div>
-   <div><label>Количество, шт ${info('Общий тираж изготавливаемых изделий.')}</label><input id="qty" type="number" min="1" step="1" oninput="recalc()"></div>
+   <div><label>Количество, шт ${info('Общий тираж изготавливаемых изделий.')}</label><input id="qty" type="number" min="1" step="1" value="1" oninput="recalc()"></div>
    <div id="postArea"></div>`;
    renderPostArea();
    recalc();
@@ -987,7 +970,7 @@ function renderGenericForm(){
  const formatOptions=(paperPhotoSelected?'':`<option value="" selected disabled>Выберите размер</option>`)+Object.entries(formats).map(([k,v],i)=>`<option value="${k}" ${paperPhotoSelected&&i===0?'selected':''}>${k}${k.startsWith('А6')?' — стандартный размер фотографий для фотоальбома':' — '+v[0]+' × '+v[1]+' см'}</option>`).join('');
  form.innerHTML=`<div class="param-block material-block"><label>${isPaperFormat?'Выберите бумагу':'Тип печати / материал'}</label><div class="${isPaperFormat?'paper-material-row':'options material-options'}">${current.opts.map((o,i)=>`<label class="option"><input type="radio" name="mat" value="${o[1]}" ${i===0?'checked':''} onchange="matChanged()"><span>${o[0]}</span>${info(o[2])}</label>`).join('')}</div></div>
  ${(isPaperFormat||isFabricFormat)?`<div class="param-block size-block"><label>Размер печати ${info(isFabricFormat?'Можно выбрать стандартный размер А4, А3, 30×10 см (надпись на спину) или 10×10 см (логотип на грудь), либо ввести произвольный размер.':'Можно выбрать готовый формат А5, А4, А3, А2, А1 или А0 либо ввести произвольные размеры вручную.')}</label><div class="options" style="margin-bottom:10px"><label class="option"><input type="radio" name="paperSizeMode" value="format" checked onchange="paperSizeModeChange()"><span>Выбрать стандартный размер</span></label><label class="option"><input type="radio" name="paperSizeMode" value="custom" onchange="paperSizeModeChange()"><span>Ввести размеры вручную</span></label></div><div id="paperFormatBox"><label>Стандартный размер</label><select id="paperFormat" onchange="paperFormatChange()">${formatOptions}</select>${isFabricFormat?'<div id="fabricSizeExample" class="fabric-size-example"></div>':''}<div class="muted" style="margin-top:7px">${isFabricFormat?'А4, А3, 30×10 см — надпись на спину, 10×10 см — логотип на грудь.':'А5, А4, А3, А2, А1 и А0. Размеры указаны в сантиметрах.'}</div></div><div id="paperCustomBox" style="display:none"><div class="row"><div><label>Ширина, см ${info(widthTip)}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info(heightTip)}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div></div></div>`:`<div class="param-block size-block"><label>Размер изделия</label><div class="row"><div><label>Ширина, см ${info(widthTip)}</label><input id="w" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите ширину изделия" oninput="recalc()"></div><div><label>Высота, см ${info(heightTip)}</label><input id="h" class="size-input" type="number" min="0.1" step="0.1" placeholder="введите высоту изделия" oninput="recalc()"></div></div></div>`}
- <div class="param-block qty-block"><label>Количество, шт ${info(qtyTip)}</label><input id="qty" type="number" min="1" step="1" oninput="recalc()"></div><div id="postArea"></div>`;
+ <div class="param-block qty-block"><label>Количество, шт ${info(qtyTip)}</label><input id="qty" type="number" min="1" step="1" value="1" oninput="recalc()"></div><div id="postArea"></div>`;
  renderPostArea();
  if(isPaperFormat||isFabricFormat) paperFormatChange();
  updateMatTip(); recalc();
@@ -1014,6 +997,208 @@ function renderPostArea(){
  if(current.id==='plastic' && mat!=='p3twoMag' && mat!=='p5Mag') posts=posts.filter(x=>!x.includes('Фигурная резка по контуру'));
  if(current.id==='plastic' && (mat==='p3twoMag' || mat==='p5Mag')) posts=posts.filter(x=>!x.includes('Нанесение скотча'));
  const canDisableAutoCut=(current.id==='paper'||current.id==='backlit');
+ if(current.id==='fabric'){
+   box.innerHTML=`<label>Дополнительно</label><div class="options"><label class="option"><input type="checkbox" id="needShirt" onchange="recalc()"><span>Нужна футболка <small>(наличие цвета и размера уточняйте)</small></span>${info('Опция включения текстильного изделия (футболки) в заказ с предварительным согласованием параметров.')}</label></div><div id="shirtQtyBox" style="display:none;margin-top:10px"><label>Количество футболок, шт</label><select id="shirtQty" onchange="recalc()">${Array.from({length:50},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select></div>`;
+   const cb=document.getElementById('needShirt');
+   cb.addEventListener('change',()=>{document.getElementById('shirtQtyBox').style.display=cb.checked?'block':'none';recalc()});
+   return;
+ }
+ const hasCutting=current.id!=='banner' && posts.some(x=>/резк|контур/i.test(x));
+ const cutWarning=hasCutting?`<div class="cut-warning"><strong>⚠️ Важно: если нужен заказ отдельными изделиями</strong>обязательно выберите нужный вариант резки ниже. Если резку не выбрать, печать будет выдана сплошным большим рулоном.</div>`:'';
+ if(current.id==='banner' && posts.length){
+   box.innerHTML=`<div class="param-block post-block"><label>Постобработка <small style="color:var(--muted);font-weight:600">— можно выбрать только один вариант</small></label><div class="options">${posts.map(x=>`<label class="option"><input type="radio" name="bannerPost" class="post" data-name="${x}" onchange="bannerPostChanged()"><span>${x}</span>${info(postTip(x))}</label>`).join('')}<label class="option"><input type="radio" name="bannerPost" onchange="bannerPostChanged()" checked><span>Без постобработки</span></label></div><div id="bannerGrommetStep" style="display:none;margin-top:12px"><label>Шаг установки люверсов ${info('Расстояние между соседними люверсами. Стандартный и самый распространённый вариант — каждые 30 см.')}</label><select id="bannerGrommetStepSelect" onchange="recalc()"><option value="15">Каждые 15 см</option><option value="20">Каждые 20 см</option><option value="30" selected>Каждые 30 см — стандарт</option></select></div></div>`;
+ }else{
+   box.innerHTML=(posts.length||canDisableAutoCut)?`<div class="param-block post-block"><label>Постобработка</label>${cutWarning}<div class="options">${posts.map(x=>{const option=`<label class="option"><input type="checkbox" class="post" data-name="${x}" onchange="recalc()"><span>${x}</span>${info(postTip(x))}</label>`;if(current.id==='vinyl'){const slug=x.includes('Контурная')?'contour-cut':x.includes('Ламинация')?'lamination':x.includes('прямоугольная')?'rect-cut':'mounting-film';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/vinyl/${slug}`,x,'')}</div>`;}if(current.id==='plastic' && (x.includes('Нанесение скотча')||x.includes('Резка прямоугольная')||x.includes('Фигурная резка'))){const slug=x.includes('скотча')?'tape':x.includes('прямоугольная')?'rect-cut':'contour-cut';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/plastic/${slug}`,x,'')}</div>`;}
+if(current.id==='flag' && (x.includes('Пошив')||x.includes('Люверсы'))){const slug=x.includes('Пошив')?'perimeter-sewing':'grommets';return `<div class="post-example-row">${option}${exampleThumbHTML(`examples/flag/${slug}`,x,'')}</div>`;}
+return option;}).join('')}${canDisableAutoCut?`<label class="option no-example"><input type="checkbox" id="noAutoCut" onchange="recalc()"><span>Без порезки</span>${info('По умолчанию прямоугольная поштучная резка уже включена в расчёт. Поставьте эту галочку, если печать нужно выдать без порезки.')}</label>`:''}</div></div>`:'';
+ }
+ setTimeout(decorateExampleOptions,0);
+}
+function updateMatTip(){const el=document.getElementById('matSelect');const box=document.getElementById('matTip');if(!el||!box||!current)return;const opt=current.opts.find(o=>o[1]===el.value);box.innerHTML=opt&&opt[2]?info(opt[2]):'';}
+function bannerPostChanged(){const selected=document.querySelector('input[name="bannerPost"]:checked');const isGrommet=!!selected?.dataset?.name?.includes('Люверсы');const box=document.getElementById('bannerGrommetStep');if(box)box.style.display=isGrommet?'block':'none';recalc();}
+function matChanged(){updateMatTip();if(current?.id==='paper')updatePaperFormatOptions();renderPostArea();recalc()}
+function postTip(x){if(current?.id==='flag'){if(x.includes('Пошив флага'))return 'Профессиональная обработка краев изделия двойной строчкой для защиты от растрепывания на ветру и пошивом кармана для флагштока.';if(x.includes('Люверсы'))return 'Установка металлических колец для удобного крепления флага на флагшток или тросы.';} if(current?.id==='backlit'){if(x.includes('Ламинация'))return 'Защитное покрытие для предотвращения выгорания чернил и повреждения поверхности при монтаже.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка готового тиража в заданный размер по периметру.';} if(current?.id==='paper'||current?.id==='photos'){if(x.includes('Ламинация'))return 'Нанесение защитной прозрачной пленки для предотвращения выцветания, загрязнений и механических повреждений бумаги.';if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка отпечатанного тиража по заданному размеру на отдельные готовые изделия.';} if(current?.id==='vinyl'){if(x.includes('Контурная резка'))return 'Точное вырезание наклеек по сложному индивидуальному контуру.';if(x.includes('Ламинация'))return 'Накатка защитной прозрачной пленки для защиты изображения от выгорания, царапин и механических повреждений.';if(x.includes('Резка прямоугольная'))return 'Нарезка отпечатанного тиража на отдельные прямоугольные изделия.';} if(current?.id==='vinyl' && x.includes('Монтажная плёнка'))return 'Нужна, если заказываем многоцветный рисунок без фона или со сложным контурным резом. Монтажная плёнка помогает легче перенести и нанести готовый рисунок в дальнейшем.'; if(current?.id==='plastic'){
+   if(x.includes('Нанесение скотча'))return 'Приклеивание двустороннего скотча на тыльную сторону для быстрого и удобного монтажа на стены или поверхности.';
+   if(x.includes('Резка прямоугольная'))return 'Аккуратная обрезка готовых изделий по заданному прямому контуру.';
+   if(x.includes('Фигурная резка'))return 'Резка магнитов плоттером по заданной форме.';
+ }
+ if(current?.id==='banner' && x.includes('Люверсы'))return 'Установка металлических колец по периметру баннера для крепления на трос, крючки или саморезы.'; if(current?.id==='banner' && x.includes('Проклейка'))return 'Усиление краёв баннера подворотом и проклейкой по периметру. Выбирается отдельно от люверсов и резки.'; if(current?.id==='banner' && x.includes('Резка'))return 'Обрезка готового изделия по контуру без проклейки и люверсов.'; if(x.includes('люверс')||x.includes('проклей'))return 'По прайсу установка люверсов/проклейка считается по периметру: 1 см = 1 ₽.';if(x.includes('Ламинация'))return 'Защитное прозрачное покрытие печати плёнкой. Повышает стойкость к влаге, истиранию и выцветанию; стоимость зависит от площади заказа.';if(x.includes('Контур'))return 'Плоттер вырезает изделие по заданному контуру. Выбирайте этот пункт, если готовые изделия должны быть отделены друг от друга по форме.';return 'Дополнительная обработка готового изделия. Стоимость рассчитывается автоматически согласно прайсу.'}
+
+function exampleKeyFromOption(opt,index){
+ const radio=opt.querySelector('input[type="radio"]');
+ const val=radio?.value||radio?.id||('item'+(index+1));
+ return String(val).replace(/[^a-zA-Z0-9_-]/g,'-');
+}
+function resolveExampleFolder(folder,title=''){
+ const map={
+  'examples/banner/banner440':'examples/banner/440gsm','examples/banner/banner280':'examples/banner/budget','examples/banner/bannerMesh':'examples/banner/mesh',
+  'examples/vinyl/vStd':'examples/vinyl/standard-print','examples/vinyl/vBudget':'examples/vinyl/budget-film','examples/vinyl/vPerf':'examples/vinyl/perforated','examples/vinyl/v1440':'examples/vinyl/1440dpi','examples/vinyl/vGlue':'examples/vinyl/front-side',
+  'examples/plotter/plotterWhite':'examples/plotter/white','examples/plotter/plotterColor':'examples/plotter/color','examples/plotter/plotterEuro':'examples/plotter/color','examples/plotter/plotterSilver':'examples/plotter/silver','examples/plotter/plotterGold':'examples/plotter/gold','examples/plotter/plotterHolo':'examples/plotter/holographic','examples/plotter/plotterGlow':'examples/plotter/glow','examples/plotter/plotterReflect':'examples/plotter/reflective',
+  'examples/flag/flagStd':'examples/flag/standard-fabric','examples/flag/flagBlock':'examples/flag/blackout','examples/fabric/sizeA4':'examples/fabric/size-a4','examples/fabric/sizeA3':'examples/fabric/size-a3','examples/fabric/size30x10':'examples/fabric/size-30x10','examples/fabric/size10x10':'examples/fabric/size-10x10',
+  'examples/fabric/fabWhite':'examples/fabric/white','examples/fabric/fabColor':'examples/fabric/solid-color','examples/fabric/fabFull':'examples/fabric/full-color',
+  'examples/paper/photo':'examples/paper/photo','examples/paper/poster':'examples/paper/poster',
+  'examples/canvas/canvas':'examples/canvas/standard',
+  'examples/plastic/p3':'examples/plastic/pvc-3mm','examples/plastic/p3lam':'examples/plastic/pvc-3mm','examples/plastic/p3two':'examples/plastic/pvc-3mm','examples/plastic/p5':'examples/plastic/pvc-5mm','examples/plastic/p3twoMag':'examples/plastic/magnet-04','examples/plastic/p5Mag':'examples/plastic/magnet-075','examples/flag/mode-standard':'examples/flag/standard-size','examples/flag/mode-winder':'examples/flag/winder','examples/flag/mode-custom':'examples/flag/custom-size','examples/flag/w220':'examples/flag/winder-60x220','examples/flag/w240':'examples/flag/winder-60x240','examples/flag/w340':'examples/flag/winder-60x340','examples/photos/main':'examples/photos/standard','examples/cards/crease-1':'examples/cards/booklet','examples/cards/crease-2':'examples/cards/leaflet-2fold',
+  'examples/flag/mode-standard':'examples/flag/standard-size',
+  'examples/flag/mode-winder':'examples/flag/winder',
+  'examples/flag/mode-custom':'examples/flag/custom-size',
+  'examples/flag/w220':'examples/flag/winder-60x220',
+  'examples/flag/w240':'examples/flag/winder-60x240',
+  'examples/flag/w340':'examples/flag/winder-60x340',
+  'examples/photos/main':'examples/photos/standard',
+  'examples/canvas/main':'examples/canvas/standard',
+  'examples/cards/crease-1':'examples/cards/booklet',
+  'examples/cards/crease-2':'examples/cards/leaflet-2fold'
+ };
+ if(map[folder]) return map[folder];
+ const t=String(title).toLowerCase();
+ if(folder==='examples/banner/on'){
+   if(t.includes('люверс'))return 'examples/banner/grommets';
+   if(t.includes('проклей'))return 'examples/banner/edge-gluing';
+   if(t.includes('резк'))return 'examples/banner/contour-cut';
+ }
+ if(folder.startsWith('examples/fabric/')){
+   if(t.includes('однотон')||t.includes('цветный'))return 'examples/fabric/solid-color';
+   if(t.includes('a4'))return 'examples/fabric/size-a4';
+   if(t.includes('a3'))return 'examples/fabric/size-a3';
+   if(t.includes('30×10')||t.includes('30x10'))return 'examples/fabric/size-30x10';
+   if(t.includes('10×10')||t.includes('10x10'))return 'examples/fabric/size-10x10';
+ }
+ if(folder.startsWith('examples/plastic/')){
+   if(t.includes('скотч'))return 'examples/plastic/double-sided-tape';
+   if(t.includes('фигур'))return 'examples/plastic/magnet-plotter-cut';
+ }
+ return folder;
+}
+function exampleAsset(path){return 'https://raw.githubusercontent.com/egoriul977/se-print/main/'+String(path).replace(/^\/+/, '');}
+function exampleCandidates(folder,n){
+ folder=resolveExampleFolder(folder);
+ const nums=[String(n).padStart(2,'0'),String(n)];
+ const exts=['webp','jpg','png','jpeg'];
+ return nums.flatMap(num=>exts.map(ext=>exampleAsset(`${folder}/${num}.${ext}`)));
+}
+function exampleThumbHTML(folder,title,cls='compact') {
+ const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
+ return `<button type="button" class="example-thumb ${cls}" style="display:none" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)"></button>`;
+}
+function exampleThumbSpanHTML(folder,title,cls='') {
+ const rf=resolveExampleFolder(folder,title), esc=String(title).replace(/"/g,'&quot;');
+ return `<span class="example-thumb ${cls}" style="display:none" role="button" tabindex="0" data-example-folder="${folder}" data-example-title="${esc}" onclick="event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openExampleGallery(this.dataset.exampleFolder,this.dataset.exampleTitle)}"><img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)"></span>`;
+}
+function exampleThumbFallback(img,folder,step){
+ const variants=['1.webp','01.jpg','1.jpg','01.png','1.png','01.jpeg','1.jpeg'];
+ if(step<=variants.length){img.onerror=()=>exampleThumbFallback(img,folder,step+1);img.src=exampleAsset(`${folder}/${variants[step-1]}`);}
+ else{const holder=img.parentElement;if(holder){const opt=holder.closest('.option');holder.remove();if(opt&&!opt.querySelector('.example-thumb'))opt.classList.remove('has-example');}}
+}
+function decorateExampleOptions(){
+ if(!current)return;
+ const options=[...form.querySelectorAll('.option')].filter(o=>{const r=o.querySelector('input[type="radio"]');return r && r.name!=='paperSizeMode' && !o.classList.contains('no-example');});
+ options.forEach((opt,i)=>{
+   if(opt.querySelector('.example-thumb'))return;
+   const key=exampleKeyFromOption(opt,i), folder=`examples/${current.id}/${key}`;
+   const thumb=document.createElement('button');thumb.type='button';thumb.className='example-thumb';thumb.dataset.exampleFolder=folder;thumb.dataset.folder=folder;thumb.dataset.title=(opt.querySelector('span')?.textContent||current.name).trim();
+   const title=thumb.dataset.title;const rf=resolveExampleFolder(folder,title);thumb.style.display='none';thumb.innerHTML=`<img src="${exampleAsset(`${rf}/01.webp`)}" alt="" onload="if(this.naturalWidth>1&&this.naturalHeight>1){this.parentElement.style.display='flex';this.parentElement.closest('.option')?.classList.add('has-example')}else exampleThumbFallback(this,this.parentElement.dataset.exampleFolder||this.parentElement.dataset.folder||'',1)" onerror="exampleThumbFallback(this,'${rf}',1)">`;
+   thumb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openExampleGallery(folder,thumb.dataset.title)});
+   opt.appendChild(thumb);
+ });
+}
+function findExampleImage(folder,n){
+ const candidates=exampleCandidates(folder,n);
+ return new Promise(resolve=>{let i=0;const img=new Image();const next=()=>{if(i>=candidates.length)return resolve(null);const src=candidates[i++];img.onload=()=>resolve(src);img.onerror=next;img.src=src;};next();});
+}
+function openExampleGallery(folder,title){
+ folder=resolveExampleFolder(folder,title);
+ document.querySelector('.example-gallery')?.remove();
+ const ov=document.createElement('div');ov.className='example-gallery';
+ ov.innerHTML=`<div class="example-gallery-inner" role="dialog" aria-label="${title}"><div class="example-gallery-loading">Загрузка фотографий…</div></div>`;
+ const inner=ov.querySelector('.example-gallery-inner');
+ const close=()=>{if(ov.classList.contains('closing'))return;ov.classList.add('closing');setTimeout(()=>ov.remove(),180)};
+ ov.addEventListener('click',close);
+ inner.addEventListener('click',e=>e.stopPropagation());
+ document.body.appendChild(ov);
+ let loaded=0, finished=0;
+ const total=6;
+ for(let n=1;n<=total;n++){
+   findExampleImage(folder,n).then(src=>{
+     finished++;
+     if(src && ov.isConnected){
+       if(loaded===0) inner.innerHTML='';
+       loaded++;
+       const item=document.createElement('div');item.className='example-gallery-item';
+       const img=document.createElement('img');img.src=src;img.alt=title;img.loading='eager';img.decoding='async';
+       item.appendChild(img);inner.appendChild(item);
+     }
+     if(finished===total && loaded===0 && ov.isConnected) inner.innerHTML='<div class="example-gallery-empty">Фотографии для этого примера пока не загружены</div>';
+   });
+ }
+}
+
+function area(){return (+w.value||0)*(+h.value||0)/10000}
+function perim(){return 2*((+w.value||0)+(+h.value||0))}
+function bandIndex(a){
+ if(a<=.30)return 0;if(a<=.35)return 1;if(a<=.5)return 2;if(a<=1)return 3;
+ if(a<=2)return 0;if(a<=5)return 1;if(a<=15)return 2;if(a<=20)return 3;if(a<=30)return 4;if(a<=40)return 5;return 6;
+}
+function priceFor(id,a){
+ if(a<=0)return {price:0,band:'',model:'per_m2',setup:0};
+ // Для баннеров тариф из прайса — это именно цена за 1 м².
+ // Сначала определяем диапазон по ОБЩЕЙ площади всего заказа, затем умножаем тариф на общую площадь.
+ if(id==='p3twoMag')id='p3two'; if(id==='p5Mag')id='p5';
+ if(id==='plotterWhite'||id==='plotterColor'||id==='plotterEuro'||id==='plotterMetal'||id==='plotterSilver'||id==='plotterGold'||id==='plotterHolo'||id==='plotterGlow'||id==='plotterReflect'){
+   const rows=plotterTariffs[id] || plotterTariffs.plotterMetal;
+   const r=rows?.find(x=>a>=x[0]-1e-9 && a<=x[1]+1e-9);
+   if(r){
+     const labels=['<0,25','0,25–0,30','0,301–0,35','0,3501–0,5','0,501–1','1,001–2','2,001–5','5,001–15','>15–20','>20–30','>30–40','>40'];
+     const idx=rows.indexOf(r);
+     return {price:r[2],band:labels[idx]+' м²',model:'per_m2',setup:r[3]||0};
+   }
+   return null;
+ }
+ if(id==='banner440'||id==='banner280'||id==='bannerMesh'){
+   const rows=areaTariffs[id];
+   const r=rows?.find(x=>a>=x[0]-1e-9 && a<=x[1]+1e-9);
+   if(r)return {price:r[2],band:(r[0]===0?'до 1':r[0]+'–'+r[1])+' м²',model:'per_m2',setup:r[4]||0};
+   // Диапазон 1,001–2 м² отсутствует в прайсе — цену не придумываем.
+   return null;
+ }
+ if(a<=1){
+   const arr=priceSmall[id]; if(!arr)return null;
+   const i=bandIndex(a);
+   // Для печатных наклеек при общей квадратуре менее 0,6 м² добавляется фиксированный запуск 300 ₽.
+   const stickerIds=['vStd','vBudget','vGlue','vPerf','v1440'];
+   const setup=stickerIds.includes(id) ? (a<0.6 ? 300 : 0) : (startup[id]?.[i]||0);
+   return {price:arr[i],band:rangeNamesSmall[i],model:'per_m2',setup};
+ }
+ const arr=high[id]; if(!arr)return null;
+ const i=bandIndex(a); if(i>=arr.length || arr[i]==null)return null;
+ return {price:arr[i],band:rangeNamesLarge[i],model:'per_m2',setup:0};
+}
+function recalc(){
+ if(!current||current.id==='cards'||current.id==='canvas'){lastCalcMeta=null;return;}
+ let mat=document.querySelector('select#matSelect')?.value || document.querySelector('input[name=mat]:checked')?.value;
+ let q=+document.getElementById('qty').value||1;
+ let unitArea=area(), a=unitArea*q;
+ let pf=priceFor(mat,a);
+ if(!pf){liveTotal.textContent='Нет цены';breakdown.innerHTML='Для этой площади в прайсе нет значения.';return}
+ let base=pf.price, launch=pf.setup||0;
+ // Сначала считаем ОБЩУЮ площадь заказа: площадь одного изделия × тираж.
+ // Если выбранный тариф в прайсе указан за м² — умножаем тариф именно на общую площадь заказа.
+ // Если в прайсе указана фиксированная цена — площадь не умножаем, цена остаётся фиксированной.
+ let subtotal=base*a;
+ let extras=0, details=[];
+ if(current.id==='fabric'){
+   // Нанесение на ткань: строго 180 ₽ за 1 изделие, без минимальной стоимости заказа.
+   const applyCost=Math.max(350,180*q);
+   extras+=applyCost;
+   details.push(`Нанесение: ${R(applyCost)} (${q} шт. × 180 ₽, минимум 350 ₽)`);
+   const shirtCb=document.getElementById('needShirt');
+   if(shirtCb?.checked){
+     const shirtQty=+(document.getElementById('shirtQty')?.value||1);
+     const shirtCost=shirtQty*600;
+     extras+=shirtCost;
+     details.push(`Футболки: ${R(shirtCost)} (${shirtQty} шт. × 600 ₽)`);
+   }
+ }
  selectedPostNames().forEach(n=>{
    if(n.includes('Люверсы по одной')){ let e=100*q; extras+=e;details.push(`${n}: ${R(e)} (${q} флагов × 100 ₽)`); } else if(current.id==='banner' && n.includes('Люверсы')){
       const step=+(document.getElementById('bannerGrommetStepSelect')?.value||30);const perOne=perim();const grommetsPerItem=Math.ceil(perOne/step);const count=grommetsPerItem*q;const e=count*30;extras+=e;details.push(`${n}: ${count} шт. × 30 ₽ = ${R(e)} (периметр 1 шт. ${R(perOne)} см ÷ шаг ${step} см → ${grommetsPerItem} люверсов/шт.)`);
@@ -1196,8 +1381,8 @@ function cardCalc(){
  if(t!=='leaf') lastCalcMeta={categoryId:current.id, fixed:true, qty:1, total:v};
  breakdown.innerHTML=detail;
 }
-function renderCanvas(){form.innerHTML=`<div class="inline-example-row"><div><label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select></div>${exampleThumbHTML('examples/canvas/standard','Картина на холсте')}</div><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="post-example-row"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label>${exampleThumbHTML('examples/canvas/hook','Крючок для крепежа','')}</div>`;canvasCalc()}
-function canvasCalc(){const raw=String(cvq?.value||'').trim();let q=+raw;if(!raw||!Number.isFinite(q)||q<1){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Укажите количество.';return;}let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
+function renderCanvas(){form.innerHTML=`<div class="inline-example-row"><div><label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select></div>${exampleThumbHTML('examples/canvas/standard','Картина на холсте')}</div><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" value="1" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="post-example-row"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label>${exampleThumbHTML('examples/canvas/hook','Крючок для крепежа','')}</div>`;canvasCalc()}
+function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
 function selectedPostNames(){
  const names=[...document.querySelectorAll('.post:checked')].map(x=>x.dataset.name||x.parentElement?.querySelector('span')?.textContent||'').filter(Boolean);
  const mat=document.querySelector('select#matSelect')?.value || document.querySelector('input[name=mat]:checked')?.value;
@@ -1227,17 +1412,17 @@ function buildCurrentDetails(){
  if(m.fixed){
    if(current?.id==='fabric'){
      (m.images||[]).forEach(x=>lines.push(`Изображение ${x.n}: ${x.typeLabel} · ${x.sizeLabel}`));
-     if(m.qty) lines.push(`Количество изображений: ${m.qty}`);
+     lines.push(`Количество изображений: ${m.qty||1}`);
      if(m.shirtCost) lines.push(`Футболки: ${R(m.shirtCost)}`);
    } else if(current?.id==='photos'){
      const el=document.getElementById('photoSize'); const q=document.getElementById('photoQty');
      lines.push(`Размер: ${el?.value||m.photoSize||'—'}`);
-     if(q?.value||m.qty) lines.push(`Количество: ${q?.value||m.qty} шт.`);
+     lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
      if(m.rate) lines.push(`Цена за 1 шт.: ${R(m.rate)}`);
    } else if(current?.id==='stand'){
      lines.push(`Форма: ${m.standShape==='arch'?'Арочный':'Прямоугольный'}`);
      lines.push(`Пластик: ${m.standSide==='double'?'Двусторонний':'Односторонний'}`);
-     if(m.qty) lines.push(`Количество: ${m.qty} шт.`);
+     lines.push(`Количество: ${m.qty||1} шт.`);
      lines.push(`Цена за 1 шт.: ${R(m.unitPrice||0)}`);
    } else if(current?.id==='digital'){
      const type=m.digitalType==='multi'?'Многостраничная продукция (каталоги)':'Одностраничная продукция (карточки)';
@@ -1259,7 +1444,7 @@ function buildCurrentDetails(){
        if(m.digitalDenseCover) multiPosts.push('Плотная обложка 300 гр');
        if(multiPosts.length) lines.push(`Постобработка: ${multiPosts.join('; ')}`);
      }
-     if(m.qty) lines.push(`Количество: ${m.qty} шт.`);
+     lines.push(`Количество: ${m.qty||1} шт.`);
    } else if(current?.id==='canvas'){
      const cvEl=document.getElementById('cv'); const q=+(document.getElementById('cvq')?.value||m.qty||1);
      lines.push(`Размер: ${cvEl?.selectedOptions?.[0]?.textContent||m.size||'—'}`);
@@ -1276,21 +1461,21 @@ function buildCurrentDetails(){
      } else if(cardType==='cardsEx'){
        const t=document.getElementById('cardExType'); const q=document.getElementById('cardExQty');
        lines.push(`Тип: ${t?.selectedOptions?.[0]?.textContent||m.type||'—'}`);
-       if(q?.value||m.qty) lines.push(`Количество: ${q?.value||m.qty} шт.`);
+       lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
      } else if(cardType==='leaf'){
        lines.push(`Вариант: Листовки офсет 115 гр`);
        lines.push(`Размер: ${m.leafSize||'—'}`);
-       if(m.leafQty||m.qty) lines.push(`Количество: ${m.leafQty||m.qty} шт.`);
+       lines.push(`Количество: ${m.leafQty||m.qty||1} шт.`);
        const linesCount=m.leafCreaseLines||0;
        if(linesCount) lines.push(`Постобработка: биговка — ${linesCount} ${linesCount===1?'линия':'линии'}`);
      }
    } else if(current?.id==='cardsEx'){
      const t=document.getElementById('cardExType'); const q=document.getElementById('cardExQty');
      lines.push(`Тип: ${t?.selectedOptions?.[0]?.textContent||m.type||'—'}`);
-     if(q?.value||m.qty) lines.push(`Количество: ${q?.value||m.qty} шт.`);
+     lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
    } else if(current?.id==='leaf'){
      lines.push(`Размер: ${m.leafSize||'—'}`);
-     if(m.leafQty||m.qty) lines.push(`Количество: ${m.leafQty||m.qty} шт.`);
+     lines.push(`Количество: ${m.leafQty||m.qty||1} шт.`);
      const linesCount=m.leafCreaseLines||0;
      if(linesCount) lines.push(`Постобработка: биговка — ${linesCount} ${linesCount===1?'линия':'линии'}`);
    } else if(current?.id==='flag' && m.winder){
@@ -1311,27 +1496,19 @@ function buildCurrentDetails(){
    const posts=selectedPostNames(); if(posts.length) lines.push(`Постобработка: ${posts.join(', ')}`);
    if(current?.id==='fabric'){
      const shirt=document.getElementById('needShirt');
-     if(shirt?.checked) lines.push(`Футболка: ${document.getElementById('shirtQty')?.value||m.copies||0} шт.`);
+     if(shirt?.checked) lines.push(`Футболка: ${document.getElementById('shirtQty')?.value||1} шт.`);
    }
    if(current?.id==='flag' && flagMode==='standard') lines.push('Размер: стандартный вариант');
  }
  return lines.join(' · ');
 }
 function addToCart(){
- const emptyManualQty=[...form.querySelectorAll('input[type="number"]')].find(inp=>{
-   if(inp.offsetParent===null)return false;
-   const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
-   const holder=inp.closest('.qty-block,.param-qty,.fabric-image-count,.fabric-copy-count,label,div');
-   const text=((holder?.textContent||'')+' '+own).toLowerCase();
-   return /количество|тираж|qty|quantity/.test(text) && !/ширин|высот|размер|width|height/.test(own) && String(inp.value).trim()==='';
- });
- if(emptyManualQty){emptyManualQty.focus();return alert('Укажите количество.');}
  let total=parseInt(liveTotal.textContent.replace(/\D/g,''))||0;
  if(!total)return alert('Не удалось получить цену по прайсу для выбранных параметров.');
  let name=current.name;
  let mat=flagMode==='standard'?(flagFixed?.label||''):(currentMaterialLabel()||'');
  let meta=lastCalcMeta?{...lastCalcMeta}:null;
- if(!meta) return alert('Сначала заполните параметры заказа и количество.');
+ if(!meta) meta={categoryId:current.id,fixed:true,qty:1,total};
  meta.total=total;
  meta.postNames=selectedPostNames();
  if(current.id==='canvas') meta.size=document.getElementById('cv')?.selectedOptions?.[0]?.textContent||'';
@@ -1340,7 +1517,7 @@ function addToCart(){
    if(meta.cardType==='cards') meta.detail=document.getElementById('cardVariant')?.selectedOptions?.[0]?.textContent||'';
    if(meta.cardType==='leaf'){meta.detail=meta.leafSize||'';meta.qty=meta.leafQty||meta.qty||1;}
  }
- if(current.id==='cardsEx') {meta.type=document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||'';meta.qty=+(document.getElementById('cardExQty')?.value||0);meta.rounded=!!document.getElementById('cardExRound')?.checked;}
+ if(current.id==='cardsEx') {meta.type=document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||'';meta.qty=+(document.getElementById('cardExQty')?.value||1);meta.rounded=!!document.getElementById('cardExRound')?.checked;}
  const details=buildCurrentDetails();
  const entry={name,mat,total,meta,details};
  if(editingCartIndex>=0){ cart[editingCartIndex]=entry; editingCartIndex=-1; }
@@ -1597,6 +1774,8 @@ renderCats();renderCart();new MutationObserver(()=>{clearTimeout(window.__exTime
     <div class="add-cart-actions">
       <button type="button" class="add-cart-continue" onclick="closeAddCartModal()">Продолжить в этой категории</button>
       <button type="button" class="add-cart-new" onclick="closeAddCartModal();goHome()">Выбрать новую категорию</button>
+      <button type="button" class="order-vk-btn add-cart-order-btn" data-messenger="ВК" data-close-add-cart="1"><span class="vk-send-mark">VK</span><span>Завершить выбор, оформить заказ через ВК</span><small>Заказ автоматически скопирован. В диалоге вставьте его в поле сообщения и отправьте</small></button>
+      <button type="button" class="order-max-btn add-cart-order-btn" data-messenger="MAX" data-close-add-cart="1"><span class="max-send-mark">M</span><span>Завершить выбор, оформить заказ через MAX</span><small>Заказ автоматически скопирован. В диалоге вставьте его в поле сообщения и отправьте</small></button>
     </div>
   </div>
 </div>
@@ -1979,8 +2158,9 @@ function enhanceSelectedBadges(root=document){
    el.classList.toggle('ui-selected',checked);
  });
 }
-document.addEventListener('change',e=>requestAnimationFrame(()=>enhanceSelectedBadges(e.target?.closest('.param-block,.options,#form')||document)));
-document.addEventListener('click',e=>requestAnimationFrame(()=>enhanceSelectedBadges(e.target?.closest('.param-block,.options,#form')||document)));
+document.addEventListener('change',()=>requestAnimationFrame(()=>enhanceSelectedBadges()));
+document.addEventListener('click',()=>requestAnimationFrame(()=>enhanceSelectedBadges()));
+new MutationObserver(()=>requestAnimationFrame(()=>enhanceSelectedBadges())).observe(document.body,{childList:true,subtree:true});
 requestAnimationFrame(()=>enhanceSelectedBadges());
 </script>
 
@@ -2051,334 +2231,25 @@ body.gallery-is-open > *:not(.example-gallery):not(.example-lightbox):not(.galle
 }
 </style>
 
-<style id="safe-mobile-tweaks-v1-css">
-:root{--selected-blue:#39b8ff;--selected-blue-soft:#eaf8ff}
-.option input[type="checkbox"],.option input[type="radio"],.flag-choice input[type="checkbox"],.flag-choice input[type="radio"]{accent-color:var(--selected-blue)!important}
-.option.ui-selected,.flag-choice.ui-selected,.option:has(input:checked){border-color:var(--selected-blue)!important;box-shadow:0 0 0 2px rgba(57,184,255,.12)!important}
-.option.ui-selected::after,.flag-choice.ui-selected::after{content:"✓ ВЫБРАНО"!important;background:var(--selected-blue)!important;color:#fff!important;box-shadow:none!important}
-@media(max-width:700px){html,body{width:100%;max-width:100%;overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box}body{padding-left:0!important;padding-right:0!important}#home,#product,main,.container,.wrap{width:100%!important;max-width:100%!important;min-width:0!important}#home,#product{padding-left:7px!important;padding-right:7px!important}#form{width:100%!important;max-width:100%!important;min-width:0!important;gap:6px!important}.param-block{width:100%!important;max-width:100%!important;min-width:0!important;margin:5px 0!important;padding:8px!important;border-radius:12px!important}.param-block>label,.param-block .label{font-size:11px!important;margin-bottom:5px!important;line-height:1.2!important}.options{gap:6px!important;max-width:100%!important}.option,.flag-choice{min-width:0!important;max-width:100%!important;padding:7px!important;min-height:38px!important;border-radius:11px!important;font-size:11px!important;line-height:1.15!important}input,select,textarea{max-width:100%!important;min-width:0!important;min-height:37px!important;height:37px!important;padding:6px 8px!important;font-size:13px!important}.size-row,.dimensions,.dimension-row,.wh-row,.fabric-custom-size{width:100%!important;max-width:100%!important;gap:6px!important}.example-thumb{max-width:100%!important;border-radius:10px!important}.option.ui-selected::after,.flag-choice.ui-selected::after{font-size:8px!important;padding:3px 6px!important}.options:has(>.ui-selected)>.option:not(.ui-selected),.flag-mode-row:has(>.ui-selected)>.flag-choice:not(.ui-selected),.material-options:has(>.ui-selected)>.option:not(.ui-selected),.paper-material-row:has(>.ui-selected)>.option:not(.ui-selected){filter:none!important}}
-</style>
-
-<script id="safe-mobile-tweaks-v1">
-(function(){
- function isManualQty(inp){if(!inp||inp.type!=="number")return false;const box=inp.closest(".param-block,.field,.row,label,div");const t=((box&&box.textContent)||"").toLowerCase();const own=((inp.name||"")+" "+(inp.id||"")+" "+(inp.placeholder||"")).toLowerCase();return /количество|тираж|qty|quantity/.test(t+" "+own)&&!/ширин|высот|размер|width|height|area|площад/.test(own)}
- function init(root){root.querySelectorAll('input[type="number"]').forEach(inp=>{if(!isManualQty(inp)||inp.dataset.blankQtyInit)return;inp.dataset.blankQtyInit="1";if(inp.value==="1"||inp.getAttribute("value")==="1"){inp.value="";inp.removeAttribute("value")}})}
- init(document);new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)init(n)}).observe(document.body,{childList:true,subtree:true});
-})();
-</script>
-
-<style id="safe-ux-improvements-v2">
-:root{--ux-blue:#39b8ff;--ux-pink:#f1268f}
-
-/* Краткая строка текущей конфигурации */
-#uxCurrentSummary{display:none;margin:7px 0 9px;padding:8px 10px;border-radius:11px;background:#f7f9fc;border:1px solid #e7ebf2;color:#596273;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#product:not(.hidden) #uxCurrentSummary{display:block}
-
-/* Выбранные этапы: компактная строка + возможность раскрыть обратно */
-.param-block.ux-collapsible>.ux-collapse-head{display:none}
+<style id="recovery-visual-only">
+:root{--recovery-blue:#39b8ff}
+.option input[type="checkbox"],.option input[type="radio"],
+.flag-choice input[type="checkbox"],.flag-choice input[type="radio"]{
+  accent-color:var(--recovery-blue)!important;
+}
+.option.ui-selected,.flag-choice.ui-selected,.option:has(input:checked){
+  border-color:var(--recovery-blue)!important;
+  box-shadow:0 0 0 2px rgba(57,184,255,.12)!important;
+}
+.option.ui-selected::after,.flag-choice.ui-selected::after{
+  background:var(--recovery-blue)!important;color:#fff!important;
+}
 @media(max-width:700px){
- .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head{display:flex;align-items:center;gap:7px;min-height:31px;cursor:pointer}
- .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head b{font-size:10.5px;color:#263246;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
- .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head .ux-ok{width:17px;height:17px;border-radius:50%;background:var(--ux-blue);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:1000}
- .param-block.ux-collapsible.ux-collapsed>.ux-collapse-head button{border:0;background:#edf7ff;color:#168bc9;border-radius:8px;padding:5px 7px;font-size:9px;font-weight:900}
- .param-block.ux-collapsible.ux-collapsed>*:not(.ux-collapse-head){display:none!important}
+  html,body{max-width:100%;overflow-x:hidden!important}
+  #home,#product,#form{max-width:100%!important;min-width:0!important}
+  .param-block{margin:5px 0!important;padding:8px!important}
+  .options{gap:6px!important}
+  .option,.flag-choice{padding:7px!important;min-height:38px!important}
+  input,select,textarea{max-width:100%!important}
 }
-
-/* Размеры — компактно в строку */
-@media(max-width:700px){
- .sizegrid,.size-row,.dimensions,.dimension-row,.wh-row{
-   display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;gap:5px!important;align-items:center!important
- }
- .sizegrid:has(>input:nth-child(2))::before,.size-row:has(>input:nth-child(2))::before,
- .dimensions:has(>input:nth-child(2))::before,.dimension-row:has(>input:nth-child(2))::before,.wh-row:has(>input:nth-child(2))::before{
-   content:"×";grid-column:2;grid-row:1;color:#8b93a1;font-weight:900
- }
- .sizegrid>input:first-child,.size-row>input:first-child,.dimensions>input:first-child,.dimension-row>input:first-child,.wh-row>input:first-child{grid-column:1;grid-row:1}
- .sizegrid>input:nth-child(2),.size-row>input:nth-child(2),.dimensions>input:nth-child(2),.dimension-row>input:nth-child(2),.wh-row>input:nth-child(2){grid-column:3;grid-row:1}
-}
-
-/* Итоговая цена — главный объект */
-.calcbox .total{font-size:clamp(28px,7vw,40px)!important;line-height:1!important;color:var(--ux-pink)!important;letter-spacing:-.7px}
-#uxPriceMeta{margin-top:5px;font-size:10px;color:#7a8392;font-weight:800}
-
-/* Без лишних рамок внутри мобильных блоков */
-@media(max-width:700px){
- .param-block{box-shadow:none!important}
- .material-block,.size-block,.qty-block,.post-block{border-color:rgba(31,41,55,.07)!important}
-}
-
-/* Нижняя безопасная панель: ничего не считает сама, только читает штатные значения */
-#uxBottomBar{position:fixed;z-index:90;left:50%;bottom:7px;transform:translateX(-50%);width:min(760px,calc(100vw - 12px));display:none;align-items:center;gap:7px;padding:7px 7px 7px 11px;border-radius:15px;background:rgba(20,27,42,.95);backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(10,15,30,.26);color:#fff}
-#product:not(.hidden)~* #uxBottomBar,#uxBottomBar.show{display:flex}
-#uxBottomBar .uxbp{min-width:0;margin-right:auto}
-#uxBottomBar .uxblabel{font-size:8px;opacity:.62;font-weight:800}
-#uxBottomBar .uxbprice{font-size:18px;font-weight:1000;line-height:1.05;white-space:nowrap}
-#uxBottomBar .uxbcart{font-size:9px;opacity:.72;margin-top:2px;white-space:nowrap}
-#uxBottomBar button{border:0;width:40px;height:40px;flex:0 0 40px;border-radius:11px;display:grid;place-items:center;cursor:pointer;font-size:18px}
-#uxBottomBar .uxAdd{background:var(--ux-pink);color:#fff}
-#uxBottomBar .uxGo{background:#fff;color:#172033}
-#uxBottomBar .uxbprice.bump{animation:uxBump .28s ease-out}
-@keyframes uxBump{40%{transform:scale(1.12)}}
-@media(max-width:700px){body{padding-bottom:66px!important}#uxBottomBar{bottom:5px;width:calc(100vw - 10px)}}
-
-/* Успешное добавление */
-#uxAddedToast{position:fixed;left:50%;bottom:62px;transform:translate(-50%,12px);z-index:110;opacity:0;pointer-events:none;background:#172033;color:#fff;border-radius:11px;padding:8px 12px;font-size:10px;font-weight:900;transition:.18s}
-#uxAddedToast.show{opacity:1;transform:translate(-50%,0)}
-</style>
-
-<script id="safe-ux-improvements-v2-js-disabled" type="text/plain">
-(function(){
- const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
- const visible=e=>!!e&&e.offsetParent!==null;
- function inProduct(){return visible(document.getElementById('product'))}
- function ensureUI(){
-   const form=document.getElementById('form');
-   if(form&&!document.getElementById('uxCurrentSummary')){
-     const d=document.createElement('div');d.id='uxCurrentSummary';form.parentNode.insertBefore(d,form);
-   }
-   if(!document.getElementById('uxPriceMeta')){
-     const t=document.getElementById('liveTotal');if(t){const d=document.createElement('div');d.id='uxPriceMeta';t.after(d)}
-   }
-   if(!document.getElementById('uxBottomBar')){
-     const b=document.createElement('div');b.id='uxBottomBar';
-     b.innerHTML='<div class="uxbp"><div class="uxblabel">Текущая позиция</div><div class="uxbprice">0 ₽</div><div class="uxbcart">Корзина: 0 ₽</div></div><button class="uxAdd" type="button" title="Добавить в корзину" aria-label="Добавить в корзину">＋</button><button class="uxGo" type="button" title="Перейти к корзине" aria-label="Перейти к корзине">🛒</button>';
-     document.body.appendChild(b);
-     q('.uxAdd',b).onclick=()=>{const x=qa('button').find(z=>/добавить в корзину/i.test(z.textContent||''));x?.click()};
-     q('.uxGo',b).onclick=()=>document.querySelector('.cart')?.scrollIntoView({behavior:'smooth',block:'start'});
-   }
-   if(!document.getElementById('uxAddedToast')){const t=document.createElement('div');t.id='uxAddedToast';t.textContent='✓ Добавлено в корзину';document.body.appendChild(t)}
- }
- function labelForBlock(b){
-   const label=b.querySelector(':scope > label')?.textContent?.replace(/\s+/g,' ').trim()||'Параметр';
-   let val='';
-   const checked=b.querySelector('input:checked');
-   if(checked){const l=checked.closest('.option,label,.flag-choice');val=l?.textContent?.replace(/✓ ВЫБРАНО/g,'').replace(/\s+/g,' ').trim()||''}
-   const sel=b.querySelector('select');if(!val&&sel&&sel.value)val=sel.options[sel.selectedIndex]?.text||'';
-   const nums=qa('input[type=number]',b).filter(x=>x.value!=='');
-   if(!val&&nums.length)val=nums.map(x=>x.value).join(' × ');
-   return {label:label.replace(/\?.*$/,'').trim(),val};
- }
- function setupCollapsible(){
-   if(innerWidth>700)return;
-   const form=document.getElementById('form');if(!form)return;
-   qa(':scope > .param-block',form).forEach(b=>{
-     // Материал и размер можно сворачивать. Постобработку и количество не трогаем.
-     const cls=b.className;
-     const text=(b.textContent||'').toLowerCase();
-     const allowed=/material-block|size-block|param-material|param-size/.test(cls)||(/материал|тип карты|тип нанесения/.test(text)&&!/постобработ|дополнительно/.test(text));
-     if(!allowed)return;
-     b.classList.add('ux-collapsible');
-     if(!b.querySelector(':scope > .ux-collapse-head')){
-       const h=document.createElement('div');h.className='ux-collapse-head';
-       h.innerHTML='<span class="ux-ok">✓</span><b></b><button type="button">Изменить</button>';
-       b.prepend(h);h.onclick=()=>b.classList.remove('ux-collapsed');
-     }
-     const info=labelForBlock(b),head=b.querySelector('.ux-collapse-head b');
-     if(head)head.textContent=info.val?`${info.label}: ${info.val}`:info.label;
-     const hasChoice=!!b.querySelector('input:checked')||!!(b.querySelector('select')?.value);
-     const nums=qa('input[type=number]',b).filter(x=>visible(x));
-     const numsDone=!nums.length||nums.every(x=>x.value!==''&&+x.value>0);
-     if(hasChoice&&numsDone&&document.activeElement&&!b.contains(document.activeElement))b.classList.add('ux-collapsed');
-   });
- }
- function currentSummary(){
-   const el=document.getElementById('uxCurrentSummary');if(!el)return;
-   const bits=[];
-   const mat=(typeof window.currentMaterialLabel==='function'?window.currentMaterialLabel():'');if(mat)bits.push(mat);
-   const m=window.lastCalcMeta;
-   if(m?.wCm!=null&&m?.hCm!=null)bits.push(`${m.wCm}×${m.hCm} см`);
-   if(m?.qty)bits.push(`${m.qty} шт.`);
-   if(typeof window.selectedPostNames==='function'){const p=window.selectedPostNames();if(p?.length)bits.push(p.join(', '))}
-   el.textContent=bits.length?bits.join(' • '):'Выберите параметры текущей позиции';
- }
- function priceMeta(){
-   const el=document.getElementById('uxPriceMeta'),m=window.lastCalcMeta;if(!el)return;
-   const bits=[];
-   if(m?.qty>1&&m?.total)bits.push(`${Math.round(m.total/m.qty).toLocaleString('ru-RU')} ₽/шт.`);
-   if(m?.area)bits.push(`${Number(m.area).toFixed(3).replace('.',',')} м²`);
-   if(m?.baseRate)bits.push(`${Math.round(m.baseRate).toLocaleString('ru-RU')} ₽/м²`);
-   el.textContent=bits.join(' · ');
- }
- let oldPrice='';
- function bottom(){
-   const b=document.getElementById('uxBottomBar');if(!b)return;
-   b.classList.toggle('show',inProduct());
-   const live=document.getElementById('liveTotal'),cur=(live?.textContent||'0 ₽').trim();
-   const pe=q('.uxbprice',b);
-   if(pe&&cur!==oldPrice){pe.textContent=cur;pe.classList.remove('bump');void pe.offsetWidth;pe.classList.add('bump');oldPrice=cur}
-   // Read the calculator's own cash total. No duplicate cart math.
-   const cash=document.getElementById('grandCash');
-   q('.uxbcart',b).textContent='Корзина: '+((cash?.textContent||'0 ₽').trim());
- }
- let lastCartCount=0;
- function addedToast(){
-   const c=window.cart;if(!Array.isArray(c))return;
-   if(c.length>lastCartCount){
-     const t=document.getElementById('uxAddedToast');t?.classList.add('show');setTimeout(()=>t?.classList.remove('show'),1100)
-   }
-   lastCartCount=c.length;
- }
- let pending=false;
- function tick(){pending=false;ensureUI();setupCollapsible();currentSummary();priceMeta();bottom();addedToast()}
- function schedule(){if(!pending){pending=true;requestAnimationFrame(tick)}}
- document.addEventListener('change',()=>setTimeout(schedule,20));
- document.addEventListener('input',schedule);
- document.addEventListener('click',()=>setTimeout(schedule,25));
- new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
- setTimeout(schedule,120);
-})();
-</script>
-
-<style id="ux-v3-fixes">
-/* 1. Mobile material / print type: keep cards readable, never squeeze text/image apart */
-@media(max-width:700px){
- .material-options,.paper-material-row,.fabric-type-options,.options{
-   width:100%!important;max-width:100%!important;min-width:0!important
- }
- .material-options>.option,.paper-material-row>.option,.fabric-type-options>.option{
-   min-width:0!important;width:100%!important;height:auto!important;
-   display:flex!important;align-items:center!important;gap:6px!important;
-   white-space:normal!important;overflow:visible!important
- }
- .material-options>.option span,.paper-material-row>.option span,.fabric-type-options>.option span{
-   min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important
- }
-}
-
-/* 2. Flag modes: title + its own image are physically one card */
-.flag-mode-unified{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
-.flag-mode-unified>.flag-mode-card{
- display:flex!important;flex-direction:column!important;align-items:stretch!important;
- width:100%!important;min-width:0!important;height:auto!important;padding:8px!important;overflow:hidden!important
-}
-.flag-mode-unified>.flag-mode-card>.flag-mode-label{
- display:block!important;position:relative!important;width:100%!important;min-height:36px!important;
- margin:0!important;padding:3px 2px 7px!important;order:1!important
-}
-.flag-mode-unified>.flag-mode-card>.example-thumb{
- display:block!important;position:relative!important;inset:auto!important;order:2!important;
- width:100%!important;max-width:none!important;height:135px!important;margin:0!important;overflow:hidden!important
-}
-.flag-mode-unified>.flag-mode-card>.example-thumb img{width:100%!important;height:100%!important;object-fit:cover!important}
-@media(max-width:700px){
- .flag-mode-unified{grid-template-columns:1fr!important;gap:6px!important}
- .flag-mode-unified>.flag-mode-card{padding:6px!important}
- .flag-mode-unified>.flag-mode-card>.example-thumb{height:120px!important}
-}
-
-/* v2 collapsing is disabled: it was breaking material/print type presentation */
-.param-block.ux-collapsible.ux-collapsed>*{display:revert!important}
-.param-block>.ux-collapse-head{display:none!important}
-
-/* 4. Bottom bar remains outside categories; only current-position section disappears */
-#uxBottomBarV3{
- position:fixed;z-index:90;left:50%;bottom:6px;transform:translateX(-50%);
- width:min(760px,calc(100vw - 12px));display:flex;align-items:center;gap:7px;
- padding:7px 7px 7px 11px;border-radius:15px;background:rgba(20,27,42,.95);
- backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(10,15,30,.26);color:#fff
-}
-#uxBottomBarV3 .cur{min-width:0;margin-right:auto}
-#uxBottomBarV3 .cur.hidden{display:none}
-#uxBottomBarV3 .cap{font-size:8px;opacity:.62;font-weight:800}
-#uxBottomBarV3 .price{font-size:18px;font-weight:1000;line-height:1.05}
-#uxBottomBarV3 .cartTotal{font-size:10px;font-weight:850;margin-right:auto;white-space:nowrap}
-#uxBottomBarV3 button{border:0;width:40px;height:40px;flex:0 0 40px;border-radius:11px;display:grid;place-items:center;cursor:pointer;font-size:18px}
-#uxBottomBarV3 .add{background:#f1268f;color:#fff}
-#uxBottomBarV3 .go{background:#fff;color:#172033}
-#uxBottomBar{display:none!important}
-body{padding-bottom:66px!important}
-</style>
-
-<script id="ux-v3-fixes-js">
-(function(){
- const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)];
- const visible=e=>!!e&&e.offsetParent!==null;
-
- function inProduct(){return visible(q('#product'))}
-
- function ensureBar(){
-   let b=q('#uxBottomBarV3');
-   if(!b){
-     b=document.createElement('div');b.id='uxBottomBarV3';
-     b.innerHTML='<div class="cur"><div class="cap">Текущая позиция</div><div class="price">—</div></div><div class="cartTotal">Корзина: 0 ₽</div><button class="add" type="button" title="Добавить в корзину">＋</button><button class="go" type="button" title="Перейти к корзине">🛒</button>';
-     document.body.appendChild(b);
-     q('.add',b).onclick=()=>{const x=qa('button').find(z=>/добавить в корзину/i.test(z.textContent||''));x?.click()};
-     q('.go',b).onclick=()=>{const c=q('.cart')||q('#cart')||q('#cartBox');c?.scrollIntoView({behavior:'smooth',block:'start'})};
-   }
-   return b;
- }
-
- function updateBar(){
-   const b=ensureBar(),inside=inProduct(),cur=q('.cur',b),add=q('.add',b);
-   cur.classList.toggle('hidden',!inside);
-   add.style.display=inside?'grid':'none';
-   const live=q('#liveTotal');
-   if(inside)q('.price',b).textContent=(live?.textContent||'—').trim();
-   // Read existing calculator cash total only.
-   const cash=q('#grandCash');
-   q('.cartTotal',b).textContent='Корзина: '+((cash?.textContent||'0 ₽').trim());
- }
-
- function fixBlankQty(){
-   // Blank only true manual quantity inputs. Do not dispatch input/change:
-   // that was what made some calculators fall back to qty=1.
-   qa('input[type=number]').forEach(inp=>{
-     if(inp.dataset.v3QtyInit)return;
-     const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
-     const holder=inp.closest('.qty-block,.param-block,.field,.row,label,div');
-     const text=((holder?.textContent||'')+' '+own).toLowerCase();
-     const isQty=/количество|тираж|qty|quantity/.test(text);
-     const isDim=/ширин|высот|размер|width|height/.test(own);
-     if(isQty&&!isDim){
-       inp.dataset.v3QtyInit='1';
-       if(inp.value==='1'||inp.getAttribute('value')==='1'){inp.value='';inp.removeAttribute('value')}
-     }
-   });
- }
-
- function preventEmptyQtyFallback(){
-   // Keep metadata/cart preview from displaying "1 шт" while a visible manual qty field is empty.
-   const empty=qa('input[type=number]').find(inp=>{
-     if(!visible(inp)||inp.value!=='')return false;
-     const own=((inp.id||'')+' '+(inp.name||'')+' '+(inp.placeholder||'')).toLowerCase();
-     const h=inp.closest('.qty-block,.param-block,.field,.row,label,div');
-     return /количество|тираж|qty|quantity/.test(((h?.textContent||'')+' '+own).toLowerCase()) &&
-            !/ширин|высот|размер|width|height/.test(own);
-   });
-   if(empty&&window.lastCalcMeta&&window.lastCalcMeta.qty===1) window.lastCalcMeta.qty=null;
- }
-
- function bindFlags(){
-   qa('.flag-mode-card[data-flag-mode]').forEach(card=>{
-     if(card.dataset.v3Bound)return;card.dataset.v3Bound='1';
-     card.addEventListener('click',e=>{
-       if(e.target.closest('.example-thumb'))return; // image keeps its gallery action
-       const mode=card.dataset.flagMode;
-       if(typeof window.selectFlagMode==='function')window.selectFlagMode(mode);
-     });
-   });
- }
-
- let pending=false;
- function tick(){pending=false;fixBlankQty();preventEmptyQtyFallback();updateBar()}
- function schedule(){if(!pending){pending=true;requestAnimationFrame(tick)}}
- document.addEventListener('input',schedule);document.addEventListener('change',schedule);document.addEventListener('click',()=>setTimeout(schedule,20));
- new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});
- setTimeout(schedule,100);
-})();
-</script>
-
-<style id="final-clean-mobile-fixes">
-@media(max-width:700px){
-  .option,.flag-choice,.option.ui-selected,.flag-choice.ui-selected,
-  .options>.option,.flag-mode-row>.flag-choice{
-    transform:none!important;filter:none!important;
-  }
-  .flag-mode-row.flag-mode-unified>.flag-mode-card{
-    display:flex!important;flex-direction:column!important;align-items:stretch!important;
-  }
-  .flag-mode-row.flag-mode-unified>.flag-mode-card>.flag-mode-label{order:1!important}
-  .flag-mode-row.flag-mode-unified>.flag-mode-card>.example-thumb{order:2!important;width:100%!important}
-}
-/* Quantity is intentionally blank until the customer enters it. */
 </style>
