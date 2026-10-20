@@ -444,7 +444,7 @@ function fabricMultiCalc(){
    const groupArea=group.reduce((a,x)=>a+x.area,0)*copies;
    const pf=priceFor(type,groupArea);
    if(!pf){tariffMissing=true;printDetails.push(`${typeLabel[type]}: нет тарифа для ${R(groupArea)} м²`);return;}
-   const cost=pf.price*groupArea+(pf.setup||0);
+   const rawCost=pf.price*groupArea+(pf.setup||0); const cost=Math.max(rawCost,tariffFloorTotal(type,groupArea));
    printCost+=cost;
    printDetails.push(`${typeLabel[type]}: ${R(groupArea)} м² × ${R(pf.price)} ₽/м² = ${R(cost)}`);
  });
@@ -746,8 +746,8 @@ function renderCopyCenter(){
          <tr><td class="service">Печать А3 фотобум (гл/мат) 300гр</td><td class="pricecell">300 ₽</td><td class="pricecell">350 ₽</td></tr>
          <tr><td class="service">Печать на бумажной самоклейке А4</td><td class="pricecell">80 ₽</td><td class="pricecell">120 ₽</td></tr>
          <tr><td class="service">Фото на документы 3×4 (6 шт.)</td><td class="pricecell">450 ₽ — без порезки</td><td class="pricecell">500 ₽ — с порезкой</td></tr>
-         <tr><td class="service">Фото 10×15 (&lt;100шт)</td><td class="pricecell">15 ₽</td><td class="dash">-</td></tr>
-         <tr><td class="service">Фото 10×15 (&gt;100шт)</td><td class="pricecell">11 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Фото 10×15 (до 99 шт)</td><td class="pricecell">15 ₽</td><td class="dash">-</td></tr>
+         <tr><td class="service">Фото 10×15 (от 100 шт)</td><td class="pricecell">12 ₽</td><td class="dash">-</td></tr>
          <tr><td class="service">Копия А4 ч/б</td><td class="pricecell">15 ₽</td><td class="pricecell">20 ₽</td></tr>
          <tr><td class="service">Копия А4 цветная</td><td class="pricecell">30 ₽</td><td class="pricecell">36 ₽</td></tr>
        </tbody>
@@ -1037,7 +1037,7 @@ function winderRecalc(){
  const blackout=!!document.getElementById('winderBlackout')?.checked;
  const materialId=blackout?'flagBlock':'flagStd';
  const pf=priceFor(materialId,a);
- const printCost=pf ? (pf.price*a+(pf.setup||0)) : 0;
+ const printCost=pf ? Math.max(pf.price*a+(pf.setup||0),tariffFloorTotal(materialId,a)) : 0;
  const sewingMeters=(2*(winderFixed.w+winderFixed.h))/100;
  const sewing=Math.max(500,sewingMeters*80);
  const flagCost=printCost+sewing;
@@ -1297,7 +1297,7 @@ function priceFor(id,a){
  if(id==='banner440'||id==='banner280'||id==='bannerMesh'){
    const rows=areaTariffs[id];
    const r=rows?.find(x=>a>=x[0]-1e-9 && a<=x[1]+1e-9);
-   if(r)return {price:r[2],band:(r[0]===0?'до 1':r[0]+'–'+r[1])+' м²',model:'per_m2',setup:r[4]||0};
+   if(r)return {price:r[2],band:(r[0]===0?'0–2':r[0]+'–'+(r[1]===Infinity?'∞':r[1]))+' м²',model:'per_m2',setup:r[4]||0};
    // Диапазон 1,001–2 м² отсутствует в прайсе — цену не придумываем.
    return null;
  }
@@ -1313,6 +1313,45 @@ function priceFor(id,a){
  const i=bandIndex(a); if(i>=arr.length || arr[i]==null)return null;
  return {price:arr[i],band:rangeNamesLarge[i],model:'per_m2',setup:0};
 }
+
+function tariffFloorTotal(id,a){
+ if(a<=0)return 0;
+ // Баннеры считаются строго по тарифной таблице выбранного диапазона.
+ // Не применяем к ним защиту от снижения общей цены на границе диапазона.
+ if(id==='banner440'||id==='banner280'||id==='bannerMesh')return 0;
+ const stickerIds=['vStd','vBudget','vGlue','vPerf','v1440'];
+ // The deliberate 300 ₽ launch disappears at 0.6 m²; do not cancel that rule.
+ if(stickerIds.includes(id) && a>=0.6 && a<1)return 0;
+
+ let segments=[];
+ if(areaTariffs[id]){
+   segments=areaTariffs[id].map(r=>({lo:r[0],hi:r[1],rate:r[2],setup:r[4]||0}));
+ }else if(plotterTariffs[id]||['plotterSilver','plotterGold','plotterHolo','plotterGlow','plotterReflect'].includes(id)){
+   const rows=plotterTariffs[id]||plotterTariffs.plotterMetal;
+   segments=rows.map(r=>({lo:r[0],hi:r[1],rate:r[2],setup:r[3]||0}));
+ }else{
+   const small=priceSmall[id], large=high[id];
+   if(!small)return 0;
+   const sHi=[0.30,0.35,0.5,1];
+   for(let i=0;i<small.length;i++){
+     const hi=sHi[i];
+     const setup=stickerIds.includes(id)?(hi<0.6?300:0):(startup[id]?.[i]||0);
+     segments.push({lo:i===0?0:sHi[i-1],hi,rate:small[i],setup});
+   }
+   const lHi=[2,5,15,20,30,40,Infinity];
+   if(large) for(let i=0;i<large.length;i++) if(large[i]!=null) segments.push({lo:i===0?1:lHi[i-1],hi:lHi[i],rate:large[i],setup:0});
+ }
+ const currentIndex=segments.findIndex(x=>a>=x.lo-1e-9&&a<=x.hi+1e-9);
+ if(currentIndex<=0)return 0;
+ let floor=0;
+ for(let i=0;i<currentIndex;i++){
+   const seg=segments[i];
+   if(!Number.isFinite(seg.hi))continue;
+   floor=Math.max(floor,seg.hi*seg.rate+(seg.setup||0));
+ }
+ return floor;
+}
+
 function recalc(){
  if(!current||current.id==='cards'||current.id==='canvas'){lastCalcMeta=null;return;}
  if(current.id==='paper' && !document.querySelector('input[name="paperSizeMode"]:checked')){lastCalcMeta=null;liveTotal.textContent='0 ₽';breakdown.textContent='Выберите стандартный размер или ввод размеров вручную.';return;}
@@ -1329,8 +1368,11 @@ function recalc(){
  // Сначала считаем ОБЩУЮ площадь заказа: площадь одного изделия × тираж.
  // Если выбранный тариф в прайсе указан за м² — умножаем тариф именно на общую площадь заказа.
  // Если в прайсе указана фиксированная цена — площадь не умножаем, цена остаётся фиксированной.
- let subtotal=base*a;
+ let rawPrintTotal=base*a+launch;
+ let protectedPrintTotal=Math.max(rawPrintTotal,tariffFloorTotal(mat,a));
+ let subtotal=Math.max(0,protectedPrintTotal-launch);
  let extras=0, details=[];
+ if(protectedPrintTotal>rawPrintTotal+0.01 && !['banner440','banner280','bannerMesh'].includes(mat)) details.push(`Защита границы тарифа: итог печати не уменьшается при увеличении площади`);
  if(current.id==='fabric'){
    // Нанесение на ткань: строго 180 ₽ за 1 изделие, без минимальной стоимости заказа.
    const applyCost=Math.max(350,180*q);
@@ -1381,7 +1423,9 @@ function recalc(){
    }
  });
  let total=subtotal+launch+extras;
- lastCalcMeta={categoryId:current.id, matId:mat, area:a, qty:q, unitArea, wCm:+document.getElementById('w').value||0, hCm:+document.getElementById('h').value||0, baseRate:base, launch, extras, total};
+ lastCalcMeta={categoryId:current.id, matId:mat, area:a, qty:q, unitArea, wCm:+document.getElementById('w').value||0, hCm:+document.getElementById('h').value||0, baseRate:base, launch, extras, total,
+   bannerGrommetStep: current.id==='banner' ? +(document.getElementById('bannerGrommetStepSelect')?.value||30) : null
+ };
  liveTotal.textContent=R(total);
  breakdown.innerHTML=`Площадь 1 шт.: <b>${unitArea.toFixed(4)} м²</b> · тираж: <b>${q} шт.</b> · общая площадь: <b>${a.toFixed(3)} м²</b> · диапазон: <b>${pf.band}</b> · тариф: <b>${R(base)} / м²</b> · печать: <b>${R(subtotal)}</b>${launch?` · запуск: <b>${R(launch)}</b>`:''}${details.length?`<br>${details.join(' · ')}`:''}`;
 }
@@ -1413,7 +1457,7 @@ function renderCardForm(){
      ['Фольгирование золото/серебро (1+1)','Фольгирование 1+1','Нанесение металлизированной фольги с обеих сторон визитки.'],
      ['Ламинация глянец/мат','Глянец/мат','Защитная пленка с глянцевым (блестящим) или матовым (без бликов) эффектом.']
    ];
-   const qtyOptions=[...Array.from({length:39},(_,i)=>i+1),...Array.from({length:59},(_,i)=>i+41),100,200,300,500];
+   const qtyOptions=[...Array.from({length:40},(_,i)=>i+1),...Array.from({length:59},(_,i)=>i+41),100,200,300,500];
    cardform.innerHTML=`
    <label>Тип визитки ${info('Выберите один вариант визиток.')}</label>
    <div class="inline-example-row"><div class="selectInfoRow"><select id="cardExType" onchange="cardCalc()">
@@ -1495,16 +1539,20 @@ function cardCalc(){
    };
    const row=rows[type];
    if(!row||!qty){liveTotal.textContent='—';breakdown.textContent='Выберите тип и количество визиток.';return;}
-   if(qty<40) v=row.per1_40*qty;
+   if(qty<=40) v=row.per1_40*qty;
    else if(qty>=41 && qty<=99) v=row.per41_99*qty;
    else if([100,200,300,500].includes(qty)) v=row[String(qty)];
    else v=null;
    const typeLabel=typeEl.selectedOptions[0].textContent;
    const qtyLabel=qtyEl.selectedOptions[0].textContent;
    if(v==null){liveTotal.textContent='Уточнить';breakdown.innerHTML=`<b>${typeLabel}</b> · ${qtyLabel}<br>Для этого тиража в прайсе указано: «по запросу».`;return;}
-   const rate=qty<40?row.per1_40:qty<100?row.per41_99:null;
-   detail=rate?`${typeLabel} · ${qtyLabel}: ${qty} × ${R(rate)} ₽ = <b>${R(v)}</b>`:`${typeLabel} · ${qtyLabel}: <b>${R(v)}</b>`;
-   if(document.getElementById('cardExRound')?.checked) detail+=` · Скругление углов`;
+   const rate=qty<=40?row.per1_40:qty<100?row.per41_99:null;
+   detail=rate?`${typeLabel} · ${qtyLabel}: ${qty} × ${R(rate)} = <b>${R(v)}</b>`:`${typeLabel} · ${qtyLabel}: <b>${R(v)}</b>`;
+   if(document.getElementById('cardExRound')?.checked){
+     const roundCost=qty*4;
+     v+=roundCost;
+     detail+=` · Скругление углов: ${qty} × 4 ₽ = <b>${R(roundCost)}</b>`;
+   }
  } else if(t==='leaf'){
    const sizeEl=document.getElementById('lfSize');
    const qtyEl=document.getElementById('lfQty');
@@ -1523,11 +1571,19 @@ function cardCalc(){
    lastCalcMeta={categoryId:current.id,fixed:true,qty,total:v,leafSize:sizeEl.selectedOptions[0].textContent,leafQty:qty,leafBasePer1000:basePer1000,leafDiscount:discount,leafCreaseLines:lines,leafCreaseCost:creaseCost,detail};
  } else return;
  liveTotal.textContent=R(v);
- if(t!=='leaf') lastCalcMeta={categoryId:current.id, fixed:true, qty:1, total:v};
+ if(t==='cards'){
+   const el=document.getElementById('cardVariant');
+   const key=el?.value||'';
+   const qty=key.startsWith('1000-')?1000:key.startsWith('200-')?200:100;
+   lastCalcMeta={categoryId:current.id,fixed:true,qty,total:v,cardType:'cards',detail:el?.selectedOptions?.[0]?.textContent||'',hole:!!document.getElementById('cardHole')?.checked};
+ }else if(t==='cardsEx'){
+   const qty=+(document.getElementById('cardExQty')?.value||1);
+   lastCalcMeta={categoryId:current.id,fixed:true,qty,total:v,cardType:'cardsEx',type:document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||'',rounded:!!document.getElementById('cardExRound')?.checked};
+ }
  breakdown.innerHTML=detail;
 }
 function renderCanvas(){form.innerHTML=`<div class="inline-example-row"><div><label>Фиксированный размер ${info('Выбор стандартного готового формата картины с уже включенной стоимостью материалов и работы (деревянный каркас + холст с натяжкой).')}</label><select id="cv" onchange="canvasCalc()">${[['20×30',1250],['30×30',1350],['30×40',1500],['30×50',1550],['40×50',1750],['30×70',2000],['40×60',2050],['50×50',2050],['50×60',2150],['50×70',2400],['60×60',2500],['50×80',2700],['60×80',2800],['70×70',2850],['70×80',3000],['90×60',3000],['70×90',3100],['100×70',3400],['80×90',3400],['100×80',3500],['120×80',3700],['100×100',4000],['150×90',4500]].map(x=>`<option value="${x[1]}">${x[0]} см — ${x[1]} ₽</option>`).join('')}</select></div>${exampleThumbHTML('examples/canvas/standard','Картина на холсте')}</div><label>Количество, шт ${info('Общий тираж изготавливаемых картин.')}</label><input id="cvq" type="number" value="1" min="1" oninput="canvasCalc()"><label>Постобработка</label><div class="post-example-row"><label class="option"><input type="checkbox" id="cvHook" onchange="canvasCalc()"><span>Крючок для крепежа</span>${info('Установка специального настенного крепления на тыльную сторону подрамника для удобного подвешивания картины на стену.')}</label>${exampleThumbHTML('examples/canvas/hook','Крючок для крепежа','')}</div>`;canvasCalc()}
-function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
+function canvasCalc(){let q=+cvq.value||1;let base=+cv.value*q;let hook=document.getElementById('cvHook')?.checked?q*50:0;let v=base+hook;lastCalcMeta={categoryId:'canvas',fixed:true,qty:q,total:v,canvasValue:cv.value,canvasSize:cv.options[cv.selectedIndex]?.text||'',hook:!!document.getElementById('cvHook')?.checked};liveTotal.textContent=R(v);breakdown.innerHTML=`Холст + подрамник · ${cv.options[cv.selectedIndex].text} · количество: <b>${q} шт</b>${hook?` · крючки: <b>${R(hook)}</b>`:''}`;}
 function selectedPostNames(){
  const names=[...document.querySelectorAll('.post:checked')].map(x=>x.dataset.name||x.parentElement?.querySelector('span')?.textContent||'').filter(Boolean);
  const mat=document.querySelector('select#matSelect')?.value || document.querySelector('input[name=mat]:checked')?.value;
@@ -1557,8 +1613,9 @@ function buildCurrentDetails(){
  if(m.fixed){
    if(current?.id==='fabric'){
      (m.images||[]).forEach(x=>lines.push(`Изображение ${x.n}: ${x.typeLabel} · ${x.sizeLabel}`));
-     lines.push(`Количество изображений: ${m.qty||1}`);
-     if(m.shirtCost) lines.push(`Футболки: ${R(m.shirtCost)}`);
+     lines.push(`Количество изображений на одном комплекте: ${(m.images||[]).length||1}`);
+     lines.push(`Количество таких комплектов: ${m.copies||1}`);
+     if(m.shirtCost) lines.push(`Футболки: ${m.copies||1} шт. · ${R(m.shirtCost)}`);
    } else if(current?.id==='photos'){
      const el=document.getElementById('photoSize'); const q=document.getElementById('photoQty');
      lines.push(`Размер: ${el?.value||m.photoSize||'—'}`);
@@ -1607,6 +1664,7 @@ function buildCurrentDetails(){
        const t=document.getElementById('cardExType'); const q=document.getElementById('cardExQty');
        lines.push(`Тип: ${t?.selectedOptions?.[0]?.textContent||m.type||'—'}`);
        lines.push(`Количество: ${q?.value||m.qty||1} шт.`);
+       if(document.getElementById('cardExRound')?.checked||m.rounded) lines.push('Постобработка: скругление углов');
      } else if(cardType==='leaf'){
        lines.push(`Вариант: Листовки офсет 115 гр`);
        lines.push(`Размер: ${m.leafSize||'—'}`);
@@ -1662,11 +1720,18 @@ function addToCart(){
  meta.postNames=selectedPostNames();
  if(current.id==='canvas') meta.size=document.getElementById('cv')?.selectedOptions?.[0]?.textContent||'';
  if(current.id==='cards'){
-   meta.cardType=document.querySelector('input[name=cardtype]:checked')?.value||'';
-   if(meta.cardType==='cards') meta.detail=document.getElementById('cardVariant')?.selectedOptions?.[0]?.textContent||'';
-   if(meta.cardType==='leaf'){meta.detail=meta.leafSize||'';meta.qty=meta.leafQty||meta.qty||1;}
+   meta.cardType=document.querySelector('input[name=cardtype]:checked')?.value||meta.cardType||'';
+   if(meta.cardType==='cards'){
+     meta.detail=document.getElementById('cardVariant')?.selectedOptions?.[0]?.textContent||meta.detail||'';
+   }else if(meta.cardType==='cardsEx'){
+     meta.type=document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||meta.type||'';
+     meta.qty=+(document.getElementById('cardExQty')?.value||meta.qty||1);
+     meta.rounded=!!document.getElementById('cardExRound')?.checked;
+   }else if(meta.cardType==='leaf'){
+     meta.detail=meta.leafSize||'';
+     meta.qty=meta.leafQty||meta.qty||1;
+   }
  }
- if(current.id==='cardsEx') {meta.type=document.getElementById('cardExType')?.selectedOptions?.[0]?.textContent||'';meta.qty=+(document.getElementById('cardExQty')?.value||1);meta.rounded=!!document.getElementById('cardExRound')?.checked;}
  const details=buildCurrentDetails();
  const entry={name,mat,total,meta,details};
  if(editingCartIndex>=0){ cart[editingCartIndex]=entry; editingCartIndex=-1; }
@@ -1702,7 +1767,55 @@ function populateCartItemForEdit(item){
    if(t&&m.type){const opt=[...t.options].find(o=>o.textContent===m.type);if(opt)t.value=opt.value;}
    if(q&&m.qty)q.value=m.qty; cardCalc(); return;
  }
- if(cat==='canvas'||cat==='flag'||cat==='copycenter'||cat==='photos'||cat==='digital'||cat==='stand') return;
+ if(cat==='canvas'){
+   const cvEl=document.getElementById('cv'),qEl=document.getElementById('cvq'),hook=document.getElementById('cvHook');
+   if(cvEl&&m.canvasValue!=null) cvEl.value=String(m.canvasValue);
+   else if(cvEl&&m.canvasSize){const opt=[...cvEl.options].find(o=>o.textContent===m.canvasSize);if(opt)cvEl.value=opt.value;}
+   if(qEl&&m.qty!=null) qEl.value=m.qty;
+   if(hook) hook.checked=!!m.hook;
+   canvasCalc(); return;
+ }
+ if(cat==='photos'){
+   const size=document.getElementById('photoSize'),q=document.getElementById('photoQty');
+   if(size&&m.photoSize) size.value=m.photoSize;
+   if(q&&m.qty!=null) q.value=m.qty;
+   photoCalc(); return;
+ }
+ if(cat==='stand'){
+   const shape=document.querySelector(`input[name="standShape"][value="${m.standShape||'rect'}"]`);
+   const side=document.querySelector(`input[name="standSide"][value="${m.standSide||'double'}"]`);
+   if(shape) shape.checked=true;if(side) side.checked=true;
+   const q=document.getElementById('standQty');if(q&&m.qty!=null)q.value=m.qty;
+   standCalc(); return;
+ }
+ if(cat==='flag'){
+   if(m.flagStandard){
+     selectFlagMode('standard');
+     const r=[...document.querySelectorAll('input[name="flagFixed"]')].find(x=>
+       (+x.dataset.w===+m.wCm)&&(+x.dataset.h===+m.hCm)&&(+x.dataset.qty===+(m.qty||1))
+     );
+     if(r){r.checked=true;flagFixedChanged();}
+     return;
+   }
+   if(m.winder){
+     selectFlagMode('winder');
+     const r=document.querySelector(`input[name="winderSize"][value="${m.winderId||''}"]`);
+     if(r){r.checked=true;winderSizeChanged();}
+     const blackout=document.getElementById('winderBlackout'),pole=document.getElementById('winderPole'),base=document.getElementById('winderBase');
+     if(blackout) blackout.checked=!!m.winderBlackout;
+     if(pole) pole.checked=!!m.pole;
+     if(base) base.checked=!!m.baseCost;
+     winderRecalc(); return;
+   }
+   selectFlagMode('custom');
+   const mat=document.querySelector(`input[name="mat"][value="${m.matId||''}"]`);
+   if(mat){mat.checked=true;matChanged();}
+   const w=document.getElementById('w'),h=document.getElementById('h'),q=document.getElementById('qty');
+   if(w)w.value=m.wCm||'';if(h)h.value=m.hCm||'';if(q)q.value=m.qty||1;
+   document.querySelectorAll('.post').forEach(cb=>cb.checked=(m.postNames||[]).includes(cb.dataset.name));
+   recalc(); return;
+ }
+ if(cat==='copycenter'||cat==='digital') return;
  const matIdForEdit=(m.matId==='p3twoMag'?'p3twoMag':m.matId==='p5Mag'?'p5Mag':m.matId);
  const matEl=document.querySelector(`input[name="mat"][value="${matIdForEdit||''}"]`);
  if(matEl){matEl.checked=true;matChanged();}
@@ -1716,6 +1829,15 @@ function populateCartItemForEdit(item){
    else {const w=document.getElementById('w'),h=document.getElementById('h');if(w)w.value=m.wCm||'';if(h)h.value=m.hCm||'';}
  }
  document.querySelectorAll('.post').forEach(cb=>cb.checked=(m.postNames||[]).includes(cb.dataset.name));
+ if(cat==='banner'){
+   const selected=[...document.querySelectorAll('input[name="bannerPost"]')].find(x=>x.dataset?.name && (m.postNames||[]).includes(x.dataset.name));
+   if(selected){
+     selected.checked=true;
+     bannerPostChanged();
+   }
+   const step=document.getElementById('bannerGrommetStepSelect');
+   if(step && m.bannerGrommetStep) step.value=String(m.bannerGrommetStep);
+ }
  if(cat==='fabric'){
    const shirtQty=(m.extras||0)>=600?Math.round((m.extras||0)/600):0;
    const need=document.getElementById('needShirt');
@@ -1747,10 +1869,9 @@ function volumeAdjustedItems(){
  const byRef=new Map(cart.map((x,i)=>[x,i]));
  for(const [category,items] of Object.entries(areaGroups)){
    // Объём считается суммарно по всей одинаковой категории в корзине.
-   // Для каждого материала берём его собственный тариф, но диапазон площади — общий.
    const totalArea=items.reduce((sum,x)=>sum+(x.meta.area||0),0);
-   // Объёмный тариф и его отображение начинаются только при площади категории больше 0,25 м².
    if(totalArea<=0.25) continue;
+   let vinylLaunchAvailable=(category==='vinyl'&&totalArea<0.6)?300:0;
    items.forEach(item=>{
      const m=item.meta;
      const pf=priceFor(m.matId,totalArea);
@@ -1759,8 +1880,27 @@ function volumeAdjustedItems(){
      const q=m.qty||1;
      const w=m.wCm||0, h=m.hCm||0;
      const perimeter=2*(w+h);
+     const isBannerMat=(m.matId==='banner440'||m.matId==='banner280'||m.matId==='bannerMesh');
+     const allPosts=(m.postNames||[]);
+
+     // Баннерную постобработку пересчитываем ЗАНОВО по тем же формулам,
+     // что используются в основной карточке товара. Так корзина не может
+     // потерять люверсы/проклейку/резку при объёмном перерасчёте.
      let extras=0;
-     const posts=m.postNames||[];
+     if(isBannerMat){
+       allPosts.forEach(n=>{
+         if(n.includes('Люверсы')){
+           const step=+(m.bannerGrommetStep||30);
+           const perItem=Math.ceil(perimeter/step);
+           extras+=perItem*q*30;
+         }else if(n.includes('Проклейка')){
+           extras+=Math.ceil(perimeter*q);
+         }else if(n.includes('Резка')){
+           extras+=(perimeter*q/100)*50;
+         }
+       });
+     }
+     const posts=isBannerMat ? [] : allPosts;
 
      posts.forEach(n=>{
        if(n.includes('Люверсы по одной')){
@@ -1791,12 +1931,27 @@ function volumeAdjustedItems(){
      // Для ткани автоматическое нанесение и футболки не зависят от общей площади.
      if(category==='fabric') extras= m.extras||0;
 
-     const newPrint=(pf.price||0)*(m.area||0);
-     const newTotal=newPrint+(pf.setup||0)+extras;
+     const rawGroupPrint=(pf.price||0)*totalArea;
+     const protectedGroupPrint=Math.max(rawGroupPrint,tariffFloorTotal(m.matId,totalArea));
+     const protectionScale=rawGroupPrint>0?protectedGroupPrint/rawGroupPrint:1;
+     const newPrint=(pf.price||0)*(m.area||0)*protectionScale;
+     let launch=(pf.setup||0);
+     if(category==='vinyl'){
+       launch=vinylLaunchAvailable;
+       vinylLaunchAvailable=0;
+     }
+     const newTotal=newPrint+launch+extras;
      const idx=byRef.get(item);
+
+     // Если тариф фактически не изменился, не называем это "скидкой за объём".
+     const originalRate=+m.baseRate||0;
+     const rateChanged=Math.abs((+pf.price||0)-originalRate)>0.0001;
+     const priceChanged=Math.abs(newTotal-(+m.total||0))>0.01;
+     const hasVolumeDiscount=rateChanged && priceChanged;
+
      out[idx].total=newTotal;
      out[idx].originalTotal=m.total;
-     out[idx].meta={...m,combinedArea:totalArea,baseRate:pf.price,band:pf.band,launch:pf.setup||0,extras,total:newTotal,volumeDiscount:true,originalTotal:m.total};
+     out[idx].meta={...m,combinedArea:totalArea,baseRate:pf.price,band:pf.band,launch,extras,total:newTotal,volumeDiscount:hasVolumeDiscount,originalTotal:m.total};
    });
  }
  return out;
@@ -5316,3 +5471,18 @@ body{padding-bottom:calc(82px + var(--ux-nav-tail))!important}
   }
 }
 </style>
+
+<style id="ux-v36-no-nav-fixed-categories">
+body[data-no-top-nav="1"] #uxCategoryNavV5{display:none!important}
+</style>
+<script id="ux-v36-nav-visibility-guard">
+(function(){
+ function sync(){
+   const hide=!!(window.current&&(current.id==='photos'||current.id==='canvas'));
+   document.body.dataset.noTopNav=hide?'1':'0';
+ }
+ document.addEventListener('click',()=>setTimeout(sync,20),true);
+ new MutationObserver(sync).observe(document.getElementById('product')||document.body,{childList:true,subtree:true});
+ setTimeout(sync,50);
+})();
+</script>
